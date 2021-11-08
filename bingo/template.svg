@@ -22,9 +22,6 @@ font-size: 80px;
 .number {
 font-size: 75px;
 }
-.free {
-font-size: 25px;
-}
 </style>
 <!-- rows -->
 <line x1="000" y1="000" x2="500" y2="000" />
