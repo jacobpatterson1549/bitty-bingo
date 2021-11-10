@@ -62,7 +62,7 @@ func (h *httpsHandler) servePost(w http.ResponseWriter, r *http.Request) {
 		h.createGame(w, r)
 	case "/game/boards": // ?n=
 		h.createBoards(w, r)
-	case "/game/check_board": // ?game=&board=&check=
+	case "/game/check_board": // ?game=&board=&type=
 		h.checkBoard(w, r)
 	case "/game/draw_number": // ?game=
 		h.drawNumber(w, r)
@@ -142,7 +142,7 @@ func (httpsHandler) getAbout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (httpsHandler) checkBoard(w http.ResponseWriter, r *http.Request) {
-	gameQueryParam := r.URL.Query().Get("gameID")
+	gameQueryParam := r.URL.Query().Get("game")
 	var g bingo.Game
 	if err := json.Unmarshal([]byte(gameQueryParam), &g); err != nil {
 		message := fmt.Sprintf("getting game from query parameter: %v", err)

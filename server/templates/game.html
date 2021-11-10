@@ -23,8 +23,39 @@
     </tbody>
 </table>
 
-<p> TODO: Show draw tiles button, disable if tilesLeft<=0</p>
+{{if gt .NumbersLeft 0}}
+<form id="check-board" method="POST" action="/game/check_board">
+    <fieldset>
+        <legend>Draw Number</legend>
+        <label>
+            <input type="submit">
+        </label>
+    </fieldset>
+</form>
+{{end}}
 
-<p>TODO: check type radios</p>
-<p>TODO: check game button</p>
-<p>TODO: show game id </p>
+{{/* <p>ID: .ID</p> */}}
+
+<form id="check-board" method="POST" action="/game/check_board">
+    <fieldset>
+        <legend>Check Board</legend>
+        <label>
+            <div>Board</div>
+            <input type="string" name="board" required>
+        </label>
+        <fieldset>
+            <legend>type<legend>
+            <label>
+                <div>Line</div>
+                <input type="radio" name="type" value="HasLine">
+            </label>
+            <label>
+                <div>All cells</div>
+                <input type="radio" name="type" value="IsFilled">
+            </label>
+        {{/* <input type="text" hidden name="game" value=".ID"> */}}
+        <label>
+            <input type="submit">
+        </label>
+    </fieldSet>
+</form>
