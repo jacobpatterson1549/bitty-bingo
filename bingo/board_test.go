@@ -60,6 +60,32 @@ func TestIsFilled(t *testing.T) {
 	})
 }
 
+func TestID(t *testing.T) {
+	b := board1257894001
+	id, err := b.ID()
+	if err != nil {
+		t.Errorf("unwanted error encoding board: %v", err)
+	}
+	if want, got := board1257894001ID, id; want != got {
+		t.Errorf("ids not equal:\nwanted: %q\ngot:    %q", want, got)
+	}
+	if want, got := 16, len(id); want != got {
+		t.Errorf("sanity check to ensure math in documentation is correct: id lengths not equal: wanted %v, got %v", want, got)
+	}
+}
+
+func TestBoardFromID(t *testing.T) {
+	id := board1257894001ID
+	want := &board1257894001
+	got, err := BoardFromID(id)
+	switch {
+	case err != nil:
+		t.Errorf("unwanted error decoding board from id: %v", err)
+	case !reflect.DeepEqual(want, got):
+		t.Errorf("decodedBoards not equal:\nwanted: %v\ngot:    %v", want, got)
+	}
+}
+
 var board1257894001 = Board{
 	15, 8, 4, 12, 10, // B
 	19, 27, 16, 28, 25, // I
@@ -67,6 +93,7 @@ var board1257894001 = Board{
 	49, 52, 50, 46, 57, // G
 	64, 72, 67, 70, 74, // O
 }
+var board1257894001ID = "5zuTsMm6CTZAs7ad"
 
 var hasLineTests = []struct {
 	name string
