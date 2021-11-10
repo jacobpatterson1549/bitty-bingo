@@ -1,0 +1,28 @@
+<table>
+    <caption>Game Drawn Tiles</caption>
+    <thead>
+        <tr>
+            <th scope="col">B</th>
+            <th scope="col">I</th>
+            <th scope="col">N</th>
+            <th scope="col">G</th>
+            <th scope="col">O</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{range index . 0}}<p>{{.}}</p>{{end}}</td>
+            <td>{{range index . 1}}<p>{{.}}</p>{{end}}</td>
+            <td>{{range index . 2}}<p>{{.}}</p>{{end}}</td>
+            <td>{{range index . 3}}<p>{{.}}</p>{{end}}</td>
+            <td>{{range index . 4}}<p>{{.}}</p>{{end}}</td>
+        <tr>
+    </tbody>
+</table>
+
+<p> TODO: Show tiles left</p>
+<p> TODO: Show draw tiles button, disable if tilesLeft<=0</p>
+
+<p>TODO: check type radios</p>
+<p>TODO: check game button</p>
+<p>TODO: show game id </p>

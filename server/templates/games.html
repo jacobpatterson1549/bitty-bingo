@@ -1,0 +1,19 @@
+<table>
+    <caption>Games</caption>
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Numbers Left</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{range .}}<tr>
+            <td><a href="/game?id={{.ID}}"></td>
+            <td>{{.NumbersLeft}}</td>
+        </tr>{{end}}
+    </tbody>
+</table>
+
+<p>TODO: New game button</p>
+
+<p>TODO: show numbero of tiles left</p>
