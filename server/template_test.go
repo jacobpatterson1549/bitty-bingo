@@ -76,12 +76,23 @@ func TestHandleGame(t *testing.T) {
 
 func TestHandleGames(t *testing.T) {
 	var w bytes.Buffer
-	var games []bingo.Game
-	err := handleGames(&w, games)
+	gi := gameInfo{
+
+		ID:          "1847",
+		ModTime:     "time_text",
+		NumbersLeft: 36,
+	}
+	gameInfos := []gameInfo{gi}
+	err := handleGames(&w, gameInfos)
+	got := w.String()
 	switch {
 	case err != nil:
 		t.Error(err)
-	case w.Len() == 0:
-		t.Error("no bytes written")
+	case !strings.Contains(got, gi.ID):
+		t.Errorf("game ID missing:\n%v", got)
+	case !strings.Contains(got, gi.ModTime):
+		t.Errorf("game Modification Time missing:\nn%v", got)
+	case !strings.Contains(got, "36"):
+		t.Errorf("game Numbers Left missing:\n%v", got)
 	}
 }

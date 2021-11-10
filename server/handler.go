@@ -19,7 +19,7 @@ func (cfg Config) httpHandler() http.Handler {
 
 func (cfg Config) httpsHandler() http.Handler {
 	h := httpsHandler{
-		games: make([]bingo.Game, 0, cfg.GameCount),
+		gameInfos: make([]gameInfo, 0, cfg.GameCount),
 	}
 	return withGzip(http.HandlerFunc(h.serveHTTPS))
 }
@@ -30,13 +30,19 @@ func httpsRedirectHandler(httpsPort string) http.HandlerFunc {
 		if len(r.URL.Port()) != 0 && httpsPort != "443" {
 			httpsURI += ":" + httpsPort
 		}
-		httpsURI += r.RequestURI
+		httpsURI += r.URL.Path
 		http.Redirect(w, r, httpsURI, http.StatusMovedPermanently)
 	}
 }
 
+type gameInfo struct {
+	ID          string
+	ModTime     string
+	NumbersLeft int
+}
+
 type httpsHandler struct {
-	games []bingo.Game
+	gameInfos []gameInfo
 }
 
 func (h *httpsHandler) serveHTTPS(w http.ResponseWriter, r *http.Request) {
@@ -66,11 +72,16 @@ func (h *httpsHandler) servePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h httpsHandler) serveGet(w http.ResponseWriter, r *http.Request) {
+	// TODO: create parent html wrapper page with nav bar(games list, help, about links)
 	switch r.URL.Path {
 	case "/":
 		h.getGames(w, r)
 	case "/game":
 		h.getGame(w, r)
+	case "/help":
+		h.getHelp(w, r)
+	case "/about":
+		h.getAbout(w, r)
 	default:
 		http.NotFound(w, r)
 	}
@@ -93,7 +104,7 @@ func (h *httpsHandler) createGame(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h httpsHandler) getGames(w http.ResponseWriter, r *http.Request) {
-	if err := handleGames(w, h.games); err != nil {
+	if err := handleGames(w, h.gameInfos); err != nil {
 		message := fmt.Sprintf("rendering games list: %v", err)
 		httpError(w, message, http.StatusInternalServerError)
 		return
@@ -114,6 +125,22 @@ func (h httpsHandler) getGame(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (httpsHandler) getHelp(w http.ResponseWriter, r *http.Request) {
+	if err := handleHelp(w); err != nil {
+		message := fmt.Sprintf("rendering help page: %v", err)
+		httpError(w, message, http.StatusInternalServerError)
+		return
+	}
+}
+
+func (httpsHandler) getAbout(w http.ResponseWriter, r *http.Request) {
+	if err := handleAbout(w); err != nil {
+		message := fmt.Sprintf("rendering about page: %v", err)
+		httpError(w, message, http.StatusInternalServerError)
+		return
+	}
+}
+
 func (httpsHandler) checkBoard(w http.ResponseWriter, r *http.Request) {
 	gameQueryParam := r.URL.Query().Get("gameID")
 	var g bingo.Game
@@ -128,33 +155,45 @@ func (httpsHandler) checkBoard(w http.ResponseWriter, r *http.Request) {
 		httpError(w, message, http.StatusBadRequest)
 	}
 	checkType := r.URL.Query().Get("type")
+	// var result bool
 	switch checkType {
 	case "HasLine":
-		b.HasLine(g)
+		// result = b.HasLine(g)
+	case "IsFilled":
+		// result = b.IsFilled(g)
+	default:
+		message := fmt.Sprintf("unknown checkType %q", checkType)
+		httpError(w, message, http.StatusBadRequest)
 	}
+	// fmt.Fprint(w, result)
+	// TODO: redirect to /game with query of board and result
 }
 
 func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
-	gameQueryParam := r.URL.Query().Get("game")
+	gameQueryParam := r.Form.Get("game")
 	var g bingo.Game
 	if err := json.Unmarshal([]byte(gameQueryParam), &g); err != nil {
 		message := fmt.Sprintf("getting game from query parameter: %v", err)
 		httpError(w, message, http.StatusBadRequest)
+		return
 	}
 	before := g.NumbersLeft()
 	g.DrawNumber()
 	after := g.NumbersLeft()
 	if before != after {
-		if len(h.games) < cap(h.games) {
-			h.games = append(h.games, bingo.Game{}) // increase length
+		if len(h.gameInfos) < cap(h.gameInfos) {
+			h.gameInfos = append(h.gameInfos, gameInfo{}) // increase length
 		}
-		copy(h.games[1:], h.games) // shift right
-		h.games[0] = g             // set first
+		copy(h.gameInfos[1:], h.gameInfos) // shift right
+		var gi gameInfo
+		// TODO: create game info for UTC
+		h.gameInfos[0] = gi // set first
 	}
+	// TODO: redirect to updated game
 }
 
 func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {
-	nQueryParam := r.URL.Query().Get("n")
+	nQueryParam := r.Form.Get("n")
 	n, err := strconv.Atoi(nQueryParam)
 	if err != nil {
 		message := fmt.Sprintf("%v: example: /game/boards?n=5 creates 5 unique boards", err)
@@ -188,6 +227,7 @@ func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("Content-Type", "application/zip")
 	w.Header().Set("Content-Disposition", "attachment; filename=bingo-boards.zip")
+	// TODO: redirect to games list
 }
 
 func withGzip(h http.Handler) http.HandlerFunc {

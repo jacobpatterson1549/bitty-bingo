@@ -24,9 +24,10 @@ func serverConfig() server.Config {
 	fs.Usage = func() {
 		fmt.Fprintln(fs.Output(), "Runs the server")
 		fmt.Fprintln(fs.Output(), "Providing PORT environment variable overrides the command line argument, runs the HTTPS Server on the specified port, does not provide a HTTP redirect, and does not load TLS certificates.")
+		fs.PrintDefaults()
 	}
-	fs.StringVar(&cfg.HTTPPort, "http-port", "0", "The TCP port for HTTP requests.")
-	fs.StringVar(&cfg.HTTPSPort, "https-port", "0", "The TCP port for HTTPS requests.")
+	fs.StringVar(&cfg.HTTPPort, "http-port", "80", "The TCP port for HTTP requests.")
+	fs.StringVar(&cfg.HTTPSPort, "https-port", "443", "The TCP port for HTTPS requests.")
 	fs.StringVar(&cfg.TLSCertFile, "tls-cert-file", "", "The name of the TLS public certificate file")
 	fs.StringVar(&cfg.TLSKeyFile, "tls-key-file", "", "The name of the TLS private key file")
 	fs.IntVar(&cfg.GameCount, "game-count", 10, "The number of game states to keep in the history")

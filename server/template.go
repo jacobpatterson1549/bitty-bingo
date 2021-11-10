@@ -12,11 +12,6 @@ import (
 var templatesFS embed.FS
 
 var t = template.Must(template.New("games.html").
-	Funcs(template.FuncMap{
-		"Value": func(n bingo.Number) int {
-			return n.Value()
-		},
-	}).
 	ParseFS(templatesFS, "templates/*"))
 
 func handleExportBoard(w io.Writer, b bingo.Board) error {
@@ -32,13 +27,9 @@ func handleAbout(w io.Writer) error {
 }
 
 func handleGame(w io.Writer, g bingo.Game) error {
-	cols := make(map[int][]bingo.Number, 5)
-	for _, n := range g.DrawnNumbers {
-		cols[n.Column()] = append(cols[n.Column()], n)
-	}
-	return t.Lookup("game.html").Execute(w, cols)
+	return t.Lookup("game.html").Execute(w, g)
 }
 
-func handleGames(w io.Writer, games []bingo.Game) error {
-	return t.Lookup("games.html").Execute(w, games)
+func handleGames(w io.Writer, gameInfos []gameInfo) error {
+	return t.Lookup("games.html").Execute(w, gameInfos)
 }

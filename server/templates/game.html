@@ -1,3 +1,4 @@
+<div id="numbers-left">{{.NumbersLeft}}</div>
 <table>
     <caption>Game Drawn Tiles</caption>
     <thead>
@@ -11,16 +12,17 @@
     </thead>
     <tbody>
         <tr>
-            <td>{{range index . 0}}<p>{{.}}</p>{{end}}</td>
-            <td>{{range index . 1}}<p>{{.}}</p>{{end}}</td>
-            <td>{{range index . 2}}<p>{{.}}</p>{{end}}</td>
-            <td>{{range index . 3}}<p>{{.}}</p>{{end}}</td>
-            <td>{{range index . 4}}<p>{{.}}</p>{{end}}</td>
+            {{with $cols := .Columns}}
+            <td>{{range index $cols 0}}<p>{{.}}</p>{{end}}</td>
+            <td>{{range index $cols 1}}<p>{{.}}</p>{{end}}</td>
+            <td>{{range index $cols 2}}<p>{{.}}</p>{{end}}</td>
+            <td>{{range index $cols 3}}<p>{{.}}</p>{{end}}</td>
+            <td>{{range index $cols 4}}<p>{{.}}</p>{{end}}</td>
+            {{end}}
         <tr>
     </tbody>
 </table>
 
-<p> TODO: Show tiles left</p>
 <p> TODO: Show draw tiles button, disable if tilesLeft<=0</p>
 
 <p>TODO: check type radios</p>
