@@ -59,8 +59,9 @@ func TestHandleAbout(t *testing.T) {
 
 func TestHandleGame(t *testing.T) {
 	var w bytes.Buffer
-	g := bingo.Game{
-		DrawnNumbers: []bingo.Number{2, 3, 31},
+	var g bingo.Game
+	for i := 0; i < int(bingo.MaxNumber); i++ {
+		g.DrawNumber()
 	}
 	err := handleGame(&w, g)
 	got := w.String()
@@ -69,8 +70,6 @@ func TestHandleGame(t *testing.T) {
 		t.Error(err)
 	case !strings.Contains(got, "B 2"):
 		t.Errorf("wanted B 2:\n%v", got)
-	case strings.Contains(got, "B 4"):
-		t.Errorf("did not want B 4:\n%v", got)
 	}
 }
 

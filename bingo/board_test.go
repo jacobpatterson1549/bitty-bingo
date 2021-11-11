@@ -20,9 +20,7 @@ func TestNewBoard(t *testing.T) {
 func TestHasLine(t *testing.T) {
 	b := board1257894001
 	for i, test := range hasLineTests {
-		g := Game{
-			DrawnNumbers: test.nums,
-		}
+		g := createTestGame(t, test.nums)
 		got := b.HasLine(g)
 		if test.want != got {
 			t.Errorf("test %v (%v): wanted %v, got %v", i, test.name, test.want, got)
@@ -34,26 +32,21 @@ func TestIsFilled(t *testing.T) {
 	b := board1257894001
 	t.Run("more-than-line", func(t *testing.T) {
 		for i, test := range hasLineTests {
-			g := Game{
-				DrawnNumbers: test.nums,
-			}
+			g := createTestGame(t, test.nums)
 			if want, got := false, b.IsFilled(g); want != got {
 				t.Errorf("test %v (%v): wanted isFilled() = %v, got %v", i, test.name, want, got)
 			}
 		}
 	})
 	t.Run("same as board", func(t *testing.T) {
-		g := Game{
-			DrawnNumbers: b[:],
-		}
+		g := createTestGame(t, b[:])
 		if want, got := true, b.IsFilled(g); want != got {
 			t.Errorf("wanted isFilled() = %v, got %v", want, got)
 		}
 	})
 	t.Run("all numbers drawn", func(t *testing.T) {
-		g := Game{
-			DrawnNumbers: []Number{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75},
-		}
+		nums := []Number{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75}
+		g := createTestGame(t, nums)
 		if want, got := true, b.IsFilled(g); want != got {
 			t.Errorf("wanted isFilled() = %v, got %v", want, got)
 		}
@@ -132,6 +125,14 @@ var board1257894001 = Board{
 	64, 72, 67, 70, 74, // O
 }
 var board1257894001ID = "5zuTsMm6CTZAs7ad"
+
+func createTestGame(t *testing.T, nums []Number) Game {
+	t.Helper()
+	var g Game
+	copy(g.numbers[:], nums)
+	g.numbersDrawn = len(nums)
+	return g
+}
 
 var hasLineTests = []struct {
 	name string

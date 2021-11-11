@@ -14,7 +14,7 @@ func NewBoard() *Board {
 	var b Board
 	for columnRowCounts < 055555 {
 		g.DrawNumber()
-		n := g.DrawnNumbers[len(g.DrawnNumbers)-1]
+		n := g.numbers[g.numbersDrawn-1]
 		c := n.Column()
 		r := (columnRowCounts >> (3 * c)) & 07
 		if r < 5 {
@@ -53,9 +53,9 @@ func (b Board) IsFilled(g Game) bool {
 }
 
 func numberSet(g Game) map[Number]struct{} {
-	s := make(map[Number]struct{}, len(g.DrawnNumbers)+1)
+	s := make(map[Number]struct{}, g.numbersDrawn+1)
 	s[0] = struct{}{} // free cell
-	for _, n := range g.DrawnNumbers {
+	for _, n := range g.DrawnNumbers() {
 		s[n] = struct{}{}
 	}
 	return s

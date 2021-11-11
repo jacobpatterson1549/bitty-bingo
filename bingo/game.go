@@ -2,50 +2,55 @@ package bingo
 
 import "math/rand"
 
+// Game represents a bingo game.  The zero value can be used to start a new game.
 type Game struct {
-	DrawnNumbers     []Number
-	availableNumbers []Number
+	numbers      [int(MaxNumber)]Number
+	numbersDrawn int
 }
 
 // NumbersLeft reports how many available numbers in the game can be drawn.
 func (g Game) NumbersLeft() int {
-	if len(g.DrawnNumbers) == 0 && len(g.availableNumbers) == 0 {
-		return int(MaxNumber - MinNumber + 1)
+	if len(g.numbers) <= g.numbersDrawn {
+		return 0
 	}
-	return len(g.availableNumbers)
+	if g.numbers[0] == 0 {
+		g.Reset()
+	}
+	return len(g.numbers) - g.numbersDrawn
+}
+
+// DrawnNumbers is the numbers in the game that have been drawn
+func (g Game) DrawnNumbers() []Number {
+	return g.numbers[:g.numbersDrawn]
 }
 
 // DrawNumber move the next available number to DrawnNumbers.
 // The game is reset if no numbers are available or have been drawn.
 func (g *Game) DrawNumber() {
-	if len(g.availableNumbers) == 0 {
-		if len(g.DrawnNumbers) != 0 {
-			return
-		}
+	switch {
+	case g.numbersDrawn <= 0:
 		g.Reset()
+		g.numbersDrawn = 1
+	case g.numbersDrawn < len(g.numbers):
+		g.numbersDrawn++
 	}
-	g.DrawnNumbers = append(g.DrawnNumbers, g.availableNumbers[0])
-	g.availableNumbers = g.availableNumbers[1:]
 }
 
 // Reset clears drawn numbers and resets/shuffles all the possible available numbers.
 func (g *Game) Reset() {
-	const c = int(MaxNumber - MinNumber + 1)
-	arr := make([]Number, c)
-	for i := 0; i < c; i++ {
-		arr[i] = Number(i + 1)
+	for i := range g.numbers {
+		g.numbers[i] = Number(i + 1)
 	}
-	rand.Shuffle(c, func(i, j int) {
-		arr[i], arr[j] = arr[j], arr[i]
+	rand.Shuffle(len(g.numbers), func(i, j int) {
+		g.numbers[i], g.numbers[j] = g.numbers[j], g.numbers[i]
 	})
-	g.availableNumbers = arr
-	g.DrawnNumbers = nil
+	g.numbersDrawn = 0
 }
 
 // Columns partitions the drawn numbers by columns in the order that they were drawn.
 func (g Game) Columns() map[int][]Number {
 	cols := make(map[int][]Number, 5)
-	for _, n := range g.DrawnNumbers {
+	for _, n := range g.DrawnNumbers() {
 		cols[n.Column()] = append(cols[n.Column()], n)
 	}
 	return cols
