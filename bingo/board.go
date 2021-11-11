@@ -2,7 +2,8 @@ package bingo
 
 import (
 	"encoding/base64"
-	"fmt"
+	"errors"
+	"strconv"
 )
 
 type Board [25]Number
@@ -110,12 +111,12 @@ var base64Encoding = base64.URLEncoding
 // Base 64 uses 6 bits for each character, so the string will be 96 / 6 = 16 characters long
 func (b Board) ID() (string, error) {
 	if b.hasDuplicateNumbers() {
-		return "", fmt.Errorf("board has duplicate numbers")
+		return "", errors.New("board has duplicate numbers")
 	}
 	for i, n := range b {
 		c := i / 5
 		if col := n.Column(); i != 12 && col != c {
-			return "", fmt.Errorf("board value at row %v, column %v invalid: %v", c+1, i%5+1, n)
+			return "", errors.New("board has number at incorrect column at index " + strconv.Itoa(i))
 		}
 	}
 	tinyBoard := make([]byte, 0, 12)
@@ -137,13 +138,12 @@ func (b Board) ID() (string, error) {
 // An error is returned if the id is for an invalid board.
 func BoardFromID(id string) (*Board, error) {
 	if len(id) != 16 {
-		return nil, fmt.Errorf("id must be 16 characters long, got %v (%q)", len(id), id)
+		return nil, errors.New("id must be 16 characters long")
 	}
 	tinyBoard, err := base64Encoding.Strict().DecodeString(id)
 	if err != nil {
-		return nil, fmt.Errorf("decoding board from id: %v", err)
+		return nil, errors.New("decoding board from id: " + err.Error())
 	}
-	fmt.Println(tinyBoard)
 	var b Board
 	i := 0
 	for _, ch := range tinyBoard {
@@ -162,7 +162,7 @@ func BoardFromID(id string) (*Board, error) {
 		}
 	}
 	if b.hasDuplicateNumbers() {
-		return nil, fmt.Errorf("board has duplicate numbers")
+		return nil, errors.New("board has duplicate numbers")
 	}
 	return &b, nil
 }
@@ -176,7 +176,7 @@ func encodeNumber(n Number) int {
 // decodeNumber converts the [0,15) byte back to a number at the index in the board
 func decodeNumber(h byte, i int) (Number, error) {
 	if h == 15 {
-		return 0, fmt.Errorf("number index %v in board invalid", i)
+		return 0, errors.New("board has invalid number at index " + strconv.Itoa(i))
 	}
 	c := i / 5
 	n := Number(int(h+1) + c*15)

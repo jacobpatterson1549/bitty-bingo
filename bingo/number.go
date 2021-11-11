@@ -1,6 +1,8 @@
 package bingo
 
-import "fmt"
+import (
+	"strconv"
+)
 
 type Number int
 
@@ -31,7 +33,7 @@ func (n Number) String() string {
 	case 4:
 		c = 'O'
 	}
-	return fmt.Sprintf("%c %d", c, n)
+	return string(c) + " " + strconv.Itoa(int(n))
 }
 
 func (n Number) Column() int {
