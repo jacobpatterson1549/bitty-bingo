@@ -2,6 +2,7 @@ package server
 
 import (
 	"embed"
+	"fmt"
 	"html/template"
 	"io"
 
@@ -14,22 +15,34 @@ var templatesFS embed.FS
 var t = template.Must(template.New("games.html").
 	ParseFS(templatesFS, "templates/*"))
 
-func handleExportBoard(w io.Writer, b bingo.Board) error {
-	return t.Lookup("board.svg").Execute(w, b)
-}
-
 func handleHelp(w io.Writer) error {
-	return t.Lookup("help.html").Execute(w, nil)
+	return executeTemplate("help.html", w, nil)
 }
 
 func handleAbout(w io.Writer) error {
-	return t.Lookup("about.html").Execute(w, nil)
+	return executeTemplate("about.html", w, nil)
 }
 
 func handleGame(w io.Writer, g bingo.Game) error {
-	return t.Lookup("game.html").Execute(w, g)
+	return executeTemplate("game.html", w, g)
 }
 
 func handleGames(w io.Writer, gameInfos []gameInfo) error {
-	return t.Lookup("games.html").Execute(w, gameInfos)
+	return executeTemplate("games.html", w, gameInfos)
+}
+
+func handleExportBoard(w io.Writer, b bingo.Board) error {
+	return executeTemplate("board.svg", w, b)
+}
+
+func executeTemplate(name string, w io.Writer, data interface{}) error {
+	t := t.Lookup(name)
+	if t == nil {
+		return fmt.Errorf("no template named %q", name)
+	}
+	err := t.Execute(w, data)
+	if err != nil {
+		return fmt.Errorf("rendering %v template: %v", name, err)
+	}
+	return nil
 }

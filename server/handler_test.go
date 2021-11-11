@@ -17,12 +17,11 @@ func TestHTTPHandler(t *testing.T) {
 		h := cfg.httpHandler()
 		h.ServeHTTP(w, test.r)
 		wantStatusCode := 301
-		test.wantHeader.Set("Content-Type", "text/html; charset=utf-8")
 		gotStatusCode := w.Code
 		gotHeader := w.Header()
 		switch {
 		case wantStatusCode != gotStatusCode:
-			t.Errorf("test %v: status codes not equal: wanted %v, got %v", i, wantStatusCode, gotStatusCode)
+			t.Errorf("test %v: response status codes not equal: wanted %v, got %v", i, wantStatusCode, gotStatusCode)
 		case !reflect.DeepEqual(test.wantHeader, gotHeader):
 			t.Errorf("test %v: response headers not equal:\nwanted: %v\ngot:    %v", i, test.wantHeader, gotHeader)
 		}
@@ -30,9 +29,23 @@ func TestHTTPHandler(t *testing.T) {
 }
 
 func TestHTTPSHandler(t *testing.T) {
-	t.Skip("TODO")
-	// for i, test := range httpHandlerTests {
-	// }
+	for i, test := range httpsHandlerTests {
+		w := httptest.NewRecorder()
+		h := httpsHandler{
+			gameInfos: test.gameInfos,
+		}
+		h.ServeHTTP(w, test.r)
+		switch {
+		case w.Code != test.wantStatusCode:
+			t.Errorf("test %v: response status codes not equal: wanted %v, got %v: %v", i, test.wantStatusCode, w.Code, w.Body.String())
+		case !reflect.DeepEqual(test.wantHeader, w.Header()):
+			t.Errorf("test %v: response headers not equal:\nwanted: %v\ngot:    %v", i, test.wantHeader, w.Header())
+		case !reflect.DeepEqual(test.wantGameInfos, h.gameInfos):
+			t.Errorf("test %v: game infos not equal:\nwanted: %v\ngot:    %v", i, test.wantGameInfos, h.gameInfos)
+		case len(test.wantBody) != 0 && test.wantBody != w.Body.String():
+			t.Errorf("test %v: response bodies not equal:\nwanted: %v\ngot:    %v", i, test.wantBody, w.Body.String())
+		}
+	}
 }
 
 func TestWithGzip(t *testing.T) {
@@ -65,26 +78,139 @@ var httpHandlerTests = []struct {
 		httpsPort: "443",
 		r:         httptest.NewRequest("GET", "http://example.com", nil),
 		wantHeader: http.Header{
-			"Location": {"https://example.com"},
+			"Content-Type": {"text/html; charset=utf-8"},
+			"Location":     {"https://example.com"},
 		},
 	},
 	{
 		httpsPort: "8000",
 		r:         httptest.NewRequest("GET", "http://example.com:8001", nil),
 		wantHeader: http.Header{
-			"Location": {"https://example.com:8000"},
+			"Content-Type": {"text/html; charset=utf-8"},
+			"Location":     {"https://example.com:8000"},
 		},
 	},
 }
 
-// var httpsHandlerTests []struct {
-// 	gameInfos []gameInfo
-// }
+var httpsHandlerTests = []struct {
+	gameInfos      []gameInfo
+	wantGameInfos  []gameInfo
+	r              *http.Request
+	wantStatusCode int
+	wantHeader     http.Header
+	wantBody       string // only checked if not empty
+}{
+	// ok requests
+	{ // get games list
+		r:              httptest.NewRequest("GET", "/", nil),
+		wantStatusCode: 200,
+		wantHeader: http.Header{
+			"Content-Type": {"text/html; charset=utf-8"},
+		},
+	},
+	{ // get game
+		r:              httptest.NewRequest("GET", "/game?id=0", nil),
+		wantStatusCode: 200,
+		wantHeader: http.Header{
+			"Content-Type": {"text/html; charset=utf-8"},
+		},
+	},
+	{ // check board - HasLine
+		r:              httptest.NewRequest("GET", "/game/check_board?gameID=5-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL&boardID=5zuTsMm6CTZAs7ad&type=HasLine", nil),
+		wantStatusCode: 200,
+		wantHeader: http.Header{
+			"Content-Type": {"text/plain; charset=utf-8"},
+		},
+		wantBody: "true",
+	},
+	{ // check board - IsFilled
+		r:              httptest.NewRequest("GET", "/game/check_board?gameID=24-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL&boardID=5zuTsMm6CTZAs7ad&type=IsFilled", nil),
+		wantStatusCode: 200,
+		wantHeader: http.Header{
+			"Content-Type": {"text/plain; charset=utf-8"},
+		},
+		wantBody: "true",
+	},
+	{ // check board - IsFilled (false)
+		r:              httptest.NewRequest("GET", "/game/check_board?gameID=1-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL&boardID=5zuTsMm6CTZAs7ad&type=IsFilled", nil),
+		wantStatusCode: 200,
+		wantHeader: http.Header{
+			"Content-Type": {"text/plain; charset=utf-8"},
+		},
+		wantBody: "false",
+	},
+	{ // help
+		r:              httptest.NewRequest("GET", "/help", nil),
+		wantStatusCode: 200,
+		wantHeader: http.Header{
+			"Content-Type": {"text/html; charset=utf-8"},
+		},
+	},
+	{ // about
+		r:              httptest.NewRequest("GET", "/about", nil),
+		wantStatusCode: 200,
+		wantHeader: http.Header{
+			"Content-Type": {"text/html; charset=utf-8"},
+		},
+	},
+	// TODO: ok posts
+	// bad requests
+	{ // get game - bad id
+		r:              httptest.NewRequest("GET", "/game?id=BAD-ID", nil),
+		wantStatusCode: 400,
+		wantHeader: http.Header{
+			"Content-Type":           {"text/plain; charset=utf-8"},
+			"X-Content-Type-Options": {"nosniff"},
+		},
+	},
+	{ // check board - bad game id
+		r:              httptest.NewRequest("GET", "/game/check_board?gameID=BAD-ID&boardID=5zuTsMm6CTZAs7ad&type=HasLine", nil),
+		wantStatusCode: 400,
+		wantHeader: http.Header{
+			"Content-Type":           {"text/plain; charset=utf-8"},
+			"X-Content-Type-Options": {"nosniff"},
+		},
+	},
+	{ // check board - bad board id
+		r:              httptest.NewRequest("GET", "/game/check_board?gameID=5-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL&boardID=BAD-ID&type=HasLine", nil),
+		wantStatusCode: 400,
+		wantHeader: http.Header{
+			"Content-Type":           {"text/plain; charset=utf-8"},
+			"X-Content-Type-Options": {"nosniff"},
+		},
+	},
+	{ // check board - bad check type
+		r:              httptest.NewRequest("GET", "/game/check_board?gameID=5-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL&boardID=5zuTsMm6CTZAs7ad&type=UNKNOWN", nil),
+		wantStatusCode: 400,
+		wantHeader: http.Header{
+			"Content-Type":           {"text/plain; charset=utf-8"},
+			"X-Content-Type-Options": {"nosniff"},
+		},
+	},
+	{ // not found
+		r:              httptest.NewRequest("GET", "/UNKNOWN", nil),
+		wantStatusCode: 404,
+		wantHeader: http.Header{
+			"Content-Type":           {"text/plain; charset=utf-8"},
+			"X-Content-Type-Options": {"nosniff"},
+		},
+	},
+	// TODO: bad posts
+	{ // bad method
+		r:              httptest.NewRequest("OPTIONS", "/", nil),
+		wantStatusCode: 405,
+		wantHeader: http.Header{
+			"Content-Type":           {"text/plain; charset=utf-8"},
+			"X-Content-Type-Options": {"nosniff"},
+		},
+	},
+}
 
 var withGzipTests = []struct {
 	acceptEncoding string
 	wantGzip       bool
 	wantBodyStart  string
+	wantBody       string
 }{
 	{
 		wantBodyStart: "abc123",

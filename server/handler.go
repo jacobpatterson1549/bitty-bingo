@@ -3,7 +3,6 @@ package server
 import (
 	"archive/zip"
 	"compress/gzip"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -21,7 +20,7 @@ func (cfg Config) httpsHandler() http.Handler {
 	h := httpsHandler{
 		gameInfos: make([]gameInfo, 0, cfg.GameCount),
 	}
-	return withGzip(http.HandlerFunc(h.serveHTTPS))
+	return withGzip(&h)
 }
 
 func httpsRedirectHandler(httpsPort string) http.HandlerFunc {
@@ -45,7 +44,7 @@ type httpsHandler struct {
 	gameInfos []gameInfo
 }
 
-func (h *httpsHandler) serveHTTPS(w http.ResponseWriter, r *http.Request) {
+func (h *httpsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		h.serveGet(w, r)
@@ -56,32 +55,32 @@ func (h *httpsHandler) serveHTTPS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *httpsHandler) servePost(w http.ResponseWriter, r *http.Request) {
-	switch r.URL.Path {
-	case "/game/create":
-		h.createGame(w, r)
-	case "/game/boards": // ?n=
-		h.createBoards(w, r)
-	case "/game/check_board": // ?game=&board=&type=
-		h.checkBoard(w, r)
-	case "/game/draw_number": // ?game=
-		h.drawNumber(w, r)
-	default:
-		http.NotFound(w, r)
-	}
-}
-
 func (h httpsHandler) serveGet(w http.ResponseWriter, r *http.Request) {
 	// TODO: create parent html wrapper page with nav bar(games list, help, about links)
 	switch r.URL.Path {
 	case "/":
 		h.getGames(w, r)
-	case "/game":
+	case "/game": // ?id=
 		h.getGame(w, r)
+	case "/game/check_board": // ?id=&board=&type=
+		h.checkBoard(w, r)
 	case "/help":
 		h.getHelp(w, r)
 	case "/about":
 		h.getAbout(w, r)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (h *httpsHandler) servePost(w http.ResponseWriter, r *http.Request) {
+	switch r.URL.Path {
+	case "/game/create":
+		h.createGame(w, r)
+	case "/game/draw_number": // ?game=
+		h.drawNumber(w, r)
+	case "/game/boards": // ?n=
+		h.createBoards(w, r)
 	default:
 		http.NotFound(w, r)
 	}
@@ -94,85 +93,69 @@ func httpError(w http.ResponseWriter, message string, statusCode int) {
 	http.Error(w, message, statusCode)
 }
 
-func (h *httpsHandler) createGame(w http.ResponseWriter, r *http.Request) {
-	var g bingo.Game
-	if err := handleGame(w, g); err != nil {
-		message := fmt.Sprintf("rendering new game: %v", err)
-		httpError(w, message, http.StatusInternalServerError)
-		return
-	}
-}
-
 func (h httpsHandler) getGames(w http.ResponseWriter, r *http.Request) {
-	if err := handleGames(w, h.gameInfos); err != nil {
-		message := fmt.Sprintf("rendering games list: %v", err)
-		httpError(w, message, http.StatusInternalServerError)
-		return
-	}
+	handleGames(w, h.gameInfos)
 }
 
 func (h httpsHandler) getGame(w http.ResponseWriter, r *http.Request) {
-	gameQueryParam := r.URL.Query().Get("id")
-	var g bingo.Game
-	if err := json.Unmarshal([]byte(gameQueryParam), &g); err != nil {
+	id := r.URL.Query().Get("id")
+	g, err := bingo.GameFromID(id)
+	if err != nil {
 		message := fmt.Sprintf("getting game from query parameter: %v", err)
 		httpError(w, message, http.StatusBadRequest)
-	}
-	if err := handleGame(w, g); err != nil {
-		message := fmt.Sprintf("rendering game: %v", err)
-		httpError(w, message, http.StatusInternalServerError)
 		return
 	}
+	handleGame(w, *g)
 }
 
 func (httpsHandler) getHelp(w http.ResponseWriter, r *http.Request) {
-	if err := handleHelp(w); err != nil {
-		message := fmt.Sprintf("rendering help page: %v", err)
-		httpError(w, message, http.StatusInternalServerError)
-		return
-	}
+	handleHelp(w)
 }
 
 func (httpsHandler) getAbout(w http.ResponseWriter, r *http.Request) {
-	if err := handleAbout(w); err != nil {
-		message := fmt.Sprintf("rendering about page: %v", err)
-		httpError(w, message, http.StatusInternalServerError)
-		return
-	}
+	handleAbout(w)
 }
 
 func (httpsHandler) checkBoard(w http.ResponseWriter, r *http.Request) {
-	gameQueryParam := r.URL.Query().Get("game")
-	var g bingo.Game
-	if err := json.Unmarshal([]byte(gameQueryParam), &g); err != nil {
+	gameID := r.URL.Query().Get("gameID")
+	g, err := bingo.GameFromID(gameID)
+	if err != nil {
 		message := fmt.Sprintf("getting game from query parameter: %v", err)
 		httpError(w, message, http.StatusBadRequest)
+		return
 	}
-	boardQueryParam := r.URL.Query().Get("board")
-	var b bingo.Board
-	if err := json.Unmarshal([]byte(boardQueryParam), &b); err != nil {
+	boardID := r.URL.Query().Get("boardID")
+	b, err := bingo.BoardFromID(boardID)
+	if err != nil {
 		message := fmt.Sprintf("getting board from query parameter: %v", err)
 		httpError(w, message, http.StatusBadRequest)
+		return
 	}
 	checkType := r.URL.Query().Get("type")
-	// var result bool
+	var result bool
 	switch checkType {
 	case "HasLine":
-		// result = b.HasLine(g)
+		result = b.HasLine(*g)
 	case "IsFilled":
-		// result = b.IsFilled(g)
+		result = b.IsFilled(*g)
 	default:
 		message := fmt.Sprintf("unknown checkType %q", checkType)
 		httpError(w, message, http.StatusBadRequest)
+		return
 	}
-	// fmt.Fprint(w, result)
+	fmt.Fprint(w, result)
 	// TODO: redirect to /game with query of board and result
 }
 
-func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
-	gameQueryParam := r.Form.Get("game")
+func (h *httpsHandler) createGame(w http.ResponseWriter, r *http.Request) {
 	var g bingo.Game
-	if err := json.Unmarshal([]byte(gameQueryParam), &g); err != nil {
+	handleGame(w, g)
+}
+
+func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
+	id := r.Form.Get("game")
+	g, err := bingo.GameFromID(id)
+	if err != nil {
 		message := fmt.Sprintf("getting game from query parameter: %v", err)
 		httpError(w, message, http.StatusBadRequest)
 		return

@@ -89,10 +89,10 @@ func TestGameFromID(t *testing.T) {
 	})
 	t.Run("invalid ids", func(t *testing.T) {
 		ids := []string{
-			"1", // no hyphen
-			"-", // bad numbersDrawn
-			"a-", // bad numbersDrawn
-			"1-", // no numbers
+			"1",          // no hyphen
+			"-",          // bad numbersDrawn
+			"a-",         // bad numbersDrawn
+			"1-",         // no numbers
 			"1-!@#%*!@$", // bad numbersLeft
 			// numbers not valid (all zeroes):
 			"75-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -157,5 +157,39 @@ var gameTests = []struct {
 			4: {61, 67, 72, 69, 65, 63, 62, 66, 74, 68, 71, 73, 75, 70, 64},
 		},
 		wantID: "75-Oh0hOyw9JDwQDC4yKS8aQzk3HiI1GBUmCzgjMA80BBsDKicIDQIBLTMxGSBIHyUoEUUSKxdBNgc_HBMFBgkWPg4UCkJKREdJS0ZA",
+	},
+	{ // first 5 numbers are for "5zuTsMm6CTZAs7ad" the rest are sequential
+		game: Game{
+			numbers:      [MaxNumber]Number{15, 8, 4, 12, 10, 19, 27, 16, 28, 25, 42, 41, 31, 40, 49, 52, 50, 46, 57, 64, 72, 67, 70, 74, 1, 2, 3, 5, 6, 7, 9, 11, 13, 14, 17, 18, 20, 21, 22, 23, 24, 26, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39, 43, 44, 45, 47, 48, 51, 53, 54, 55, 56, 58, 59, 60, 61, 62, 63, 65, 66, 68, 69, 71, 73, 75},
+			numbersDrawn: 5,
+		},
+		wantAvailableAfterDraw: Game{
+			numbers:      [MaxNumber]Number{15, 8, 4, 12, 10, 19, 27, 16, 28, 25, 42, 41, 31, 40, 49, 52, 50, 46, 57, 64, 72, 67, 70, 74, 1, 2, 3, 5, 6, 7, 9, 11, 13, 14, 17, 18, 20, 21, 22, 23, 24, 26, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39, 43, 44, 45, 47, 48, 51, 53, 54, 55, 56, 58, 59, 60, 61, 62, 63, 65, 66, 68, 69, 71, 73, 75},
+			numbersDrawn: 6,
+		},
+		wantNumbersLeft: 70,
+		wantColumns: map[int][]Number{
+			0: {15, 8, 4, 12, 10},
+		},
+		wantID: "5-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL",
+	},
+	{ // first 24 numbers are for "5zuTsMm6CTZAs7ad" the rest are sequential
+		game: Game{
+			numbers:      [MaxNumber]Number{15, 8, 4, 12, 10, 19, 27, 16, 28, 25, 42, 41, 31, 40, 49, 52, 50, 46, 57, 64, 72, 67, 70, 74, 1, 2, 3, 5, 6, 7, 9, 11, 13, 14, 17, 18, 20, 21, 22, 23, 24, 26, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39, 43, 44, 45, 47, 48, 51, 53, 54, 55, 56, 58, 59, 60, 61, 62, 63, 65, 66, 68, 69, 71, 73, 75},
+			numbersDrawn: 24,
+		},
+		wantAvailableAfterDraw: Game{
+			numbers:      [MaxNumber]Number{15, 8, 4, 12, 10, 19, 27, 16, 28, 25, 42, 41, 31, 40, 49, 52, 50, 46, 57, 64, 72, 67, 70, 74, 1, 2, 3, 5, 6, 7, 9, 11, 13, 14, 17, 18, 20, 21, 22, 23, 24, 26, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39, 43, 44, 45, 47, 48, 51, 53, 54, 55, 56, 58, 59, 60, 61, 62, 63, 65, 66, 68, 69, 71, 73, 75},
+			numbersDrawn: 25,
+		},
+		wantNumbersLeft: 51,
+		wantColumns: map[int][]Number{
+			0: {15, 8, 4, 12, 10},
+			1: {19, 27, 16, 28, 25},
+			2: {42, 41, 31, 40},
+			3: {49, 52, 50, 46, 57},
+			4: {64, 72, 67, 70, 74},
+		},
+		wantID: "24-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL",
 	},
 }
