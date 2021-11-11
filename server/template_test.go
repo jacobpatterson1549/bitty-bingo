@@ -95,3 +95,11 @@ func TestHandleExport(t *testing.T) {
 		}
 	}
 }
+
+func TestExecuteTemplate_badName(t *testing.T) {
+	var w bytes.Buffer
+	gotErr := executeTemplate("UNKNOWN", &w, nil)
+	if gotErr == nil {
+		t.Errorf("wanted error executing template with unknown name")
+	}
+}

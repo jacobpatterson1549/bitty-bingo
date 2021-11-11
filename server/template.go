@@ -40,9 +40,5 @@ func executeTemplate(name string, w io.Writer, data interface{}) error {
 	if t == nil {
 		return fmt.Errorf("no template named %q", name)
 	}
-	err := t.Execute(w, data)
-	if err != nil {
-		return fmt.Errorf("rendering %v template: %v", name, err)
-	}
-	return nil
+	return t.Execute(w, data)
 }
