@@ -61,11 +61,13 @@ func (g Game) Columns() map[int][]Number {
 	return cols
 }
 
-func (g Game) ID() string {
+func (g Game) ID() (string, error) {
 	if g.numbersDrawn <= 0 {
-		return "0"
+		return "0", nil
 	}
-	// TODO: validate board to ensure only all numbers are in numbers
+	if !g.validNumbers() {
+		return "", errors.New("game numbers not valid")
+	}
 	// TODO: make byte array smaller, numbers should only range [0,75)
 	// this means each number takes 7 digits: ceil(log2(75)) digits = ceil(6.2288)
 	// this means only 7*75=525 bits are needed, and 525/8 = 65 5/8, so only 66 bytes are needed
@@ -75,7 +77,7 @@ func (g Game) ID() string {
 	}
 	nums := base64Encoding.EncodeToString(b)
 	id := strconv.Itoa(g.numbersDrawn) + "-" + nums
-	return id
+	return id, nil
 }
 
 func GameFromID(id string) (*Game, error) {
@@ -100,12 +102,26 @@ func GameFromID(id string) (*Game, error) {
 		return nil, errors.New("decoded numbers too large/small")
 	}
 	for i, n := range b {
-		if n < byte(MinNumber) || n > byte(MaxNumber) {
-			return nil, errors.New("invalid number at index " + strconv.Itoa(i) + ": " + strconv.Itoa(int(n)))
-		}
 		g.numbers[i] = Number(n)
+	}
+	if !g.validNumbers() {
+		return nil, errors.New("game numbers not valid")
 	}
 	g.numbersDrawn = numbersDrawn
 	return &g, nil
+}
 
+// validNumbers determines if the all the valid numbers are in the game and there are no duplicates.
+func (g Game) validNumbers() bool {
+	m := make(map[Number]struct{}, MaxNumber)
+	for _, n := range g.numbers {
+		if n < MinNumber || n > MaxNumber {
+			return false // not valid
+		}
+		if _, ok := m[n]; ok {
+			return false // duplicate
+		}
+		m[n] = struct{}{}
+	}
+	return true
 }

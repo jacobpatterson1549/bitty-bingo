@@ -25,25 +25,12 @@ func TestGameDrawNumber(t *testing.T) {
 }
 
 func TestResetGame(t *testing.T) {
-	hasAllAvailableNumbers := func(numbers []Number) bool {
-		m := make(map[Number]struct{}, MaxNumber)
-		for _, n := range numbers {
-			if n < MinNumber || n > MaxNumber {
-				return false // not valid
-			}
-			if _, ok := m[n]; ok {
-				return false // duplicate
-			}
-			m[n] = struct{}{}
-		}
-		return true
-	}
 	for i, test := range gameTests {
 		test.game.Reset()
 		if got := test.game.DrawnNumbers(); len(got) != 0 {
 			t.Errorf("test %v: drawn numbers not empty after reset: got %v", i, got)
 		}
-		if !hasAllAvailableNumbers(test.game.numbers[:]) {
+		if !test.game.validNumbers() {
 			t.Errorf("test %v: not all numbers available after reset: %v", i, test.game.numbers)
 		}
 	}
@@ -58,24 +45,65 @@ func TestColumns(t *testing.T) {
 }
 
 func TestGameID(t *testing.T) {
-	for i, test := range gameTests {
-		if want, got := test.wantID, test.game.ID(); want != got {
-			t.Errorf("test %v: ids not equal:\nwanted: %q\ngot:    %q", i, want, got)
+	t.Run("ok games", func(t *testing.T) {
+		for i, test := range gameTests {
+			want := test.wantID
+			got, err := test.game.ID()
+			switch {
+			case err != nil:
+				t.Errorf("test %v: unwanted error getting game id: %v", i, err)
+			case want != got:
+				t.Errorf("test %v: ids not equal:\nwanted: %q\ngot:    %q", i, want, got)
+			}
 		}
-	}
+	})
+	t.Run("invalid games", func(t *testing.T) {
+		games := []Game{
+			{numbersDrawn: 1}, // first number is invalid
+			{numbers: [int(MaxNumber)]Number{9999}, numbersDrawn: 1}, // first number is invalid
+			{numbers: [int(MaxNumber)]Number{1, 1}, numbersDrawn: 1}, // duplicate numbers
+			// duplicate numbers (first and last)
+			{numbers: [int(MaxNumber)]Number{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 1}, numbersDrawn: 1},
+		}
+		for i, game := range games {
+			_, err := game.ID()
+			if err == nil {
+				t.Errorf("test %v: wanted error getting id", i)
+			}
+		}
+	})
 }
 
 func TestGameFromID(t *testing.T) {
-	for i, test := range gameTests {
-		want := &test.game
-		got, err := GameFromID(test.wantID)
-		switch {
-		case err != nil:
-			t.Errorf("test %v: GameFromID(%q): unwanted error : %v", i, test.wantID, err)
-		case !reflect.DeepEqual(want, got):
-			t.Errorf("test %v: GameFromID(%q):\nwanted: %v\ngot:    %v", i, test.wantID, want, got)
+	t.Run("ok ids", func(t *testing.T) {
+		for i, test := range gameTests {
+			want := &test.game
+			got, err := GameFromID(test.wantID)
+			switch {
+			case err != nil:
+				t.Errorf("test %v: GameFromID(%q): unwanted error : %v", i, test.wantID, err)
+			case !reflect.DeepEqual(want, got):
+				t.Errorf("test %v: GameFromID(%q):\nwanted: %v\ngot:    %v", i, test.wantID, want, got)
+			}
 		}
-	}
+	})
+	t.Run("invalid ids", func(t *testing.T) {
+		ids := []string{
+			"1", // no hyphen
+			"-", // bad numbersDrawn
+			"a-", // bad numbersDrawn
+			"1-", // no numbers
+			"1-!@#%*!@$", // bad numbersLeft
+			// numbers not valid (all zeroes):
+			"75-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+		}
+		for i, id := range ids {
+			_, err := GameFromID(id)
+			if err == nil {
+				t.Errorf("test %v: wanted error getting game from %q", i, id)
+			}
+		}
+	})
 }
 
 var gameTests = []struct {
