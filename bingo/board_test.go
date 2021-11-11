@@ -78,12 +78,20 @@ func TestBoardID(t *testing.T) {
 		var b Board
 		copy(b[:], board1257894001[:])
 		b[0], b[len(b)-1] = b[len(b)-1], b[0]
-		_, err := b.ID()
+		id, err := b.ID()
 		if err == nil {
-			t.Errorf("wanted error when swapping first and last values of board (B and O columns)")
+			t.Errorf("wanted error when swapping first and last values of board (B and O columns), got %q", id)
 		}
 	})
-	// TODO should getting id of board with duplicate numbers cause an error?
+	t.Run("duplicate numbers", func(t *testing.T) {
+		var b Board
+		copy(b[:], board1257894001[:])
+		b[1] = b[0]
+		id, err := b.ID() // 7juTsMm6CTZAs7ad
+		if err == nil {
+			t.Errorf("wanted when first number repeated, got %q", id)
+		}
+	})
 }
 
 func TestBoardFromID(t *testing.T) {
@@ -103,8 +111,9 @@ func TestBoardFromID(t *testing.T) {
 			"",                      // too short
 			board1257894001ID + "_", // to long
 			"INVALID B64 CHAR",      // spaces not allowed
-			// TODO: duplicate number tests
-			// "________________",
+			"9zuTsMm6CTZAs7ad",      // first number is too large (15)
+			"7zuTsMm6CTZAs7ad",      // second number is too large (15)
+			"7juTsMm6CTZAs7ad",      // first number duplicated
 		}
 		for i, id := range invalidIds {
 			_, err := BoardFromID(id)
@@ -114,7 +123,6 @@ func TestBoardFromID(t *testing.T) {
 		}
 	})
 }
-
 
 var board1257894001 = Board{
 	15, 8, 4, 12, 10, // B

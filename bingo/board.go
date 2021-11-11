@@ -100,6 +100,7 @@ func (b Board) hasDiagonal2(nums map[Number]struct{}) bool {
 	return true
 }
 
+// base64Encoding is used to encode/decode boards/ids.  The ids can be put in urls.
 var base64Encoding = base64.URLEncoding
 
 // ID encodes the board into a base64 string.
@@ -108,6 +109,9 @@ var base64Encoding = base64.URLEncoding
 // Since there are 8 bits in a byte the array uses 8 * 12 = 96 bits.
 // Base 64 uses 6 bits for each character, so the string will be 96 / 6 = 16 characters long
 func (b Board) ID() (string, error) {
+	if b.hasDuplicateNumbers() {
+		return "", fmt.Errorf("board has duplicate numbers")
+	}
 	for i, n := range b {
 		c := i / 5
 		if col := n.Column(); i != 12 && col != c {
@@ -125,7 +129,8 @@ func (b Board) ID() (string, error) {
 			i++
 		}
 	}
-	return base64Encoding.EncodeToString(tinyBoard), nil
+	id := base64Encoding.EncodeToString(tinyBoard)
+	return id, nil
 }
 
 // BoardFromID converts the board id to a Board.
@@ -141,7 +146,6 @@ func BoardFromID(id string) (*Board, error) {
 	fmt.Println(tinyBoard)
 	var b Board
 	i := 0
-	// TODO: check for duplicates in decodeNumber function with seen []byte or map[int]int, return (number, error)
 	for _, ch := range tinyBoard {
 		l, err := decodeNumber(ch>>4, i)
 		if err != nil {
@@ -157,14 +161,19 @@ func BoardFromID(id string) (*Board, error) {
 			i++
 		}
 	}
+	if b.hasDuplicateNumbers() {
+		return nil, fmt.Errorf("board has duplicate numbers")
+	}
 	return &b, nil
 }
 
+// encodeNumber converts the number to one in [0,15)
 func encodeNumber(n Number) int {
 	h := int(n-1) % 15 // (mod 15 is same as subtract n.Column()*15)
 	return h
 }
 
+// decodeNumber converts the [0,15) byte back to a number at the index in the board
 func decodeNumber(h byte, i int) (Number, error) {
 	if h == 15 {
 		return 0, fmt.Errorf("number index %v in board invalid", i)
@@ -172,4 +181,16 @@ func decodeNumber(h byte, i int) (Number, error) {
 	c := i / 5
 	n := Number(int(h+1) + c*15)
 	return n, nil
+}
+
+// hasDuplicateNumbers determines if the board has duplicate numbers
+func (b Board) hasDuplicateNumbers() bool {
+	m := make(map[Number]struct{}, len(b))
+	for _, n := range b {
+		if _, ok := m[n]; ok {
+			return true
+		}
+		m[n] = struct{}{}
+	}
+	return false
 }
