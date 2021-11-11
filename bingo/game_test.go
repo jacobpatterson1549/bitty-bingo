@@ -57,52 +57,61 @@ func TestColumns(t *testing.T) {
 	}
 }
 
+func TestGameID(t *testing.T) {
+	for i, test := range gameTests {
+		if want, got := test.wantID, test.game.ID(); want != got {
+			t.Errorf("test %v: ids not equal:\nwanted: %q\ngot:    %q", i, want, got)
+		}
+	}
+}
+
+func TestGameFromID(t *testing.T) {
+	for i, test := range gameTests {
+		want := &test.game
+		got, err := GameFromID(test.wantID)
+		switch {
+		case err != nil:
+			t.Errorf("test %v: GameFromID(%q): unwanted error : %v", i, test.wantID, err)
+		case !reflect.DeepEqual(want, got):
+			t.Errorf("test %v: GameFromID(%q):\nwanted: %v\ngot:    %v", i, test.wantID, want, got)
+		}
+	}
+}
+
 var gameTests = []struct {
 	game                   Game
 	wantAvailableAfterDraw Game
 	wantNumbersLeft        int
 	wantColumns            map[int][]Number
+	wantID                 string
 }{
 	{ // shuffle numbers if game is not initialized; random generator is seeded at 1257894000 for these results
+		game: Game{},
 		wantAvailableAfterDraw: Game{
 			numbers:      [MaxNumber]Number{24, 20, 64, 54, 6, 62, 25, 43, 22, 57, 10, 40, 28, 29, 30, 73, 75, 69, 68, 23, 2, 37, 36, 15, 38, 26, 8, 18, 51, 49, 53, 42, 1, 32, 52, 71, 16, 65, 5, 35, 31, 9, 12, 59, 34, 4, 33, 39, 17, 41, 27, 67, 70, 11, 55, 56, 13, 72, 46, 19, 58, 3, 47, 14, 74, 45, 66, 48, 44, 63, 21, 50, 61, 60, 7},
 			numbersDrawn: 1,
 		},
 		wantNumbersLeft: 75,
 		wantColumns:     map[int][]Number{},
-	},
-	{ // NOOP if the game has drawn numbers and there are no available numbers to draw
-		game: Game{
-			numbers:      [MaxNumber]Number{66},
-			numbersDrawn: int(MaxNumber),
-		},
-		wantAvailableAfterDraw: Game{
-			numbers:      [MaxNumber]Number{66},
-			numbersDrawn: int(MaxNumber),
-		},
-		wantNumbersLeft: 0,
-		wantColumns: map[int][]Number{
-			4: {66},
-			// 74 zeroes at the end because numbers is a fixed sized array and all have been drawn
-			0: {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-		},
+		wantID:          "0",
 	},
 	{ // draw from front of available numbers, add to end of drawn numbers
 		game: Game{
-			numbers:      [MaxNumber]Number{7, 28, 3, 21, 34, 18},
+			numbers:      [MaxNumber]Number{65, 35, 44, 73, 18, 1, 37, 41, 69, 62, 72, 13, 9, 30, 14, 60, 2, 16, 64, 71, 24, 21, 6, 75, 55, 29, 61, 54, 12, 23, 53, 42, 48, 43, 28, 70, 15, 49, 46, 63, 68, 27, 31, 47, 67, 52, 56, 25, 11, 4, 39, 59, 66, 19, 26, 74, 22, 36, 45, 10, 50, 34, 3, 5, 57, 20, 32, 17, 40, 8, 58, 7, 51, 38, 33},
 			numbersDrawn: 3,
 		},
 		wantAvailableAfterDraw: Game{
-			numbers:      [MaxNumber]Number{7, 28, 3, 21, 34, 18},
+			numbers:      [MaxNumber]Number{65, 35, 44, 73, 18, 1, 37, 41, 69, 62, 72, 13, 9, 30, 14, 60, 2, 16, 64, 71, 24, 21, 6, 75, 55, 29, 61, 54, 12, 23, 53, 42, 48, 43, 28, 70, 15, 49, 46, 63, 68, 27, 31, 47, 67, 52, 56, 25, 11, 4, 39, 59, 66, 19, 26, 74, 22, 36, 45, 10, 50, 34, 3, 5, 57, 20, 32, 17, 40, 8, 58, 7, 51, 38, 33},
 			numbersDrawn: 4,
 		},
 		wantNumbersLeft: 72,
 		wantColumns: map[int][]Number{
-			0: {7, 3},
-			1: {28},
+			2: {35, 44},
+			4: {65},
 		},
+		wantID: "3-QSMsSRIBJSlFPkgNCR4OPAIQQEcYFQZLNx09NgwXNSowKxxGDzEuP0QbHy9DNDgZCwQnO0ITGkoWJC0KMiIDBTkUIBEoCDoHMyYh",
 	},
-	{ // al numbers, shuffled
+	{ // do not draw if all numbers have been drawn
 		game: Game{
 			numbers:      [MaxNumber]Number{58, 29, 33, 59, 44, 61, 36, 60, 16, 12, 46, 50, 41, 47, 26, 67, 57, 55, 30, 34, 53, 24, 21, 38, 11, 56, 35, 48, 15, 52, 4, 27, 3, 42, 39, 8, 13, 2, 1, 45, 51, 49, 25, 32, 72, 31, 37, 40, 17, 69, 18, 43, 23, 65, 54, 7, 63, 28, 19, 5, 6, 9, 22, 62, 14, 20, 10, 66, 74, 68, 71, 73, 75, 70, 64},
 			numbersDrawn: 75,
@@ -119,5 +128,6 @@ var gameTests = []struct {
 			3: {58, 59, 60, 46, 50, 47, 57, 55, 53, 56, 48, 52, 51, 49, 54},
 			4: {61, 67, 72, 69, 65, 63, 62, 66, 74, 68, 71, 73, 75, 70, 64},
 		},
+		wantID: "75-Oh0hOyw9JDwQDC4yKS8aQzk3HiI1GBUmCzgjMA80BBsDKicIDQIBLTMxGSBIHyUoEUUSKxdBNgc_HBMFBgkWPg4UCkJKREdJS0ZA",
 	},
 }

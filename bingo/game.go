@@ -1,6 +1,11 @@
 package bingo
 
-import "math/rand"
+import (
+	"errors"
+	"math/rand"
+	"strconv"
+	"strings"
+)
 
 // Game represents a bingo game.  The zero value can be used to start a new game.
 type Game struct {
@@ -54,4 +59,53 @@ func (g Game) Columns() map[int][]Number {
 		cols[n.Column()] = append(cols[n.Column()], n)
 	}
 	return cols
+}
+
+func (g Game) ID() string {
+	if g.numbersDrawn <= 0 {
+		return "0"
+	}
+	// TODO: validate board to ensure only all numbers are in numbers
+	// TODO: make byte array smaller, numbers should only range [0,75)
+	// this means each number takes 7 digits: ceil(log2(75)) digits = ceil(6.2288)
+	// this means only 7*75=525 bits are needed, and 525/8 = 65 5/8, so only 66 bytes are needed
+	b := make([]byte, len(g.numbers))
+	for i, n := range g.numbers {
+		b[i] = byte(n)
+	}
+	nums := base64Encoding.EncodeToString(b)
+	id := strconv.Itoa(g.numbersDrawn) + "-" + nums
+	return id
+}
+
+func GameFromID(id string) (*Game, error) {
+	if id == "0" {
+		return new(Game), nil
+	}
+	i := strings.IndexAny(id, "-")
+	if i < 0 || i >= len(id) {
+		return nil, errors.New("could not split id string into numbersDrawn and numbers")
+	}
+	numbersDrawnStr, numsStr := id[:i], id[i+1:]
+	numbersDrawn, err := strconv.Atoi(numbersDrawnStr)
+	if err != nil {
+		return nil, errors.New("parsing numbersLeft: " + err.Error())
+	}
+	b, err := base64Encoding.DecodeString(numsStr)
+	if err != nil {
+		return nil, errors.New("decoding game numbers: " + err.Error())
+	}
+	var g Game
+	if len(b) != len(g.numbers) {
+		return nil, errors.New("decoded numbers too large/small")
+	}
+	for i, n := range b {
+		if n < byte(MinNumber) || n > byte(MaxNumber) {
+			return nil, errors.New("invalid number at index " + strconv.Itoa(i) + ": " + strconv.Itoa(int(n)))
+		}
+		g.numbers[i] = Number(n)
+	}
+	g.numbersDrawn = numbersDrawn
+	return &g, nil
+
 }
