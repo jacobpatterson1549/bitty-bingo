@@ -60,31 +60,61 @@ func TestIsFilled(t *testing.T) {
 	})
 }
 
-func TestID(t *testing.T) {
-	b := board1257894001
-	id, err := b.ID()
-	if err != nil {
-		t.Errorf("unwanted error encoding board: %v", err)
-	}
-	if want, got := board1257894001ID, id; want != got {
-		t.Errorf("ids not equal:\nwanted: %q\ngot:    %q", want, got)
-	}
-	if want, got := 16, len(id); want != got {
-		t.Errorf("sanity check to ensure math in documentation is correct: id lengths not equal: wanted %v, got %v", want, got)
-	}
+func TestBoardID(t *testing.T) {
+	t.Run("board1257894001", func(t *testing.T) {
+		b := board1257894001
+		id, err := b.ID()
+		if err != nil {
+			t.Errorf("unwanted error encoding board: %v", err)
+		}
+		if want, got := board1257894001ID, id; want != got {
+			t.Errorf("ids not equal:\nwanted: %q\ngot:    %q", want, got)
+		}
+		if want, got := 16, len(id); want != got {
+			t.Errorf("sanity check to ensure math in documentation is correct: id lengths not equal: wanted %v, got %v", want, got)
+		}
+	})
+	t.Run("numbers in wrong columns", func(t *testing.T) {
+		var b Board
+		copy(b[:], board1257894001[:])
+		b[0], b[len(b)-1] = b[len(b)-1], b[0]
+		_, err := b.ID()
+		if err == nil {
+			t.Errorf("wanted error when swapping first and last values of board (B and O columns)")
+		}
+	})
+	// TODO should getting id of board with duplicate numbers cause an error?
 }
 
 func TestBoardFromID(t *testing.T) {
-	id := board1257894001ID
-	want := &board1257894001
-	got, err := BoardFromID(id)
-	switch {
-	case err != nil:
-		t.Errorf("unwanted error decoding board from id: %v", err)
-	case !reflect.DeepEqual(want, got):
-		t.Errorf("decodedBoards not equal:\nwanted: %v\ngot:    %v", want, got)
-	}
+	t.Run("board1257894001", func(t *testing.T) {
+		id := board1257894001ID
+		want := &board1257894001
+		got, err := BoardFromID(id)
+		switch {
+		case err != nil:
+			t.Errorf("unwanted error decoding board from id: %v", err)
+		case !reflect.DeepEqual(want, got):
+			t.Errorf("decodedBoards not equal:\nwanted: %v\ngot:    %v", want, got)
+		}
+	})
+	t.Run("invalid ids", func(t *testing.T) {
+		invalidIds := []string{
+			"",                      // too short
+			board1257894001ID + "_", // to long
+			"INVALID B64 CHAR",      // spaces not allowed
+			// TODO: duplicate number tests
+			// "________________",
+		}
+		for i, id := range invalidIds {
+			_, err := BoardFromID(id)
+			if err == nil {
+				t.Errorf("test %v (%q): wanted id to be invalid", i, id)
+			}
+		}
+	})
 }
+
 
 var board1257894001 = Board{
 	15, 8, 4, 12, 10, // B

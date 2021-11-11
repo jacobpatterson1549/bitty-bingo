@@ -115,11 +115,10 @@ func (b Board) ID() (string, error) {
 		}
 	}
 	tinyBoard := make([]byte, 0, 12)
-	enc := func(n Number) int { return int(n-1) % 15 }
 	for i := 0; i < len(b); i++ {
-		l := enc(b[i])
+		l := encodeNumber(b[i])
 		i++
-		r := enc(b[i])
+		r := encodeNumber(b[i])
 		ch := byte(l<<4 | r)
 		tinyBoard = append(tinyBoard, ch)
 		if i == 11 { // free cell
@@ -142,20 +141,35 @@ func BoardFromID(id string) (*Board, error) {
 	fmt.Println(tinyBoard)
 	var b Board
 	i := 0
-	dec := func(h byte, c int) Number { return Number(c*15 + int(h+1)) }
+	// TODO: check for duplicates in decodeNumber function with seen []byte or map[int]int, return (number, error)
 	for _, ch := range tinyBoard {
-		l, r := ch>>4, ch&15
-		if l == 15 {
-			return nil, fmt.Errorf("number index %v in board invalid", i)
+		l, err := decodeNumber(ch>>4, i)
+		if err != nil {
+			return nil, err
 		}
-		if r == 15 {
-			return nil, fmt.Errorf("number index %v in board invalid", i)
+		r, err := decodeNumber(ch&15, i+1)
+		if err != nil {
+			return nil, err
 		}
-		b[i], b[i+1] = dec(l, i/5), dec(r, (i+1)/5)
+		b[i], b[i+1] = l, r
 		i += 2
 		if i == 12 {
 			i++
 		}
 	}
 	return &b, nil
+}
+
+func encodeNumber(n Number) int {
+	h := int(n-1) % 15 // (mod 15 is same as subtract n.Column()*15)
+	return h
+}
+
+func decodeNumber(h byte, i int) (Number, error) {
+	if h == 15 {
+		return 0, fmt.Errorf("number index %v in board invalid", i)
+	}
+	c := i / 5
+	n := Number(int(h+1) + c*15)
+	return n, nil
 }
