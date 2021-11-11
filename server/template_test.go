@@ -9,32 +9,6 @@ import (
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
 
-func TestHandleExport(t *testing.T) {
-	b := bingo.Board{
-		15, 8, 4, 12, 10, // B
-		19, 27, 16, 28, 25, // I
-		42, 41, 0, 31, 40, // N
-		49, 52, 50, 46, 57, // G
-		64, 72, 67, 70, 74, // O
-	}
-	var w bytes.Buffer
-	gotErr := handleExportBoard(&w, b)
-	if gotErr != nil {
-		t.Fatalf("unwanted export error: %v", gotErr)
-	}
-	got := w.String()
-	for i, n := range b {
-		if i == 12 {
-			continue
-		}
-		s := ">" + strconv.Itoa(int(n)) + "<"
-		if !strings.Contains(got, s) {
-			t.Errorf("wanted board export to contain %q:\n%v", s, got)
-			break
-		}
-	}
-}
-
 func TestHandleHelp(t *testing.T) {
 	var w bytes.Buffer
 	err := handleHelp(&w)
@@ -93,5 +67,31 @@ func TestHandleGames(t *testing.T) {
 		t.Errorf("game Modification Time missing:\nn%v", got)
 	case !strings.Contains(got, "36"):
 		t.Errorf("game Numbers Left missing:\n%v", got)
+	}
+}
+
+func TestHandleExport(t *testing.T) {
+	b := bingo.Board{
+		15, 8, 4, 12, 10, // B
+		19, 27, 16, 28, 25, // I
+		42, 41, 0, 31, 40, // N
+		49, 52, 50, 46, 57, // G
+		64, 72, 67, 70, 74, // O
+	}
+	var w bytes.Buffer
+	gotErr := handleExportBoard(&w, b)
+	if gotErr != nil {
+		t.Fatalf("unwanted export error: %v", gotErr)
+	}
+	got := w.String()
+	for i, n := range b {
+		if i == 12 {
+			continue
+		}
+		s := ">" + strconv.Itoa(int(n)) + "<"
+		if !strings.Contains(got, s) {
+			t.Errorf("wanted board export to contain %q:\n%v", s, got)
+			break
+		}
 	}
 }
