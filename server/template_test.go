@@ -37,7 +37,7 @@ func TestHandleGame(t *testing.T) {
 	for i := 0; i < int(bingo.MaxNumber); i++ {
 		g.DrawNumber()
 	}
-	err := handleGame(&w, g)
+	err := handleGame(&w, &g)
 	got := w.String()
 	switch {
 	case err != nil:
@@ -50,7 +50,6 @@ func TestHandleGame(t *testing.T) {
 func TestHandleGames(t *testing.T) {
 	var w bytes.Buffer
 	gi := gameInfo{
-
 		ID:          "1847",
 		ModTime:     "time_text",
 		NumbersLeft: 36,

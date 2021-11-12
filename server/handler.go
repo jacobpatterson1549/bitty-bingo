@@ -113,7 +113,7 @@ func (h httpsHandler) getGame(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	handleGame(w, *g)
+	handleGame(w, g)
 }
 
 func (httpsHandler) getHelp(w http.ResponseWriter, r *http.Request) {

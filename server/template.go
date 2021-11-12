@@ -11,23 +11,28 @@ import (
 //go:embed templates
 var templatesFS embed.FS
 
-var t = template.Must(template.New("games.html").
-	ParseFS(templatesFS, "templates/*"))
+var t = template.Must(template.ParseFS(templatesFS, "templates/*"))
+
+type page struct {
+	Name string
+	List []gameInfo
+	Game *bingo.Game
+}
 
 func handleHelp(w io.Writer) error {
-	return t.ExecuteTemplate(w, "help.html", nil)
+	return t.ExecuteTemplate(w, "index.html", page{Name: "help"})
 }
 
 func handleAbout(w io.Writer) error {
-	return t.ExecuteTemplate(w, "about.html", nil)
+	return t.ExecuteTemplate(w, "index.html", page{Name: "about"})
 }
 
-func handleGame(w io.Writer, g bingo.Game) error {
-	return t.ExecuteTemplate(w, "game.html", g)
+func handleGame(w io.Writer, g *bingo.Game) error {
+	return t.ExecuteTemplate(w, "index.html", page{Name: "game", Game: g})
 }
 
 func handleGames(w io.Writer, gameInfos []gameInfo) error {
-	return t.ExecuteTemplate(w, "games.html", gameInfos)
+	return t.ExecuteTemplate(w, "index.html", page{Name: "list", List: gameInfos})
 }
 
 func handleExportBoard(w io.Writer, b bingo.Board) error {
