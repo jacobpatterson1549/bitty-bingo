@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/http"
 	"time"
@@ -33,26 +34,31 @@ const (
 
 type Server struct {
 	Config
-	httpServer  *http.Server
 	httpsServer *http.Server
+	httpServer  *http.Server
 }
 
-func (cfg Config) NewServer() *Server {
+func (cfg Config) NewServer() (*Server, error) {
+	httpsHandler, err := cfg.httpsHandler()
+	if err != nil {
+		return nil, fmt.Errorf("creating httpsHandler: %v", err)
+	}
+	httpHandler := cfg.httpHandler()
 	s := Server{
 		Config:      cfg,
-		httpServer:  httpServer(cfg.HTTPPort, cfg.httpHandler()),
-		httpsServer: httpServer(cfg.HTTPSPort, cfg.httpsHandler()),
+		httpsServer: httpServer(cfg.HTTPSPort, httpsHandler),
+		httpServer:  httpServer(cfg.HTTPPort, httpHandler),
 	}
-	return &s
+	return &s, nil
 }
 
 // Run starts the HTTP and HTTPS TCP servers.
 func (s *Server) Run() <-chan error {
 	errC := make(chan error, 2)
+	go s.serveTCP(s.httpsServer, "https", errC, true)
 	if s.HTTPSRedirect {
 		go s.serveTCP(s.httpServer, "http", errC, false)
 	}
-	go s.serveTCP(s.httpsServer, "https", errC, true)
 	return errC
 }
 
@@ -61,11 +67,11 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	ctx, cancelFunc := context.WithTimeout(ctx, stopDur)
 	defer cancelFunc()
 	var err1, err2 error
-	if s.httpServer != nil {
-		err1 = s.httpServer.Shutdown(ctx)
-	}
 	if s.httpsServer != nil {
-		err2 = s.httpsServer.Shutdown(ctx)
+		err1 = s.httpsServer.Shutdown(ctx)
+	}
+	if s.httpServer != nil {
+		err2 = s.httpServer.Shutdown(ctx)
 	}
 	switch {
 	case err1 != nil:

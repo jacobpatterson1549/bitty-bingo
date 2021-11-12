@@ -27,24 +27,38 @@ func TestHTTPHandler(t *testing.T) {
 }
 
 func TestHTTPSHandler(t *testing.T) {
-	for i, test := range httpsHandlerTests {
-		w := httptest.NewRecorder()
-		h := test.cfg.httpsHandler()
-		test.r.Header = test.header
-		h.ServeHTTP(w, test.r)
-		gotStatusCode := w.Code
-		gotHeader := w.Header()
-		switch {
-		case test.wantStatusCode != gotStatusCode:
-			t.Errorf("test %v: response status codes not equal: wanted %v, got %v", i, test.wantStatusCode, gotStatusCode)
-		case !reflect.DeepEqual(test.wantHeader, gotHeader):
-			t.Errorf("test %v: response headers not equal:\nwanted: %v\ngot:    %v", i, test.wantHeader, gotHeader)
+	t.Run("valid configs", func(t *testing.T) {
+		for i, test := range httpsHandlerTests {
+			w := httptest.NewRecorder()
+			h, err := test.cfg.httpsHandler()
+			if err != nil {
+				t.Errorf("test %v: creating handler: %v", i, err)
+				continue
+			}
+			test.r.Header = test.header
+			h.ServeHTTP(w, test.r)
+			gotStatusCode := w.Code
+			gotHeader := w.Header()
+			switch {
+			case test.wantStatusCode != gotStatusCode:
+				t.Errorf("test %v: response status codes not equal: wanted %v, got %v", i, test.wantStatusCode, gotStatusCode)
+			case !reflect.DeepEqual(test.wantHeader, gotHeader):
+				t.Errorf("test %v: response headers not equal:\nwanted: %v\ngot:    %v", i, test.wantHeader, gotHeader)
+			}
 		}
-	}
-}
-
-func TestHTTPSHandlerBadCongfig(t *testing.T) {
-	t.Skip("TODO")
+	})
+	t.Run("bad configs", func(t *testing.T) {
+		configs := []Config{
+			{},
+			{GameCount: -9, Time: func() string { return "anything" }},
+			{GameCount: 9},
+		}
+		for i, cfg := range configs {
+			if _, err := cfg.httpsHandler(); err == nil {
+				t.Errorf("test %v: wanted error for bad config: %#v", i, cfg)
+			}
+		}
+	})
 }
 
 func TestHTTPSHandlerServeHTTP(t *testing.T) {
@@ -140,6 +154,10 @@ var httpsHandlerTests = []struct {
 	wantHeader     http.Header
 }{
 	{
+		cfg: Config{
+			GameCount: 10,
+			Time:      func() string { return "time" },
+		},
 		r:              httptest.NewRequest("GET", "https://example.com/", nil),
 		wantStatusCode: 200,
 		wantHeader: http.Header{
@@ -147,6 +165,10 @@ var httpsHandlerTests = []struct {
 		},
 	},
 	{
+		cfg: Config{
+			GameCount: 10,
+			Time:      func() string { return "time" },
+		},
 		r: httptest.NewRequest("GET", "https://example.com/", nil),
 		header: http.Header{
 			"Accept-Encoding": {"gzip, deflate, br"},

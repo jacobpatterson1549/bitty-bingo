@@ -17,12 +17,18 @@ func (cfg Config) httpHandler() http.Handler {
 	return withGzip(h)
 }
 
-func (cfg Config) httpsHandler() http.Handler {
+func (cfg Config) httpsHandler() (http.Handler, error) {
+	if cfg.GameCount < 1 {
+		return nil, fmt.Errorf("positive GameCount required, got %v", cfg.GameCount)
+	}
+	if cfg.Time == nil {
+		return nil, fmt.Errorf("time function required")
+	}
 	h := httpsHandler{
 		gameInfos: make([]gameInfo, 0, cfg.GameCount),
 		time:      cfg.Time,
 	}
-	return withGzip(&h)
+	return withGzip(&h), nil
 }
 
 func httpsRedirectHandler(httpsPort string) http.HandlerFunc {

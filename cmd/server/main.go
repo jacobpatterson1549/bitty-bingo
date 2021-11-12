@@ -45,7 +45,10 @@ func serverConfig() server.Config {
 }
 
 func runServer(cfg server.Config) {
-	s := cfg.NewServer()
+	s, err := cfg.NewServer()
+	if err != nil {
+		log.Fatalf("creating server: %v", err)
+	}
 	done := make(chan os.Signal, 2)
 	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
 	errC := s.Run()
