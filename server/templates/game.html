@@ -30,7 +30,7 @@
     <fieldset>
         <legend>Draw Number</legend>
         <label>
-            <input type="text" hidden name="id" value="{{.ID}}">
+            <input type="text" hidden name="gameID" value="{{.ID}}">
             <input type="submit">
         </label>
     </fieldset>
@@ -40,6 +40,7 @@
 <form id="check-board" method="POST" action="/game/check_board">
     <fieldset>
         <legend>Check Board</legend>
+        <input type="text" hidden name="gameID" value="{{.ID}}">
         <label>
             <div>Board</div>
             <input type="string" name="board" required>
@@ -55,7 +56,6 @@
                 <input type="radio" name="type" value="IsFilled">
             </label>
         </fieldset>
-        <input type="text" hidden name="id" value="{{.ID}}">
         <input type="submit">
     </fieldset>
 </form>

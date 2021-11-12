@@ -61,9 +61,9 @@ func (h httpsHandler) serveGet(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/":
 		h.getGames(w, r)
-	case "/game": // ?id=
+	case "/game": // ?gameID=
 		h.getGame(w, r)
-	case "/game/check_board": // ?id=&board=&type=
+	case "/game/check_board": // ?gameID=&boardID=&type=
 		h.checkBoard(w, r)
 	case "/help":
 		h.getHelp(w, r)
@@ -78,7 +78,7 @@ func (h *httpsHandler) servePost(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/game/create":
 		h.createGame(w, r)
-	case "/game/draw_number": // ?game=
+	case "/game/draw_number": // ?gameID=
 		h.drawNumber(w, r)
 	case "/game/boards": // ?n=
 		h.createBoards(w, r)
@@ -99,7 +99,7 @@ func (h httpsHandler) getGames(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h httpsHandler) getGame(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+	id := r.URL.Query().Get("gameID")
 	var g *bingo.Game
 	switch len(id) {
 	case 0:
@@ -160,7 +160,7 @@ func (h *httpsHandler) createGame(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
-	id := r.FormValue("id")
+	id := r.FormValue("gameID")
 	g, err := bingo.GameFromID(id)
 	if err != nil {
 		message := fmt.Sprintf("getting game from query parameter: %v", err)
@@ -171,7 +171,7 @@ func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	g.DrawNumber()
 	after := g.NumbersLeft()
 	if before == after {
-		http.Redirect(w, r, "/game?id="+id, http.StatusNotModified)
+		http.Redirect(w, r, "/game?gameID="+id, http.StatusNotModified)
 		return
 	}
 	id2, err := g.ID()
@@ -191,7 +191,7 @@ func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
 		NumbersLeft: after,
 	}
 	h.gameInfos[0] = gi // set first
-	http.Redirect(w, r, "/game?id="+gi.ID, http.StatusSeeOther)
+	http.Redirect(w, r, "/game?gameID="+gi.ID, http.StatusSeeOther)
 }
 
 func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {

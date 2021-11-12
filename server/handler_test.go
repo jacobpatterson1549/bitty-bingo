@@ -111,7 +111,7 @@ var httpsHandlerTests = []struct {
 		},
 	},
 	{ // get game
-		r:              httptest.NewRequest("GET", "/game?id=5-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL", nil),
+		r:              httptest.NewRequest("GET", "/game?gameID=5-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL", nil),
 		wantStatusCode: 200,
 		wantHeader: http.Header{
 			"Content-Type": {"text/html; charset=utf-8"},
@@ -179,10 +179,10 @@ var httpsHandlerTests = []struct {
 			ModTime:     "the_past_a",
 			NumbersLeft: 66,
 		}, {ID: "1"}, {ID: "2"}, {ID: "3"}},
-		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("id=8-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
+		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("gameID=8-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
 		wantStatusCode: 303,
 		wantHeader: http.Header{
-			"Location": {"/game?id=9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
+			"Location": {"/game?gameID=9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
 		},
 	},
 	{ // draw number (and discard last in history)
@@ -193,19 +193,19 @@ var httpsHandlerTests = []struct {
 			ModTime:     "the_past_b",
 			NumbersLeft: 66,
 		}, {ID: "1"}, {ID: "2"}},
-		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("id=8-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
+		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("gameID=8-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
 		wantStatusCode: 303,
 		wantHeader: http.Header{
-			"Location": {"/game?id=9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
+			"Location": {"/game?gameID=9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
 		},
 	},
 	{ // draw number - do not change game infos if all numbers are drawn
 		gameInfos:      append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 		wantGameInfos:  append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
-		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("id=75-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
+		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("gameID=75-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
 		wantStatusCode: 304,
 		wantHeader: http.Header{
-			"Location": {"/game?id=75-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
+			"Location": {"/game?gameID=75-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
 		},
 	},
 	{ // create boards
@@ -218,7 +218,7 @@ var httpsHandlerTests = []struct {
 		},
 	},
 	{ // get game - bad id
-		r:              httptest.NewRequest("GET", "/game?id=BAD-ID", nil),
+		r:              httptest.NewRequest("GET", "/game?gameID=BAD-ID", nil),
 		wantStatusCode: 400,
 		wantHeader: http.Header{
 			"Content-Type":           {"text/plain; charset=utf-8"},
@@ -258,7 +258,7 @@ var httpsHandlerTests = []struct {
 		},
 	},
 	{ // draw number - bad game id
-		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("id=BAD-ID")),
+		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("gameID=BAD-ID")),
 		wantStatusCode: 400,
 		wantHeader: http.Header{
 			"Content-Type":           {"text/plain; charset=utf-8"},
