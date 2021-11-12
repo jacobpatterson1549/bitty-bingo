@@ -55,7 +55,8 @@ func (b Board) IsFilled(g Game) bool {
 func numberSet(g Game) map[Number]struct{} {
 	s := make(map[Number]struct{}, g.numbersDrawn+1)
 	s[0] = struct{}{} // free cell
-	for _, n := range g.DrawnNumbers() {
+	drawnNumbers := g.DrawnNumbers()
+	for _, n := range drawnNumbers {
 		s[n] = struct{}{}
 	}
 	return s

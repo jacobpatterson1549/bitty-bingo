@@ -12,7 +12,7 @@
     </thead>
     <tbody>
         <tr>
-            {{with $cols := .Columns}}
+            {{with $cols := .DrawnNumberColumns}}
             <td>{{range index $cols 0}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 1}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 2}}<p>{{.}}</p>{{end}}</td>

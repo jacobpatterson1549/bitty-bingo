@@ -52,10 +52,11 @@ func (g *Game) Reset() {
 	g.numbersDrawn = 0
 }
 
-// Columns partitions the drawn numbers by columns in the order that they were drawn.
-func (g Game) Columns() map[int][]Number {
+// DrawnNumberColumns partitions the drawn numbers by columns in the order that they were drawn.
+func (g Game) DrawnNumberColumns() map[int][]Number {
 	cols := make(map[int][]Number, 5)
-	for _, n := range g.DrawnNumbers() {
+	drawnNumbers := g.DrawnNumbers()
+	for _, n := range drawnNumbers {
 		cols[n.Column()] = append(cols[n.Column()], n)
 	}
 	return cols

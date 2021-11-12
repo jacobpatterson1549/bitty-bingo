@@ -38,7 +38,7 @@ func TestResetGame(t *testing.T) {
 
 func TestColumns(t *testing.T) {
 	for i, test := range gameTests {
-		if want, got := test.wantColumns, test.game.Columns(); !reflect.DeepEqual(want, got) {
+		if want, got := test.wantColumns, test.game.DrawnNumberColumns(); !reflect.DeepEqual(want, got) {
 			t.Errorf("test %v: columns not equal:\nwanted: %v\ngot:    %v", i, want, got)
 		}
 	}
