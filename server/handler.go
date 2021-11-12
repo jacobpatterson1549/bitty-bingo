@@ -2,6 +2,7 @@ package server
 
 import (
 	"archive/zip"
+	"bytes"
 	"compress/gzip"
 	"fmt"
 	"io"
@@ -219,7 +220,8 @@ func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {
 		httpError(w, "n must be be between 1 and 100", http.StatusBadRequest)
 		return
 	}
-	z := zip.NewWriter(w)
+	var buf bytes.Buffer
+	z := zip.NewWriter(&buf)
 	for i := 1; i <= n; i++ {
 		fileName := fmt.Sprintf("bingo_%v.svg", i)
 		f, err := z.Create(fileName)
@@ -235,9 +237,14 @@ func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	w.Header().Add("Content-Type", "application/zip")
+	if err := z.Close(); err != nil {
+		message := fmt.Sprintf("unexpected problem closing zip file: %v", err)
+		httpError(w, message, http.StatusInternalServerError)
+		return
+	}
+	buf.WriteTo(w)
 	w.Header().Set("Content-Disposition", "attachment; filename=bingo-boards.zip")
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	// http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func withGzip(h http.Handler) http.HandlerFunc {

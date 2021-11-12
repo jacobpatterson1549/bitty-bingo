@@ -314,11 +314,10 @@ var httpsHandlerServeHTTPTests = []struct {
 	{ // create boards
 		r:              httptest.NewRequest("POST", "/game/boards", strings.NewReader("n=5")),
 		header:         http.Header{"Content-Type": {"application/x-www-form-urlencoded"}},
-		wantStatusCode: 303,
+		wantStatusCode: 200,
 		wantHeader: http.Header{
 			"Content-Type":        {"application/zip"},
 			"Content-Disposition": {"attachment; filename=bingo-boards.zip"},
-			"Location":            {"/"},
 		},
 	},
 	{ // get game - bad id
