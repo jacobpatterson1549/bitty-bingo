@@ -68,9 +68,6 @@ func (g Game) ID() (string, error) {
 	if !g.validNumbers() {
 		return "", errors.New("game numbers not valid")
 	}
-	// TODO: make byte array smaller, numbers should only range [0,75)
-	// this means each number takes 7 digits: ceil(log2(75)) digits = ceil(6.2288)
-	// this means only 7*75=525 bits are needed, and 525/8 = 65 5/8, so only 66 bytes are needed
 	b := make([]byte, len(g.numbers))
 	for i, n := range g.numbers {
 		b[i] = byte(n)

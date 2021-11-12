@@ -58,7 +58,7 @@ font-size: 75px;
   <text x="250" y="050" class="header">N</text>
   <text x="250" y="150" class="number">{{(index . 10).Value}}</text>
   <text x="250" y="250" class="number">{{(index . 11).Value}}</text>
-  <text x="250" y="350" class="number"></text><!-- TODO: include board hash in center -->
+  <text x="250" y="350" class="number"></text>
   <text x="250" y="450" class="number">{{(index . 13).Value}}</text>
   <text x="250" y="550" class="number">{{(index . 14).Value}}</text>
 </g>

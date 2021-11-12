@@ -58,7 +58,6 @@ func (h *httpsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h httpsHandler) serveGet(w http.ResponseWriter, r *http.Request) {
-	// TODO: create parent html wrapper page with nav bar(games list, help, about links)
 	switch r.URL.Path {
 	case "/":
 		h.getGames(w, r)
@@ -216,7 +215,7 @@ func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {
 			httpError(w, message, http.StatusInternalServerError)
 			return
 		}
-		board := bingo.NewBoard() // TODO: ensure boards are unique
+		board := bingo.NewBoard()
 		if err := handleExportBoard(f, *board); err != nil {
 			message := fmt.Sprintf("unexpected problam adding board %v to zip file: %v", i, err)
 			httpError(w, message, http.StatusInternalServerError)
