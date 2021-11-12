@@ -28,12 +28,14 @@ func TestHTTPHandler(t *testing.T) {
 	}
 }
 
-func TestHTTPSHandler(t *testing.T) {
+func TestHTTPSHandlerServeHTTP(t *testing.T) {
 	for i, test := range httpsHandlerTests {
 		w := httptest.NewRecorder()
 		h := httpsHandler{
+			time:      test.time,
 			gameInfos: test.gameInfos,
 		}
+		test.r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		h.ServeHTTP(w, test.r)
 		switch {
 		case w.Code != test.wantStatusCode:
@@ -93,6 +95,7 @@ var httpHandlerTests = []struct {
 }
 
 var httpsHandlerTests = []struct {
+	time           func() string
 	gameInfos      []gameInfo
 	wantGameInfos  []gameInfo
 	r              *http.Request
@@ -100,7 +103,7 @@ var httpsHandlerTests = []struct {
 	wantHeader     http.Header
 	wantBody       string // only checked if not empty
 }{
-	// ok requests
+	// ok GET requests:
 	{ // get games list
 		r:              httptest.NewRequest("GET", "/", nil),
 		wantStatusCode: 200,
@@ -109,7 +112,14 @@ var httpsHandlerTests = []struct {
 		},
 	},
 	{ // get game
-		r:              httptest.NewRequest("GET", "/game?id=0", nil),
+		r:              httptest.NewRequest("GET", "/game?id=5-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL", nil),
+		wantStatusCode: 200,
+		wantHeader: http.Header{
+			"Content-Type": {"text/html; charset=utf-8"},
+		},
+	},
+	{ // get game (zero)
+		r:              httptest.NewRequest("GET", "/game", nil),
 		wantStatusCode: 200,
 		wantHeader: http.Header{
 			"Content-Type": {"text/html; charset=utf-8"},
@@ -153,8 +163,54 @@ var httpsHandlerTests = []struct {
 			"Content-Type": {"text/html; charset=utf-8"},
 		},
 	},
-	// TODO: ok posts
-	// bad requests
+	// ok POST requests:
+	{ // create game
+		gameInfos:      []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
+		wantGameInfos:  []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
+		r:              httptest.NewRequest("POST", "/game/create", nil),
+		wantStatusCode: 201,
+		wantHeader: http.Header{
+			"Location": {"/game"},
+		},
+	},
+	{ // draw number
+		time:      func() string { return "the_past_a" },
+		gameInfos: append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
+		wantGameInfos: []gameInfo{{
+			ID:          "9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL",
+			ModTime:     "the_past_a",
+			NumbersLeft: 66,
+		}, {ID: "1"}, {ID: "2"}, {ID: "3"}},
+		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("id=8-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
+		wantStatusCode: 201,
+		wantHeader: http.Header{
+			"Location": {"/game?id=9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
+		},
+	},
+	{ // draw number (and discard last in history)
+		time:      func() string { return "the_past_b" },
+		gameInfos: append(make([]gameInfo, 0, 3), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
+		wantGameInfos: []gameInfo{{
+			ID:          "9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL",
+			ModTime:     "the_past_b",
+			NumbersLeft: 66,
+		}, {ID: "1"}, {ID: "2"}},
+		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("id=8-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
+		wantStatusCode: 201,
+		wantHeader: http.Header{
+			"Location": {"/game?id=9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
+		},
+	},
+	{ // draw number - do not change game infos if all numbers are drawn
+		gameInfos:      append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
+		wantGameInfos:  append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
+		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("id=75-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
+		wantStatusCode: 201,
+		wantHeader: http.Header{
+			"Location": {"/game?id=75-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
+		},
+	},
+	// bad GET requests:
 	{ // get game - bad id
 		r:              httptest.NewRequest("GET", "/game?id=BAD-ID", nil),
 		wantStatusCode: 400,
@@ -187,7 +243,7 @@ var httpsHandlerTests = []struct {
 			"X-Content-Type-Options": {"nosniff"},
 		},
 	},
-	{ // not found
+	{ // get -not found
 		r:              httptest.NewRequest("GET", "/UNKNOWN", nil),
 		wantStatusCode: 404,
 		wantHeader: http.Header{
@@ -195,7 +251,23 @@ var httpsHandlerTests = []struct {
 			"X-Content-Type-Options": {"nosniff"},
 		},
 	},
-	// TODO: bad posts
+	// TODO: bad POST requests:
+	{ // draw number - bad game id
+		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("id=BAD-ID")),
+		wantStatusCode: 400,
+		wantHeader: http.Header{
+			"Content-Type":           {"text/plain; charset=utf-8"},
+			"X-Content-Type-Options": {"nosniff"},
+		},
+	},
+	{ // post - not found
+		r:              httptest.NewRequest("POST", "/UNKNOWN", nil),
+		wantStatusCode: 404,
+		wantHeader: http.Header{
+			"Content-Type":           {"text/plain; charset=utf-8"},
+			"X-Content-Type-Options": {"nosniff"},
+		},
+	},
 	{ // bad method
 		r:              httptest.NewRequest("OPTIONS", "/", nil),
 		wantStatusCode: 405,

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/jacobpatterson1549/bitty-bingo/server"
 )
@@ -36,6 +37,9 @@ func serverConfig() server.Config {
 	cfg.HTTPSRedirect = !hasPortOverride
 	if hasPortOverride {
 		cfg.HTTPSPort = portOverride
+	}
+	cfg.Time = func() string {
+		return time.Now().UTC().String()
 	}
 	return cfg
 }

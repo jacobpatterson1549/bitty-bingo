@@ -63,7 +63,7 @@ func (g Game) Columns() map[int][]Number {
 
 func (g Game) ID() (string, error) {
 	if g.numbersDrawn <= 0 {
-		return "0", nil
+		return "", nil
 	}
 	if !g.validNumbers() {
 		return "", errors.New("game numbers not valid")
@@ -81,7 +81,7 @@ func (g Game) ID() (string, error) {
 }
 
 func GameFromID(id string) (*Game, error) {
-	if id == "0" {
+	if len(id) == 0 {
 		return new(Game), nil
 	}
 	i := strings.IndexAny(id, "-")

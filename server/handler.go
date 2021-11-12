@@ -19,6 +19,7 @@ func (cfg Config) httpHandler() http.Handler {
 func (cfg Config) httpsHandler() http.Handler {
 	h := httpsHandler{
 		gameInfos: make([]gameInfo, 0, cfg.GameCount),
+		time:      cfg.Time,
 	}
 	return withGzip(&h)
 }
@@ -42,6 +43,7 @@ type gameInfo struct {
 
 type httpsHandler struct {
 	gameInfos []gameInfo
+	time      func() string
 }
 
 func (h *httpsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -148,12 +150,11 @@ func (httpsHandler) checkBoard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *httpsHandler) createGame(w http.ResponseWriter, r *http.Request) {
-	var g bingo.Game
-	handleGame(w, g)
+	http.Redirect(w, r, "/game", http.StatusCreated)
 }
 
 func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
-	id := r.Form.Get("game")
+	id := r.FormValue("id")
 	g, err := bingo.GameFromID(id)
 	if err != nil {
 		message := fmt.Sprintf("getting game from query parameter: %v", err)
@@ -164,19 +165,30 @@ func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	g.DrawNumber()
 	after := g.NumbersLeft()
 	if before != after {
+		id2, err := g.ID()
+		if err != nil {
+			message := fmt.Sprintf("getting id after drawing tile from game with a VALID id %q: %v", id, err)
+			httpError(w, message, http.StatusInternalServerError)
+			return
+		}
 		if len(h.gameInfos) < cap(h.gameInfos) {
 			h.gameInfos = append(h.gameInfos, gameInfo{}) // increase length
 		}
 		copy(h.gameInfos[1:], h.gameInfos) // shift right
-		var gi gameInfo
-		// TODO: create game info for UTC
+		modTime := h.time()
+		gi := gameInfo{
+			ID:          id2,
+			ModTime:     modTime,
+			NumbersLeft: after,
+		}
 		h.gameInfos[0] = gi // set first
+		id = id2            // redirect to the updated game
 	}
-	// TODO: redirect to updated game
+	http.Redirect(w, r, "/game?id="+id, http.StatusCreated)
 }
 
 func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {
-	nQueryParam := r.Form.Get("n")
+	nQueryParam := r.FormValue("n")
 	n, err := strconv.Atoi(nQueryParam)
 	if err != nil {
 		message := fmt.Sprintf("%v: example: /game/boards?n=5 creates 5 unique boards", err)

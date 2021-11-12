@@ -21,6 +21,8 @@ type Config struct {
 	TLSKeyFile string
 	// GameCount is the number of game states kept in the game list.
 	GameCount int
+	// Time is a function that can add a timestamp to parts of the site.
+	Time func() string
 }
 
 const (
