@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Game represents a bingo game.  The zero value can be used to start a new game.
@@ -41,7 +42,14 @@ func (g *Game) DrawNumber() {
 	}
 }
 
+// init seeds the random number generator to randomly shuffle numbers.
+func init() {
+	seed := time.Now().UnixNano()
+	rand.Seed(seed)
+}
+
 // Reset clears drawn numbers and resets/shuffles all the possible available numbers.
+// To shuffle the numbers to a specific order, call rand.Seed() with a constant value.
 func (g *Game) Reset() {
 	for i := range g.numbers {
 		g.numbers[i] = Number(i + 1)
