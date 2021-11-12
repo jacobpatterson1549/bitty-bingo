@@ -37,13 +37,13 @@
 </form>
 {{end}}
 
-<form id="check-board" method="POST" action="/game/check_board">
+<form id="check-board" method="GET" action="/game/check_board">
     <fieldset>
         <legend>Check Board</legend>
         <input type="text" hidden name="gameID" value="{{.ID}}">
         <label>
             <div>Board</div>
-            <input type="string" name="board" required>
+            <input type="string" name="boardID" value="{{.BoardID}}" required>
         </label>
         <fieldset>
             <legend>type</legend>
@@ -57,5 +57,12 @@
             </label>
         </fieldset>
         <input type="submit">
+        {{if .BoardID}}
+            {{if .HasBingo}}
+                <span class="has-bingo">BINGO !!!</span>
+            {{else}}
+                <span class="no-bingo">No Bingo :(</span>
+            {{end}}
+        {{end}}
     </fieldset>
 </form>

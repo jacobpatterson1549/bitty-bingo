@@ -77,8 +77,6 @@ func TestHTTPSHandlerServeHTTP(t *testing.T) {
 			t.Errorf("test %v: response headers not equal:\nwanted: %v\ngot:    %v", i, test.wantHeader, w.Header())
 		case !reflect.DeepEqual(test.wantGameInfos, h.gameInfos):
 			t.Errorf("test %v: game infos not equal:\nwanted: %v\ngot:    %v", i, test.wantGameInfos, h.gameInfos)
-		case len(test.wantBody) != 0 && test.wantBody != w.Body.String():
-			t.Errorf("test %v: response bodies not equal:\nwanted: %v\ngot:    %v", i, test.wantBody, w.Body.String())
 		}
 	}
 }
@@ -203,7 +201,6 @@ var httpsHandlerServeHTTPTests = []struct {
 	header         http.Header
 	wantStatusCode int
 	wantHeader     http.Header
-	wantBody       string // only checked if not empty
 }{
 	{ // get games list
 		r:              httptest.NewRequest("GET", "/", nil),
@@ -228,27 +225,27 @@ var httpsHandlerServeHTTPTests = []struct {
 	},
 	{ // check board - HasLine
 		r:              httptest.NewRequest("GET", "/game/check_board?gameID=5-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL&boardID=5zuTsMm6CTZAs7ad&type=HasLine", nil),
-		wantStatusCode: 200,
+		wantStatusCode: 303,
 		wantHeader: http.Header{
-			"Content-Type": {"text/plain; charset=utf-8"},
+			"Content-Type": {"text/html; charset=utf-8"},
+			"Location":     {"/game?gameID=5-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL&boardID=5zuTsMm6CTZAs7ad&bingo"},
 		},
-		wantBody: "true",
 	},
 	{ // check board - IsFilled
 		r:              httptest.NewRequest("GET", "/game/check_board?gameID=24-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL&boardID=5zuTsMm6CTZAs7ad&type=IsFilled", nil),
-		wantStatusCode: 200,
+		wantStatusCode: 303,
 		wantHeader: http.Header{
-			"Content-Type": {"text/plain; charset=utf-8"},
+			"Content-Type": {"text/html; charset=utf-8"},
+			"Location":     {"/game?gameID=24-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL&boardID=5zuTsMm6CTZAs7ad&bingo"},
 		},
-		wantBody: "true",
 	},
 	{ // check board - IsFilled (false)
 		r:              httptest.NewRequest("GET", "/game/check_board?gameID=1-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL&boardID=5zuTsMm6CTZAs7ad&type=IsFilled", nil),
-		wantStatusCode: 200,
+		wantStatusCode: 303,
 		wantHeader: http.Header{
-			"Content-Type": {"text/plain; charset=utf-8"},
+			"Content-Type": {"text/html; charset=utf-8"},
+			"Location":     {"/game?gameID=1-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL&boardID=5zuTsMm6CTZAs7ad"},
 		},
-		wantBody: "false",
 	},
 	{ // help
 		r:              httptest.NewRequest("GET", "/help", nil),

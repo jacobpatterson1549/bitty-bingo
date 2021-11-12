@@ -32,18 +32,92 @@ func TestHandleAbout(t *testing.T) {
 }
 
 func TestHandleGame(t *testing.T) {
-	var w bytes.Buffer
-	var g bingo.Game
+	// t.Run("has number", func(t *testing.T) {
+	// 	var w bytes.Buffer
+	// 	var g bingo.Game
+	// 	for i := 0; i < int(bingo.MaxNumber); i++ {
+	// 		g.DrawNumber()
+	// 	}
+	// 	err := handleGame(&w, &g, "", false)
+	// 	got := w.String()
+	// 	want := "B 2"
+	// 	switch {
+	// 	case err != nil:
+	// 		t.Error(err)
+	// 	case !strings.Contains(got, want):
+	// 		t.Errorf("wanted rendered game to contain %q, got:\n%v", want, got)
+	// 	}
+	// })
+	// t.Run("has boardID", func(t *testing.T) {
+	// 	var w bytes.Buffer
+	// 	var g bingo.Game
+	// 	boardID := "board_id_input_value"
+	// 	err := handleGame(&w, &g, boardID, false)
+	// 	got := w.String()
+	// 	switch {
+	// 	case err != nil:
+	// 		t.Error(err)
+	// 	case !strings.Contains(got, boardID):
+	// 		t.Errorf("wanted rendered game to contain %q, got:\n%v", boardID, got)
+	// 	}
+	// })
+	// t.Run("board has bing", func(t *testing.T) {
+	// 	tests := []bool{false, true}
+	// 	for i, test := range tests {
+	// 		var w bytes.Buffer
+	// 	var g bingo.Game
+	// 	boardID := "board_id_input_value"
+	// 	err := handleGame(&w, &g, "", false)
+	// 	got := w.String()
+	// 	switch {
+	// 	case err != nil:
+	// 		t.Error(err)
+	// 	case !strings.Contains(got, boardID):
+	// 		t.Errorf("wanted rendered game to contain %q, got:\n%v", boardID, got)
+	// 	}
+	// 	}
+	// })
+	var allDrawnGame bingo.Game
 	for i := 0; i < int(bingo.MaxNumber); i++ {
-		g.DrawNumber()
+		allDrawnGame.DrawNumber()
 	}
-	err := handleGame(&w, &g)
-	got := w.String()
-	switch {
-	case err != nil:
-		t.Error(err)
-	case !strings.Contains(got, "B 2"):
-		t.Errorf("wanted B 2:\n%v", got)
+	tests :=
+		[]struct {
+			game     bingo.Game
+			boardID  string
+			hasBingo bool
+			want     string
+		}{
+			{},
+			{
+				game: allDrawnGame,
+				want: "B 2",
+			},
+			{
+				boardID: "board_id_input_value",
+				want:    "board_id_input_value",
+			},
+			{
+				boardID:  "board_id_input_value",
+				hasBingo: false,
+				want:     "No Bingo :(",
+			},
+			{
+				boardID:  "board_id_input_value",
+				hasBingo: true,
+				want:     "BINGO !!!",
+			},
+		}
+	for i, test := range tests {
+		var w bytes.Buffer
+		err := handleGame(&w, &test.game, test.boardID, test.hasBingo)
+		got := w.String()
+		switch {
+		case err != nil:
+			t.Errorf("test %v: unwanted error: %v", i, err)
+		case !strings.Contains(got, test.want):
+			t.Errorf("test %v: wanted rendered game to contain %q, got:\n%v", i, test.want, got)
+		}
 	}
 }
 

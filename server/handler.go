@@ -68,7 +68,7 @@ func (h httpsHandler) serveGet(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/":
 		h.getGames(w, r)
-	case "/game": // ?gameID=
+	case "/game": // ?gameID=&boardID=&bingo
 		h.getGame(w, r)
 	case "/game/check_board": // ?gameID=&boardID=&type=
 		h.checkBoard(w, r)
@@ -107,6 +107,8 @@ func (h httpsHandler) getGames(w http.ResponseWriter, r *http.Request) {
 
 func (h httpsHandler) getGame(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("gameID")
+	boardID := r.URL.Query().Get("boardID")
+	hasBingo := r.URL.Query().Has("bingo")
 	var g *bingo.Game
 	switch len(id) {
 	case 0:
@@ -120,7 +122,8 @@ func (h httpsHandler) getGame(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	handleGame(w, g)
+
+	handleGame(w, g, boardID, hasBingo)
 }
 
 func (httpsHandler) getHelp(w http.ResponseWriter, r *http.Request) {
@@ -158,8 +161,11 @@ func (httpsHandler) checkBoard(w http.ResponseWriter, r *http.Request) {
 		httpError(w, message, http.StatusBadRequest)
 		return
 	}
-	fmt.Fprint(w, result)
-	// TODO: redirect to /game with query of board and result
+	url := fmt.Sprintf("/game?gameID=%v&boardID=%v", gameID, boardID)
+	if result {
+		url += "&bingo"
+	}
+	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
 func (h *httpsHandler) createGame(w http.ResponseWriter, r *http.Request) {

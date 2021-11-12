@@ -16,7 +16,13 @@ var t = template.Must(template.ParseFS(templatesFS, "templates/*"))
 type page struct {
 	Name string
 	List []gameInfo
-	Game *bingo.Game
+	Game *game
+}
+
+type game struct {
+	bingo.Game
+	BoardID  string
+	HasBingo bool
 }
 
 func handleHelp(w io.Writer) error {
@@ -27,8 +33,13 @@ func handleAbout(w io.Writer) error {
 	return t.ExecuteTemplate(w, "index.html", page{Name: "about"})
 }
 
-func handleGame(w io.Writer, g *bingo.Game) error {
-	return t.ExecuteTemplate(w, "index.html", page{Name: "game", Game: g})
+func handleGame(w io.Writer, g *bingo.Game, boardID string, hasBingo bool) error {
+	templateGame := game{
+		Game:     *g,
+		BoardID:  boardID,
+		HasBingo: hasBingo,
+	}
+	return t.ExecuteTemplate(w, "index.html", page{Name: "game", Game: &templateGame})
 }
 
 func handleGames(w io.Writer, gameInfos []gameInfo) error {
