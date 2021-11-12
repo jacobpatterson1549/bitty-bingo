@@ -13,7 +13,8 @@ import (
 )
 
 func (cfg Config) httpHandler() http.Handler {
-	return withGzip(http.HandlerFunc(httpsRedirectHandler(cfg.HTTPSPort)))
+	h := httpsRedirectHandler(cfg.HTTPSPort)
+	return withGzip(h)
 }
 
 func (cfg Config) httpsHandler() http.Handler {
