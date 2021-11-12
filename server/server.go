@@ -102,7 +102,7 @@ func (cfg Config) serveTCP(svr *http.Server, name string, errC chan<- error, htt
 	if cfg.HTTPSRedirect {
 		certificate, err := tls.LoadX509KeyPair(cfg.TLSCertFile, cfg.TLSKeyFile)
 		if err != nil {
-			errC <- err
+			errC <- fmt.Errorf("loading TLS certificates: %v", err)
 			return
 		}
 		cfg := tls.Config{
