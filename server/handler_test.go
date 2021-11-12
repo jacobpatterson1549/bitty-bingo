@@ -10,11 +10,9 @@ import (
 
 func TestHTTPHandler(t *testing.T) {
 	for i, test := range httpHandlerTests {
-		cfg := Config{
-			HTTPSPort: test.httpsPort,
-		}
 		w := httptest.NewRecorder()
-		h := cfg.httpHandler()
+		h := test.cfg.httpHandler()
+		test.r.Header = test.header
 		h.ServeHTTP(w, test.r)
 		wantStatusCode := 301
 		gotStatusCode := w.Code
@@ -28,14 +26,35 @@ func TestHTTPHandler(t *testing.T) {
 	}
 }
 
-func TestHTTPSHandlerServeHTTP(t *testing.T) {
+func TestHTTPSHandler(t *testing.T) {
 	for i, test := range httpsHandlerTests {
+		w := httptest.NewRecorder()
+		h := test.cfg.httpsHandler()
+		test.r.Header = test.header
+		h.ServeHTTP(w, test.r)
+		gotStatusCode := w.Code
+		gotHeader := w.Header()
+		switch {
+		case test.wantStatusCode != gotStatusCode:
+			t.Errorf("test %v: response status codes not equal: wanted %v, got %v", i, test.wantStatusCode, gotStatusCode)
+		case !reflect.DeepEqual(test.wantHeader, gotHeader):
+			t.Errorf("test %v: response headers not equal:\nwanted: %v\ngot:    %v", i, test.wantHeader, gotHeader)
+		}
+	}
+}
+
+func TestHTTPSHandlerBadCongfig(t *testing.T) {
+	t.Skip("TODO")
+}
+
+func TestHTTPSHandlerServeHTTP(t *testing.T) {
+	for i, test := range httpsHandlerServeHTTPTests {
 		w := httptest.NewRecorder()
 		h := httpsHandler{
 			time:      test.time,
 			gameInfos: test.gameInfos,
 		}
-		test.r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		test.r.Header = test.header
 		h.ServeHTTP(w, test.r)
 		switch {
 		case w.Code != test.wantStatusCode:
@@ -72,33 +91,94 @@ func TestWithGzip(t *testing.T) {
 }
 
 var httpHandlerTests = []struct {
-	httpsPort  string
+	cfg        Config
 	r          *http.Request
+	header     http.Header
 	wantHeader http.Header
 }{
 	{
-		httpsPort: "443",
-		r:         httptest.NewRequest("GET", "http://example.com", nil),
+		cfg: Config{
+			HTTPSPort: "443",
+		},
+		r: httptest.NewRequest("GET", "http://example.com/", nil),
 		wantHeader: http.Header{
 			"Content-Type": {"text/html; charset=utf-8"},
-			"Location":     {"https://example.com"},
+			"Location":     {"https://example.com/"},
 		},
 	},
 	{
-		httpsPort: "8000",
-		r:         httptest.NewRequest("GET", "http://example.com:8001", nil),
+		cfg: Config{
+			HTTPSPort: "8000",
+		},
+		r: httptest.NewRequest("GET", "http://example.com:8001/", nil),
 		wantHeader: http.Header{
 			"Content-Type": {"text/html; charset=utf-8"},
-			"Location":     {"https://example.com:8000"},
+			"Location":     {"https://example.com:8000/"},
+		},
+	},
+	{
+		cfg: Config{
+			HTTPSPort: "8000",
+		},
+		r: httptest.NewRequest("GET", "http://example.com:8001/", nil),
+		header: http.Header{
+			"Accept-Encoding": {"gzip, deflate, br"},
+		},
+		wantHeader: http.Header{
+			"Content-Encoding": {"gzip"},
+			"Content-Type":     {"text/html; charset=utf-8"},
+			"Location":         {"https://example.com:8000/"},
 		},
 	},
 }
 
 var httpsHandlerTests = []struct {
+	cfg            Config
+	r              *http.Request
+	header         http.Header
+	wantStatusCode int
+	wantHeader     http.Header
+}{
+	{
+		r:              httptest.NewRequest("GET", "https://example.com/", nil),
+		wantStatusCode: 200,
+		wantHeader: http.Header{
+			"Content-Type": {"text/html; charset=utf-8"},
+		},
+	},
+	{
+		r: httptest.NewRequest("GET", "https://example.com/", nil),
+		header: http.Header{
+			"Accept-Encoding": {"gzip, deflate, br"},
+		},
+		wantStatusCode: 200,
+		wantHeader: http.Header{
+			"Content-Encoding": {"gzip"},
+			"Content-Type":     {"application/x-gzip"},
+		},
+	},
+	{
+		cfg: Config{
+			GameCount: 10,
+			Time:      func() string { return "then" },
+		},
+		r: httptest.NewRequest("POST", "https://example.com/game/draw_number", strings.NewReader("gameID=8-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
+		header: http.Header{
+			"Content-Type": {"application/x-www-form-urlencoded"},
+		},
+		wantStatusCode: 303,
+		wantHeader: http.Header{
+			"Location": {"/game?gameID=9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
+		},
+	},
+}
+
+var httpsHandlerServeHTTPTests = []struct {
 	time           func() string
 	gameInfos      []gameInfo
 	wantGameInfos  []gameInfo
 	r              *http.Request
+	header         http.Header
 	wantStatusCode int
 	wantHeader     http.Header
 	wantBody       string // only checked if not empty
@@ -166,6 +246,7 @@ var httpsHandlerTests = []struct {
 		gameInfos:      []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
 		wantGameInfos:  []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
 		r:              httptest.NewRequest("POST", "/game/create", nil),
+		header:         http.Header{"Content-Type": {"application/x-www-form-urlencoded"}},
 		wantStatusCode: 303,
 		wantHeader: http.Header{
 			"Location": {"/game"},
@@ -180,6 +261,7 @@ var httpsHandlerTests = []struct {
 			NumbersLeft: 66,
 		}, {ID: "1"}, {ID: "2"}, {ID: "3"}},
 		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("gameID=8-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
+		header:         http.Header{"Content-Type": {"application/x-www-form-urlencoded"}},
 		wantStatusCode: 303,
 		wantHeader: http.Header{
 			"Location": {"/game?gameID=9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
@@ -187,13 +269,14 @@ var httpsHandlerTests = []struct {
 	},
 	{ // draw number (and discard last in history)
 		time:      func() string { return "the_past_b" },
-		gameInfos: append(make([]gameInfo, 0, 3), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
+		gameInfos: []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
 		wantGameInfos: []gameInfo{{
 			ID:          "9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL",
 			ModTime:     "the_past_b",
 			NumbersLeft: 66,
 		}, {ID: "1"}, {ID: "2"}},
 		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("gameID=8-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
+		header:         http.Header{"Content-Type": {"application/x-www-form-urlencoded"}},
 		wantStatusCode: 303,
 		wantHeader: http.Header{
 			"Location": {"/game?gameID=9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
@@ -203,6 +286,7 @@ var httpsHandlerTests = []struct {
 		gameInfos:      append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 		wantGameInfos:  append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("gameID=75-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
+		header:         http.Header{"Content-Type": {"application/x-www-form-urlencoded"}},
 		wantStatusCode: 304,
 		wantHeader: http.Header{
 			"Location": {"/game?gameID=75-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
@@ -210,6 +294,7 @@ var httpsHandlerTests = []struct {
 	},
 	{ // create boards
 		r:              httptest.NewRequest("POST", "/game/boards", strings.NewReader("n=5")),
+		header:         http.Header{"Content-Type": {"application/x-www-form-urlencoded"}},
 		wantStatusCode: 303,
 		wantHeader: http.Header{
 			"Content-Type":        {"application/zip"},
@@ -257,8 +342,28 @@ var httpsHandlerTests = []struct {
 			"X-Content-Type-Options": {"nosniff"},
 		},
 	},
+	{ // draw number - no form content type header (cannot parse game id)
+		time:           func() string { return "" },
+		gameInfos:      []gameInfo{{}},
+		wantGameInfos:  []gameInfo{{}},
+		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("gameID=8-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
+		wantStatusCode: 400,
+		wantHeader: http.Header{
+			"Content-Type":           {"text/plain; charset=utf-8"},
+			"X-Content-Type-Options": {"nosniff"},
+		},
+	},
 	{ // draw number - bad game id
 		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("gameID=BAD-ID")),
+		header:         http.Header{"Content-Type": {"application/x-www-form-urlencoded"}},
+		wantStatusCode: 400,
+		wantHeader: http.Header{
+			"Content-Type":           {"text/plain; charset=utf-8"},
+			"X-Content-Type-Options": {"nosniff"},
+		},
+	},
+	{ // create boards - no form content type header (missing number)
+		r:              httptest.NewRequest("POST", "/game/boards", strings.NewReader("n=5")),
 		wantStatusCode: 400,
 		wantHeader: http.Header{
 			"Content-Type":           {"text/plain; charset=utf-8"},
@@ -267,6 +372,7 @@ var httpsHandlerTests = []struct {
 	},
 	{ // create boards - missing number
 		r:              httptest.NewRequest("POST", "/game/boards", nil),
+		header:         http.Header{"Content-Type": {"application/x-www-form-urlencoded"}},
 		wantStatusCode: 400,
 		wantHeader: http.Header{
 			"Content-Type":           {"text/plain; charset=utf-8"},
@@ -275,6 +381,7 @@ var httpsHandlerTests = []struct {
 	},
 	{ // create boards - number too small
 		r:              httptest.NewRequest("POST", "/game/boards", strings.NewReader("n=0")),
+		header:         http.Header{"Content-Type": {"application/x-www-form-urlencoded"}},
 		wantStatusCode: 400,
 		wantHeader: http.Header{
 			"Content-Type":           {"text/plain; charset=utf-8"},
@@ -283,6 +390,7 @@ var httpsHandlerTests = []struct {
 	},
 	{ // create boards - number too large
 		r:              httptest.NewRequest("POST", "/game/boards", strings.NewReader("n=9999999")),
+		header:         http.Header{"Content-Type": {"application/x-www-form-urlencoded"}},
 		wantStatusCode: 400,
 		wantHeader: http.Header{
 			"Content-Type":           {"text/plain; charset=utf-8"},
