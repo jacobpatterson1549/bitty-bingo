@@ -121,7 +121,7 @@ var gameTests = []struct {
 		},
 		wantNumbersLeft: 75,
 		wantColumns:     map[int][]Number{},
-		wantID:          "",
+		wantID:          "0",
 	},
 	{ // draw from front of available numbers, add to end of drawn numbers
 		game: Game{

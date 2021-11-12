@@ -101,11 +101,18 @@ func (h httpsHandler) getGames(w http.ResponseWriter, r *http.Request) {
 
 func (h httpsHandler) getGame(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
-	g, err := bingo.GameFromID(id)
-	if err != nil {
-		message := fmt.Sprintf("getting game from query parameter: %v", err)
-		httpError(w, message, http.StatusBadRequest)
-		return
+	var g *bingo.Game
+	switch len(id) {
+	case 0:
+		g = new(bingo.Game)
+	default:
+		var err error
+		g, err = bingo.GameFromID(id)
+		if err != nil {
+			message := fmt.Sprintf("getting game from query parameter: %v", err)
+			httpError(w, message, http.StatusBadRequest)
+			return
+		}
 	}
 	handleGame(w, *g)
 }
@@ -150,7 +157,7 @@ func (httpsHandler) checkBoard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *httpsHandler) createGame(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/game", http.StatusCreated)
+	http.Redirect(w, r, "/game", http.StatusSeeOther)
 }
 
 func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
@@ -164,27 +171,28 @@ func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	before := g.NumbersLeft()
 	g.DrawNumber()
 	after := g.NumbersLeft()
-	if before != after {
-		id2, err := g.ID()
-		if err != nil {
-			message := fmt.Sprintf("unexpected problem getting id after drawing tile from game with a VALID id %q: %v", id, err)
-			httpError(w, message, http.StatusInternalServerError)
-			return
-		}
-		if len(h.gameInfos) < cap(h.gameInfos) {
-			h.gameInfos = append(h.gameInfos, gameInfo{}) // increase length
-		}
-		copy(h.gameInfos[1:], h.gameInfos) // shift right
-		modTime := h.time()
-		gi := gameInfo{
-			ID:          id2,
-			ModTime:     modTime,
-			NumbersLeft: after,
-		}
-		h.gameInfos[0] = gi // set first
-		id = id2            // redirect to the updated game
+	if before == after {
+		http.Redirect(w, r, "/game?id="+id, http.StatusNotModified)
+		return
 	}
-	http.Redirect(w, r, "/game?id="+id, http.StatusCreated)
+	id2, err := g.ID()
+	if err != nil {
+		message := fmt.Sprintf("unexpected problem getting id after drawing tile from game with a VALID id %q: %v", id, err)
+		httpError(w, message, http.StatusInternalServerError)
+		return
+	}
+	if len(h.gameInfos) < cap(h.gameInfos) {
+		h.gameInfos = append(h.gameInfos, gameInfo{}) // increase length
+	}
+	copy(h.gameInfos[1:], h.gameInfos) // shift right
+	modTime := h.time()
+	gi := gameInfo{
+		ID:          id2,
+		ModTime:     modTime,
+		NumbersLeft: after,
+	}
+	h.gameInfos[0] = gi // set first
+	http.Redirect(w, r, "/game?id="+gi.ID, http.StatusSeeOther)
 }
 
 func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {
@@ -217,7 +225,7 @@ func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("Content-Type", "application/zip")
 	w.Header().Set("Content-Disposition", "attachment; filename=bingo-boards.zip")
-	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func withGzip(h http.Handler) http.HandlerFunc {

@@ -103,7 +103,6 @@ var httpsHandlerTests = []struct {
 	wantHeader     http.Header
 	wantBody       string // only checked if not empty
 }{
-	// ok GET requests:
 	{ // get games list
 		r:              httptest.NewRequest("GET", "/", nil),
 		wantStatusCode: 200,
@@ -163,12 +162,11 @@ var httpsHandlerTests = []struct {
 			"Content-Type": {"text/html; charset=utf-8"},
 		},
 	},
-	// ok POST requests:
 	{ // create game
 		gameInfos:      []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
 		wantGameInfos:  []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
 		r:              httptest.NewRequest("POST", "/game/create", nil),
-		wantStatusCode: 201,
+		wantStatusCode: 303,
 		wantHeader: http.Header{
 			"Location": {"/game"},
 		},
@@ -182,7 +180,7 @@ var httpsHandlerTests = []struct {
 			NumbersLeft: 66,
 		}, {ID: "1"}, {ID: "2"}, {ID: "3"}},
 		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("id=8-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
-		wantStatusCode: 201,
+		wantStatusCode: 303,
 		wantHeader: http.Header{
 			"Location": {"/game?id=9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
 		},
@@ -196,7 +194,7 @@ var httpsHandlerTests = []struct {
 			NumbersLeft: 66,
 		}, {ID: "1"}, {ID: "2"}},
 		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("id=8-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
-		wantStatusCode: 201,
+		wantStatusCode: 303,
 		wantHeader: http.Header{
 			"Location": {"/game?id=9-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
 		},
@@ -205,21 +203,20 @@ var httpsHandlerTests = []struct {
 		gameInfos:      append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 		wantGameInfos:  append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("id=75-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL")),
-		wantStatusCode: 201,
+		wantStatusCode: 304,
 		wantHeader: http.Header{
 			"Location": {"/game?id=75-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
 		},
 	},
 	{ // create boards
 		r:              httptest.NewRequest("POST", "/game/boards", strings.NewReader("n=5")),
-		wantStatusCode: 301,
+		wantStatusCode: 303,
 		wantHeader: http.Header{
 			"Content-Type":        {"application/zip"},
 			"Content-Disposition": {"attachment; filename=bingo-boards.zip"},
 			"Location":            {"/"},
 		},
 	},
-	// bad GET requests:
 	{ // get game - bad id
 		r:              httptest.NewRequest("GET", "/game?id=BAD-ID", nil),
 		wantStatusCode: 400,
@@ -252,7 +249,7 @@ var httpsHandlerTests = []struct {
 			"X-Content-Type-Options": {"nosniff"},
 		},
 	},
-	{ // get -not found
+	{ // get - not found
 		r:              httptest.NewRequest("GET", "/UNKNOWN", nil),
 		wantStatusCode: 404,
 		wantHeader: http.Header{

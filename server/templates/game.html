@@ -1,4 +1,4 @@
-<div id="numbers-left">{{.NumbersLeft}}</div>
+
 <table>
     <caption>Game Drawn Tiles</caption>
     <thead>
@@ -23,18 +23,19 @@
     </tbody>
 </table>
 
-{{if gt .NumbersLeft 0}}
-<form id="check-board" method="POST" action="/game/check_board">
+<div id="numbers-left"><span>Numbers left: {{.NumbersLeft}}</span></div>
+
+{{if .NumbersLeft}}
+<form id="draw-number" method="POST" action="/game/draw_number">
     <fieldset>
         <legend>Draw Number</legend>
         <label>
+            <input type="text" hidden name="id" value="{{.ID}}">
             <input type="submit">
         </label>
     </fieldset>
 </form>
 {{end}}
-
-{{/* <p>ID: .ID</p> */}}
 
 <form id="check-board" method="POST" action="/game/check_board">
     <fieldset>
@@ -44,18 +45,17 @@
             <input type="string" name="board" required>
         </label>
         <fieldset>
-            <legend>type<legend>
+            <legend>type</legend>
             <label>
                 <div>Line</div>
-                <input type="radio" name="type" value="HasLine">
+                <input type="radio" name="type" value="HasLine" checked>
             </label>
             <label>
                 <div>All cells</div>
                 <input type="radio" name="type" value="IsFilled">
             </label>
-        {{/* <input type="text" hidden name="game" value=".ID"> */}}
-        <label>
-            <input type="submit">
-        </label>
-    </fieldSet>
+        </fieldset>
+        <input type="text" hidden name="id" value="{{.ID}}">
+        <input type="submit">
+    </fieldset>
 </form>
