@@ -1,4 +1,4 @@
-.PHONY: all test clean serve serve-tcp
+.PHONY: all test clean serve
 
 OBJ := bitty-bingo
 BUILD_DIR := build
@@ -13,12 +13,8 @@ test:
 clean:
 	rm -rf $(BUILD_DIR)
 
-serve: $(BUILD_DIR)/$(SERVER_OBJ)
+serve: $(BUILD_DIR)/$(OBJ)
 	$(SERVE_ARGS) $<
-
-serve-tcp: $(BUILD_DIR)/$(SERVER_OBJ)
-	sudo setcap cap_net_bind_service=+ep $<
-	$(SERVE_ARGS) HTTP_PORT=80 HTTPS_PORT=443 $<
 
 $(BUILD_DIR):
 	mkdir -p $@

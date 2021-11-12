@@ -42,3 +42,5 @@ Examples:
 * Run on default HTTP ports with local HTTPS certificate: `sudo ./build/bitty-bingo --tls-cert-file=/home/jacobpatterson1549/tls-cert.pem --tls-key-file=/home/jacobpatterson1549/tls-key.pem`
 
 * Run only the HTTPS server, using managed TLS certificates: `sudo PORT=443 ./build/bitty-bingo`
+
+* Special: If PORT is defined in a file named `.env` (`PORT=8000`), the server can be started in HTTPS-only mode with `make serve`
