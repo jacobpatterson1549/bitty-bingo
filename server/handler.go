@@ -167,7 +167,7 @@ func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	if before != after {
 		id2, err := g.ID()
 		if err != nil {
-			message := fmt.Sprintf("getting id after drawing tile from game with a VALID id %q: %v", id, err)
+			message := fmt.Sprintf("unexpected problem getting id after drawing tile from game with a VALID id %q: %v", id, err)
 			httpError(w, message, http.StatusInternalServerError)
 			return
 		}
@@ -204,25 +204,20 @@ func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {
 		fileName := fmt.Sprintf("bingo_%v.svg", i)
 		f, err := z.Create(fileName)
 		if err != nil {
-			message := fmt.Sprintf("problem creating zip file #%v: %v", i, fileName)
+			message := fmt.Sprintf("unexpected problem creating file #%v in zip: %v", i, fileName)
 			httpError(w, message, http.StatusInternalServerError)
 			return
 		}
 		board := bingo.NewBoard() // TODO: ensure boards are unique
 		if err := handleExportBoard(f, *board); err != nil {
-			message := fmt.Sprintf("problam adding board %v to zip file: %v", i, err)
+			message := fmt.Sprintf("unexpected problam adding board %v to zip file: %v", i, err)
 			httpError(w, message, http.StatusInternalServerError)
 			return
 		}
 	}
-	if err := z.Close(); err != nil {
-		message := fmt.Sprintf("problem closing zip file: %v", err)
-		httpError(w, message, http.StatusInternalServerError)
-		return
-	}
 	w.Header().Add("Content-Type", "application/zip")
 	w.Header().Set("Content-Disposition", "attachment; filename=bingo-boards.zip")
-	// TODO: redirect to games list
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
 func withGzip(h http.Handler) http.HandlerFunc {

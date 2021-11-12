@@ -210,6 +210,15 @@ var httpsHandlerTests = []struct {
 			"Location": {"/game?id=75-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"},
 		},
 	},
+	{ // create boards
+		r:              httptest.NewRequest("POST", "/game/boards", strings.NewReader("n=5")),
+		wantStatusCode: 301,
+		wantHeader: http.Header{
+			"Content-Type":        {"application/zip"},
+			"Content-Disposition": {"attachment; filename=bingo-boards.zip"},
+			"Location":            {"/"},
+		},
+	},
 	// bad GET requests:
 	{ // get game - bad id
 		r:              httptest.NewRequest("GET", "/game?id=BAD-ID", nil),
@@ -251,9 +260,32 @@ var httpsHandlerTests = []struct {
 			"X-Content-Type-Options": {"nosniff"},
 		},
 	},
-	// TODO: bad POST requests:
 	{ // draw number - bad game id
 		r:              httptest.NewRequest("POST", "/game/draw_number", strings.NewReader("id=BAD-ID")),
+		wantStatusCode: 400,
+		wantHeader: http.Header{
+			"Content-Type":           {"text/plain; charset=utf-8"},
+			"X-Content-Type-Options": {"nosniff"},
+		},
+	},
+	{ // create boards - missing number
+		r:              httptest.NewRequest("POST", "/game/boards", nil),
+		wantStatusCode: 400,
+		wantHeader: http.Header{
+			"Content-Type":           {"text/plain; charset=utf-8"},
+			"X-Content-Type-Options": {"nosniff"},
+		},
+	},
+	{ // create boards - number too small
+		r:              httptest.NewRequest("POST", "/game/boards", strings.NewReader("n=0")),
+		wantStatusCode: 400,
+		wantHeader: http.Header{
+			"Content-Type":           {"text/plain; charset=utf-8"},
+			"X-Content-Type-Options": {"nosniff"},
+		},
+	},
+	{ // create boards - number too large
+		r:              httptest.NewRequest("POST", "/game/boards", strings.NewReader("n=9999999")),
 		wantStatusCode: 400,
 		wantHeader: http.Header{
 			"Content-Type":           {"text/plain; charset=utf-8"},
