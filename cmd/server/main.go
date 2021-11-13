@@ -16,14 +16,15 @@ import (
 
 // main runs a bingo server
 func main() {
-	cfg := serverConfig()
+	programName, programArgs := os.Args[0], os.Args[1:]
+	var cfg server.Config
+	fs := flagSet(&cfg, programName)
+	parseServerConfig(&cfg, fs, programArgs)
 	runServer(cfg) // BLOCKING
 }
 
-// serverConfig parses command line flags and environment variables into a server config
-func serverConfig() server.Config {
-	var cfg server.Config
-	programName, programArgs := os.Args[0], os.Args[1:]
+// flagSet creates a flag set that sets the config
+func flagSet(cfg *server.Config, programName string) *flag.FlagSet {
 	fs := flag.NewFlagSet(programName, flag.ExitOnError)
 	fs.Usage = func() {
 		fmt.Fprintln(fs.Output(), "Runs the server")
@@ -35,6 +36,11 @@ func serverConfig() server.Config {
 	fs.StringVar(&cfg.TLSCertFile, "tls-cert-file", "", "The name of the TLS public certificate file")
 	fs.StringVar(&cfg.TLSKeyFile, "tls-key-file", "", "The name of the TLS private key file")
 	fs.IntVar(&cfg.GameCount, "game-count", 10, "The number of game states to keep in the history")
+	return fs
+}
+
+// parseServerConfig parses command line flag set and environment variables into a server config
+func parseServerConfig(cfg *server.Config, fs *flag.FlagSet, programArgs []string) {
 	fs.Parse(programArgs)
 	portOverride, hasPortOverride := os.LookupEnv("PORT")
 	cfg.HTTPSRedirect = !hasPortOverride
@@ -44,7 +50,6 @@ func serverConfig() server.Config {
 	cfg.Time = func() string {
 		return time.Now().UTC().String()
 	}
-	return cfg
 }
 
 // runServer creates and runs a bingo server from the config
