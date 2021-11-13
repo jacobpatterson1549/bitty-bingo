@@ -1,3 +1,4 @@
+// Package bingo provides structures to simulate bingo games, boards, and number values.
 package bingo
 
 import (
@@ -70,6 +71,7 @@ func (g Game) DrawnNumberColumns() map[int][]Number {
 	return cols
 }
 
+// ID encodes the game into an easy to transport string.
 func (g Game) ID() (string, error) {
 	if g.numbersDrawn <= 0 {
 		return "0", nil
@@ -86,6 +88,7 @@ func (g Game) ID() (string, error) {
 	return id, nil
 }
 
+// GameFromID creates a game from the identifying string.
 func GameFromID(id string) (*Game, error) {
 	if id == "0" {
 		return new(Game), nil

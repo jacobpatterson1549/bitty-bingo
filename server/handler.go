@@ -13,11 +13,16 @@ import (
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
 
+// httpHandler creates a HTTP handler that redirects all requests to HTTPS.
+// Responses are returned gzip compression when allowed.
 func (cfg Config) httpHandler() http.Handler {
 	h := httpsRedirectHandler(cfg.HTTPSPort)
 	return withGzip(h)
 }
 
+// httpsHandler creates a HTTP handler to serve the site.
+// The gameCount and time function are validated used from the config in the handler
+// Responses are returned gzip compression when allowed.
 func (cfg Config) httpsHandler() (http.Handler, error) {
 	if cfg.GameCount < 1 {
 		return nil, fmt.Errorf("positive GameCount required, got %v", cfg.GameCount)
@@ -32,6 +37,8 @@ func (cfg Config) httpsHandler() (http.Handler, error) {
 	return withGzip(&h), nil
 }
 
+// httpsRedirectHandler is a handler that redirects all requests to HTTPS uris.
+// The httpsPort is used to redirect requests to non-standard HTTPS ports.
 func httpsRedirectHandler(httpsPort string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		httpsURI := "https://" + r.URL.Hostname()
@@ -43,17 +50,24 @@ func httpsRedirectHandler(httpsPort string) http.HandlerFunc {
 	}
 }
 
+// gameInfo is the display value of the sate of a game at a specific time.
 type gameInfo struct {
-	ID          string
-	ModTime     string
+	// ID is the identifier of the game.
+	ID string
+	// ModTime is used to display when the game was last modified.
+	ModTime string
+	// NumbersLeft is the amount of Numbers that can still be drawn in the game.
 	NumbersLeft int
 }
 
+// httpsHandler tracks servers HTTP requests and stores recent game infos.
+// The time function is used to create game infos
 type httpsHandler struct {
 	gameInfos []gameInfo
 	time      func() string
 }
 
+// ServeHTTP serves requests for GET and POST methods, not allowing others.
 func (h *httpsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
@@ -65,6 +79,7 @@ func (h *httpsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// serveGet handles various GET requests.
 func (h httpsHandler) serveGet(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/":
@@ -82,6 +97,7 @@ func (h httpsHandler) serveGet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// servePost handles various POST requests.
 func (h *httpsHandler) servePost(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/game/create":
@@ -95,6 +111,7 @@ func (h *httpsHandler) servePost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// httpError writes the message with statusCode to the response.
 func httpError(w http.ResponseWriter, message string, statusCode int) {
 	if len(message) == 0 {
 		message = http.StatusText(statusCode)
@@ -102,10 +119,13 @@ func httpError(w http.ResponseWriter, message string, statusCode int) {
 	http.Error(w, message, statusCode)
 }
 
+// getGames renders the games page onto the response with the game infos.
 func (h httpsHandler) getGames(w http.ResponseWriter, r *http.Request) {
 	handleGames(w, h.gameInfos)
 }
 
+// getGame renders the game page onto the response with the game of the 'gameID' query parameter.
+// The 'boardID' and 'bingo' query parameters are also used to forward the results of a BINGO check.
 func (h httpsHandler) getGame(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("gameID")
 	boardID := r.URL.Query().Get("boardID")
@@ -123,18 +143,21 @@ func (h httpsHandler) getGame(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
 	handleGame(w, g, boardID, hasBingo)
 }
 
+// hetHelp renders the help page onto the response.
 func (httpsHandler) getHelp(w http.ResponseWriter, r *http.Request) {
 	handleHelp(w)
 }
 
+// hetHelp renders the about page onto the response.
 func (httpsHandler) getAbout(w http.ResponseWriter, r *http.Request) {
 	handleAbout(w)
 }
 
+// checkBoard checks the board on the game with a checkType using the 'gameID', 'boardID', and 'type' query parameters.
+// The results of the check are included as query parameters onto a redirect to the game page.'
 func (httpsHandler) checkBoard(w http.ResponseWriter, r *http.Request) {
 	gameID := r.URL.Query().Get("gameID")
 	g, err := bingo.GameFromID(gameID)
@@ -169,10 +192,13 @@ func (httpsHandler) checkBoard(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
+// createGame redirects to a game that has not had any numbers drawn
 func (h *httpsHandler) createGame(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/game", http.StatusSeeOther)
 }
 
+// drawNumber draws a new number for the game specified by the request's 'gameID' form parameter.
+// The response is redirected to the updated game.  It's updated state is stored in the game infos slice.
 func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("gameID")
 	g, err := bingo.GameFromID(id)
@@ -190,7 +216,7 @@ func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	}
 	id2, err := g.ID()
 	if err != nil {
-		message := fmt.Sprintf("unexpected problem getting id after drawing tile from game with a VALID id %q: %v", id, err)
+		message := fmt.Sprintf("unexpected problem getting id after drawing number from game with a VALID id %q: %v", id, err)
 		httpError(w, message, http.StatusInternalServerError)
 		return
 	}
@@ -208,6 +234,7 @@ func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/game?gameID="+gi.ID, http.StatusSeeOther)
 }
 
+// createBoards creates 'n' boards as specified by the request's form parameter, attaching the boards in a zip file.
 func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {
 	nQueryParam := r.FormValue("n")
 	n, err := strconv.Atoi(nQueryParam)
@@ -244,9 +271,9 @@ func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {
 	}
 	buf.WriteTo(w)
 	w.Header().Set("Content-Disposition", "attachment; filename=bingo-boards.zip")
-	// http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// withGzip wraps the handler with a handler that writes responses using gzip compression when accepted.
 func withGzip(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {

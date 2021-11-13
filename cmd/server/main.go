@@ -1,3 +1,4 @@
+// Package main runs a bingo server on the command line..
 package main
 
 import (
@@ -13,11 +14,13 @@ import (
 	"github.com/jacobpatterson1549/bitty-bingo/server"
 )
 
+// main runs a bingo server
 func main() {
 	cfg := serverConfig()
 	runServer(cfg) // BLOCKING
 }
 
+// serverConfig parses command line flags and environment variables into a server config
 func serverConfig() server.Config {
 	var cfg server.Config
 	programName, programArgs := os.Args[0], os.Args[1:]
@@ -44,6 +47,7 @@ func serverConfig() server.Config {
 	return cfg
 }
 
+// runServer creates and runs a bingo server from the config
 func runServer(cfg server.Config) {
 	s, err := cfg.NewServer()
 	if err != nil {

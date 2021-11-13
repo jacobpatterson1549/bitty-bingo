@@ -6,8 +6,12 @@ import (
 	"strconv"
 )
 
+// Board represents a 5*5 square bingo board.
+// The middle square (index 12) is left empty (0).
 type Board [25]Number
 
+// NewBoard creates a board by drawing numbers from a game.
+// Each column of the board (5-cell group) only contains numbers of the same column.
 func NewBoard() *Board {
 	var g Game
 	columnRowCounts := 0
@@ -32,6 +36,7 @@ func NewBoard() *Board {
 	return &b
 }
 
+// HasLine determines if the board has a five-in-a row line, creating a BINGO for the game.
 func (b Board) HasLine(g Game) bool {
 	nums := numberSet(g)
 	for i := 0; i < 5; i++ {
@@ -42,6 +47,7 @@ func (b Board) HasLine(g Game) bool {
 	return b.hasDiagonal1(nums) || b.hasDiagonal2(nums)
 }
 
+// IsFilled determines if all the numbers in the board have been called in the game.
 func (b Board) IsFilled(g Game) bool {
 	nums := numberSet(g)
 	for _, n := range b {
@@ -52,6 +58,8 @@ func (b Board) IsFilled(g Game) bool {
 	return true
 }
 
+// NumberSet creates a map of all the drawn numbers in the game.
+// It also includes the zero number to always accout for the middle free cell.
 func numberSet(g Game) map[Number]struct{} {
 	s := make(map[Number]struct{}, g.numbersDrawn+1)
 	s[0] = struct{}{} // free cell
@@ -62,6 +70,7 @@ func numberSet(g Game) map[Number]struct{} {
 	return s
 }
 
+// hasColumn checks to see if the column on the board is completely included in nums.
 func (b Board) hasColumn(c int, nums map[Number]struct{}) bool {
 	for r := 0; r < 5; r++ {
 		i := c*5 + r
@@ -72,6 +81,7 @@ func (b Board) hasColumn(c int, nums map[Number]struct{}) bool {
 	return true
 }
 
+// hasColumn checks to see if the row on the board is completely included in nums.
 func (b Board) hasRow(r int, nums map[Number]struct{}) bool {
 	for c := 0; c < 5; c++ {
 		i := c*5 + r
@@ -82,6 +92,7 @@ func (b Board) hasRow(r int, nums map[Number]struct{}) bool {
 	return true
 }
 
+// hasDiagonal1 checks to see if the leading 5-number diagonal on the board is completely included in nums.
 func (b Board) hasDiagonal1(nums map[Number]struct{}) bool {
 	for j := 0; j < 5; j++ {
 		i := j*5 + j
@@ -92,6 +103,7 @@ func (b Board) hasDiagonal1(nums map[Number]struct{}) bool {
 	return true
 }
 
+// hasColumn checks to see if the trailing 5-number diagonal on the board is completely included in nums.
 func (b Board) hasDiagonal2(nums map[Number]struct{}) bool {
 	for j := 0; j < 5; j++ {
 		i := j*5 + 4 - j
