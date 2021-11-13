@@ -217,7 +217,7 @@ func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	if len(h.gameInfos) < cap(h.gameInfos) {
 		h.gameInfos = append(h.gameInfos, gameInfo{}) // increase length
 	}
-	copy(h.gameInfos[1:], h.gameInfos) // shift right
+	copy(h.gameInfos[1:], h.gameInfos) // shift right, overwriting last
 	modTime := h.time()
 	gi := gameInfo{
 		ID:          id2,
