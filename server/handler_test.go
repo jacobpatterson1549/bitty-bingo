@@ -64,9 +64,13 @@ func TestHTTPSHandler(t *testing.T) {
 func TestHTTPSHandlerServeHTTP(t *testing.T) {
 	for i, test := range httpsHandlerServeHTTPTests {
 		w := httptest.NewRecorder()
+		gameInfos := make([]gameInfo, len(test.gameInfos), cap(test.gameInfos))
+		copy(gameInfos, test.gameInfos) // do not modify the test value
+		wantGameInfos := make([]gameInfo, len(test.wantGameInfos))
+		copy(wantGameInfos, test.wantGameInfos)
 		h := httpsHandler{
 			time:      test.time,
-			gameInfos: test.gameInfos,
+			gameInfos: gameInfos,
 		}
 		test.r.Header = test.header
 		h.ServeHTTP(w, test.r)
@@ -75,8 +79,8 @@ func TestHTTPSHandlerServeHTTP(t *testing.T) {
 			t.Errorf("test %v: response status codes not equal: wanted %v, got %v: %v", i, test.wantStatusCode, w.Code, w.Body.String())
 		case !reflect.DeepEqual(test.wantHeader, w.Header()):
 			t.Errorf("test %v: response headers not equal:\nwanted: %v\ngot:    %v", i, test.wantHeader, w.Header())
-		case !reflect.DeepEqual(test.wantGameInfos, h.gameInfos):
-			t.Errorf("test %v: game infos not equal:\nwanted: %v\ngot:    %v", i, test.wantGameInfos, h.gameInfos)
+		case !reflect.DeepEqual(wantGameInfos, h.gameInfos):
+			t.Errorf("test %v: game infos not equal:\nwanted: %v\ngot:    %v", i, wantGameInfos, h.gameInfos)
 		}
 	}
 }
