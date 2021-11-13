@@ -1,6 +1,10 @@
 # bitty-bingo
 
-a small bingo application
+[![Docker Image CI](https://github.com/jacobpatterson1549/bitty-bingo/actions/workflows/go.yml/badge.svg)](https://github.com/jacobpatterson1549/bitty-bingo/actions/workflows/gco.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jacobpatterson1549/bitty-bingo)](https://goreportcard.com/report/github.com/jacobpatterson1549/bitty-bingo)
+[![GoDoc](https://godoc.org/github.com/jacobpatterson1549/bitty-bingo?status.svg)](https://godoc.org/github.com/jacobpatterson1549/bitty-bingo)
+
+## a small bingo application
 
 The application runs as a web server that creates bingo board SVG images.
 It also manages games, whose previous states can be reverted to.
