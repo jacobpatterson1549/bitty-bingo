@@ -12,10 +12,11 @@
             {{template "nav.html"}}
         </header>
         <main>
-            {{if eq .Name "list"}}{{template "games.html" .List}}{{end}}
-            {{if eq .Name "game"}}{{template "game.html" .Game}}{{end}}
-            {{if eq .Name "help"}}{{template "help.html"}}{{end}}
-            {{if eq .Name "about"}}{{template "about.html"}}{{end}}
+            {{if eq .Name "list"}}{{template "games.html" .List}}
+            {{else if eq .Name "game"}}{{template "game.html" .Game}}
+            {{else if eq .Name "help"}}{{template "help.html"}}
+            {{else if eq .Name "about"}}{{template "about.html"}}
+            {{end}}
         </main>
     </body>
 </html>

@@ -2,6 +2,8 @@ package server
 
 import (
 	"bytes"
+	"html/template"
+	"net/http/httptest"
 	"strconv"
 	"strings"
 	"testing"
@@ -65,7 +67,7 @@ func TestHandleGame(t *testing.T) {
 		}
 	for i, test := range tests {
 		var w bytes.Buffer
-		err := handleGame(&w, &test.game, test.boardID, test.hasBingo)
+		err := handleGame(&w, test.game, test.boardID, test.hasBingo)
 		got := w.String()
 		switch {
 		case err != nil:
@@ -120,6 +122,38 @@ func TestHandleExport(t *testing.T) {
 		if !strings.Contains(got, s) {
 			t.Errorf("wanted board export to contain %q:\n%v", s, got)
 			break
+		}
+	}
+}
+
+func TestHandleIndexResponseWriter(t *testing.T) {
+	tests := []struct {
+		page
+		t              *template.Template
+		wantStatusCode int
+		wantOk         bool
+	}{
+		{ // unknown template
+			t:              template.Must(template.New("unknown template").Parse("<p>template for {{.UNKNOWN}}</p>")),
+			wantStatusCode: 500,
+		},
+		{ // empty game
+			page:           page{Name: "about"},
+			t:              embeddedTemplate,
+			wantStatusCode: 200,
+			wantOk:         true,
+		},
+	}
+	for i, test := range tests {
+		w := httptest.NewRecorder()
+		err := test.page.handleIndex(test.t, w)
+		gotOk := err == nil
+		gotStatusCode := w.Code
+		switch {
+		case test.wantOk != gotOk:
+			t.Errorf("test %v: ok values not equal: wanted %v, got %v (error: %v) ", i, test.wantOk, gotOk, err)
+		case test.wantStatusCode != gotStatusCode:
+			t.Errorf("test %v: status codes not equal: wanted %v, got %v", i, test.wantStatusCode, gotStatusCode)
 		}
 	}
 }

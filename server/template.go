@@ -1,9 +1,12 @@
 package server
 
 import (
+	"bytes"
 	"embed"
+	"fmt"
 	"html/template"
 	"io"
+	"net/http"
 
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
@@ -12,8 +15,8 @@ import (
 //go:embed templates
 var templatesFS embed.FS
 
-// t is the template containing the html and svg templates.
-var t = template.Must(template.ParseFS(templatesFS, "templates/*"))
+// embeddedTemplate is the template containing the html and svg templates.
+var embeddedTemplate = template.Must(template.ParseFS(templatesFS, "templates/*"))
 
 // page contains all the data needed to render any html page.
 type page struct {
@@ -31,30 +34,61 @@ type game struct {
 
 // handleHelp renders the help html page.
 func handleHelp(w io.Writer) error {
-	return t.ExecuteTemplate(w, "index.html", page{Name: "help"})
+	p := page{
+		Name: "help",
+	}
+	return p.handleIndex(embeddedTemplate, w)
 }
 
 // handleAbout renders the about html page.
 func handleAbout(w io.Writer) error {
-	return t.ExecuteTemplate(w, "index.html", page{Name: "about"})
+	p := page{
+		Name: "about",
+	}
+	return p.handleIndex(embeddedTemplate, w)
 }
 
 // handleGame renders the game html page.
-func handleGame(w io.Writer, g *bingo.Game, boardID string, hasBingo bool) error {
+func handleGame(w io.Writer, g bingo.Game, boardID string, hasBingo bool) error {
 	templateGame := game{
-		Game:     *g,
+		Game:     g,
 		BoardID:  boardID,
 		HasBingo: hasBingo,
 	}
-	return t.ExecuteTemplate(w, "index.html", page{Name: "game", Game: &templateGame})
+	p := page{
+		Name: "game",
+		Game: &templateGame,
+	}
+	return p.handleIndex(embeddedTemplate, w)
 }
 
 // handleGames renders the games list html page.
 func handleGames(w io.Writer, gameInfos []gameInfo) error {
-	return t.ExecuteTemplate(w, "index.html", page{Name: "list", List: gameInfos})
+	p := page{
+		Name: "list",
+		List: gameInfos,
+	}
+	return p.handleIndex(embeddedTemplate, w)
 }
 
 // handleExportBoard renders the board onto an svg image.
 func handleExportBoard(w io.Writer, b bingo.Board) error {
-	return t.ExecuteTemplate(w, "board.svg", b)
+	return embeddedTemplate.ExecuteTemplate(w, "board.svg", b)
+}
+
+// handleIndex renders the page on the index HTML template.
+// HTTPErrors are handled if Writer is a ResponseWriter.
+// Templates are written a buffer to ensure they execute correctly before they are written to the response
+func (p page) handleIndex(t *template.Template, w io.Writer) error {
+	var buf bytes.Buffer
+	err := t.ExecuteTemplate(&buf, "index.html", p)
+	if err != nil {
+		if rw, ok := w.(http.ResponseWriter); ok {
+			message := fmt.Sprintf("unexpected problem rendering %v template: %v", p.Name, err)
+			httpError(rw, message, http.StatusInternalServerError)
+		}
+		return err
+	}
+	_, err = buf.WriteTo(w)
+	return err
 }

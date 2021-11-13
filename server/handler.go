@@ -143,7 +143,7 @@ func (h httpsHandler) getGame(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	handleGame(w, g, boardID, hasBingo)
+	handleGame(w, *g, boardID, hasBingo)
 }
 
 // hetHelp renders the help page onto the response.
