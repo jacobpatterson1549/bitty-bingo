@@ -40,26 +40,30 @@ func TestHandleGame(t *testing.T) {
 	}
 	tests :=
 		[]struct {
+			name     string
 			game     bingo.Game
 			boardID  string
 			hasBingo bool
 			want     string
 		}{
-			{},
 			{
+				name: "game has drawn tile",
 				game: allDrawnGame,
 				want: "B 2",
 			},
 			{
+				name:    "checked board value",
 				boardID: "board_id_input_value",
 				want:    "board_id_input_value",
 			},
 			{
+				name:     "checked board has no bingo",
 				boardID:  "board_id_input_value",
 				hasBingo: false,
 				want:     "No Bingo :(",
 			},
 			{
+				name:     "checked board has bingo",
 				boardID:  "board_id_input_value",
 				hasBingo: true,
 				want:     "BINGO !!!",
@@ -71,9 +75,9 @@ func TestHandleGame(t *testing.T) {
 		got := w.String()
 		switch {
 		case err != nil:
-			t.Errorf("test %v: unwanted error: %v", i, err)
+			t.Errorf("test %v (%v): unwanted error: %v", i, test.name, err)
 		case !strings.Contains(got, test.want):
-			t.Errorf("test %v: wanted rendered game to contain %q, got:\n%v", i, test.want, got)
+			t.Errorf("test %v (%v): wanted rendered game to contain %q, got:\n%v", i, test.name, test.want, got)
 		}
 	}
 }
@@ -128,16 +132,19 @@ func TestHandleExport(t *testing.T) {
 
 func TestHandleIndexResponseWriter(t *testing.T) {
 	tests := []struct {
+		name string
 		page
 		t              *template.Template
 		wantStatusCode int
 		wantOk         bool
 	}{
-		{ // unknown template
+		{
+			name:           "unknown template",
 			t:              template.Must(template.New("unknown template").Parse("<p>template for {{.UNKNOWN}}</p>")),
 			wantStatusCode: 500,
 		},
-		{ // empty game
+		{
+			name:           "empty game",
 			page:           page{Name: "about"},
 			t:              embeddedTemplate,
 			wantStatusCode: 200,
@@ -151,9 +158,9 @@ func TestHandleIndexResponseWriter(t *testing.T) {
 		gotStatusCode := w.Code
 		switch {
 		case test.wantOk != gotOk:
-			t.Errorf("test %v: ok values not equal: wanted %v, got %v (error: %v) ", i, test.wantOk, gotOk, err)
+			t.Errorf("test %v (%v): ok values not equal: wanted %v, got %v (error: %v) ", i, test.name, test.wantOk, gotOk, err)
 		case test.wantStatusCode != gotStatusCode:
-			t.Errorf("test %v: status codes not equal: wanted %v, got %v", i, test.wantStatusCode, gotStatusCode)
+			t.Errorf("test %v (%v): status codes not equal: wanted %v, got %v", i, test.name, test.wantStatusCode, gotStatusCode)
 		}
 	}
 }

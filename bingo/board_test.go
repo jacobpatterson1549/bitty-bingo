@@ -100,18 +100,21 @@ func TestBoardFromID(t *testing.T) {
 		}
 	})
 	t.Run("invalid ids", func(t *testing.T) {
-		invalidIds := []string{
-			"",                      // too short
-			board1257894001ID + "_", // to long
-			"INVALID B64 CHAR",      // spaces not allowed
-			"9zuTsMm6CTZAs7ad",      // first number is too large (15)
-			"7zuTsMm6CTZAs7ad",      // second number is too large (15)
-			"7juTsMm6CTZAs7ad",      // first number duplicated
+		invalidIds := []struct {
+			id   string
+			name string
+		}{
+			{"", "too short"},
+			{board1257894001ID + "_", "too long"},
+			{"INVALID B64 CHAR", "spaces not allowed"},
+			{"9zuTsMm6CTZAs7ad", "first number is too large (15)"},
+			{"7zuTsMm6CTZAs7ad", "second number is too large (15)"},
+			{"7juTsMm6CTZAs7ad", "first number duplicated"},
 		}
-		for i, id := range invalidIds {
-			_, err := BoardFromID(id)
+		for i, test := range invalidIds {
+			_, err := BoardFromID(test.id)
 			if err == nil {
-				t.Errorf("test %v (%q): wanted id to be invalid", i, id)
+				t.Errorf("test %v (%v): wanted id to be invalid", i, test.name)
 			}
 		}
 	})

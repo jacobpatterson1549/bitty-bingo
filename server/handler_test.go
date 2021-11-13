@@ -19,9 +19,9 @@ func TestHTTPHandler(t *testing.T) {
 		gotHeader := w.Header()
 		switch {
 		case wantStatusCode != gotStatusCode:
-			t.Errorf("test %v: HTTP response status codes not equal: wanted %v, got %v: %v", i, wantStatusCode, w.Code, w.Body.String())
+			t.Errorf("test %v (%v): HTTP response status codes not equal: wanted %v, got %v: %v", i, test.name, wantStatusCode, w.Code, w.Body.String())
 		case !reflect.DeepEqual(test.wantHeader, gotHeader):
-			t.Errorf("test %v: HTTP response headers not equal:\nwanted: %v\ngot:    %v", i, test.wantHeader, gotHeader)
+			t.Errorf("test %v (%v): HTTP response headers not equal:\nwanted: %v\ngot:    %v", i, test.name, test.wantHeader, gotHeader)
 		}
 	}
 }
@@ -32,7 +32,7 @@ func TestHTTPSHandler(t *testing.T) {
 			w := httptest.NewRecorder()
 			h, err := test.cfg.httpsHandler()
 			if err != nil {
-				t.Errorf("test %v: creating handler: %v", i, err)
+				t.Errorf("test %v (%v): creating handler: %v", i, test.name, err)
 				continue
 			}
 			test.r.Header = test.header
@@ -41,21 +41,24 @@ func TestHTTPSHandler(t *testing.T) {
 			gotHeader := w.Header()
 			switch {
 			case test.wantStatusCode != gotStatusCode:
-				t.Errorf("test %v: HTTPS response status codes not equal: wanted %v, got %v: %v", i, test.wantStatusCode, w.Code, w.Body.String())
+				t.Errorf("test %v (%v): HTTPS response status codes not equal: wanted %v, got %v: %v", i, test.name, test.wantStatusCode, w.Code, w.Body.String())
 			case !reflect.DeepEqual(test.wantHeader, gotHeader):
-				t.Errorf("test %v: HTTPS response headers not equal:\nwanted: %v\ngot:    %v", i, test.wantHeader, gotHeader)
+				t.Errorf("test %v (%v): HTTPS response headers not equal:\nwanted: %v\ngot:    %v", i, test.name, test.wantHeader, gotHeader)
 			}
 		}
 	})
 	t.Run("bad configs", func(t *testing.T) {
-		configs := []Config{
-			{},
-			{GameCount: -9, Time: func() string { return "anything" }},
-			{GameCount: 9},
+		tests := []struct {
+			cfg  Config
+			name string
+		}{
+			{name: "zero values [zero game count]"},
+			{cfg: Config{GameCount: -9, Time: func() string { return "anything" }}, name: "nonPositiveGameCount"},
+			{cfg: Config{GameCount: 9}, name: "no time func"},
 		}
-		for i, cfg := range configs {
-			if _, err := cfg.httpsHandler(); err == nil {
-				t.Errorf("test %v: wanted error for bad config: %#v", i, cfg)
+		for i, test := range tests {
+			if _, err := test.cfg.httpsHandler(); err == nil {
+				t.Errorf("test %v (%v): wanted error for bad config: %#v", i, test.name, test.cfg)
 			}
 		}
 	})
@@ -76,11 +79,11 @@ func TestHTTPSHandlerServeHTTP(t *testing.T) {
 		h.ServeHTTP(w, test.r)
 		switch {
 		case w.Code != test.wantStatusCode:
-			t.Errorf("test %v: HTTPS response status codes not equal: wanted %v, got %v: %v", i, test.wantStatusCode, w.Code, w.Body.String())
+			t.Errorf("test %v (%v): HTTPS response status codes not equal: wanted %v, got %v: %v", i, test.name, test.wantStatusCode, w.Code, w.Body.String())
 		case !reflect.DeepEqual(test.wantHeader, w.Header()):
-			t.Errorf("test %v: HTTPS response headers not equal:\nwanted: %v\ngot:    %v", i, test.wantHeader, w.Header())
+			t.Errorf("test %v (%v): HTTPS response headers not equal:\nwanted: %v\ngot:    %v", i, test.name, test.wantHeader, w.Header())
 		case !reflect.DeepEqual(wantGameInfos, h.gameInfos):
-			t.Errorf("test %v: game infos not equal:\nwanted: %v\ngot:    %v", i, wantGameInfos, h.gameInfos)
+			t.Errorf("test %v (%v): game infos not equal:\nwanted: %v\ngot:    %v", i, test.name, wantGameInfos, h.gameInfos)
 		}
 	}
 }
@@ -99,9 +102,9 @@ func TestWithGzip(t *testing.T) {
 		gotMessage := w.Body.String()
 		switch {
 		case test.wantGzip != gotGzip:
-			t.Errorf("Test %v: wanted gzip: %v, got %v", i, test.wantGzip, gotGzip)
+			t.Errorf("test %v (%v): wanted gzip: %v, got %v", i, test.name, test.wantGzip, gotGzip)
 		case !strings.HasPrefix(gotMessage, test.wantBodyStart):
-			t.Errorf("Test %v: written message prefixes not equal:\nwanted: %x\ngot:    %x", i, test.wantBodyStart, gotMessage)
+			t.Errorf("test %v (%v): written message prefixes not equal:\nwanted: %x\ngot:    %x", i, test.name, test.wantBodyStart, gotMessage)
 		}
 	}
 }
@@ -142,12 +145,14 @@ const (
 )
 
 var httpHandlerTests = []struct {
+	name       string
 	cfg        Config
 	r          *http.Request
 	header     http.Header
 	wantHeader http.Header
 }{
 	{
+		name: "default http port to default HTTP port",
 		cfg: Config{
 			HTTPSPort: "443",
 		},
@@ -158,6 +163,7 @@ var httpHandlerTests = []struct {
 		},
 	},
 	{
+		name: "redirect to custom HTTPS port",
 		cfg: Config{
 			HTTPSPort: "8000",
 		},
@@ -168,6 +174,7 @@ var httpHandlerTests = []struct {
 		},
 	},
 	{
+		name: "redirect with gzip",
 		cfg: Config{
 			HTTPSPort: "8000",
 		},
@@ -184,6 +191,7 @@ var httpHandlerTests = []struct {
 }
 
 var httpsHandlerTests = []struct {
+	name           string
 	cfg            Config
 	r              *http.Request
 	header         http.Header
@@ -191,6 +199,7 @@ var httpsHandlerTests = []struct {
 	wantHeader     http.Header
 }{
 	{
+		name: "root with no accept encodings",
 		cfg: Config{
 			GameCount: 10,
 			Time:      func() string { return "time" },
@@ -202,6 +211,7 @@ var httpsHandlerTests = []struct {
 		},
 	},
 	{
+		name: "root with gzip",
 		cfg: Config{
 			GameCount: 10,
 			Time:      func() string { return "time" },
@@ -217,6 +227,7 @@ var httpsHandlerTests = []struct {
 		},
 	},
 	{
+		name: "draw number",
 		cfg: Config{
 			GameCount: 10,
 			Time:      func() string { return "then" },
@@ -233,6 +244,7 @@ var httpsHandlerTests = []struct {
 }
 
 var httpsHandlerServeHTTPTests = []struct {
+	name           string
 	time           func() string
 	gameInfos      []gameInfo
 	wantGameInfos  []gameInfo
@@ -241,28 +253,32 @@ var httpsHandlerServeHTTPTests = []struct {
 	wantStatusCode int
 	wantHeader     http.Header
 }{
-	{ // get games list
+	{
+		name:           "get games list",
 		r:              httptest.NewRequest(methodGet, urlPathGames, nil),
 		wantStatusCode: 200,
 		wantHeader: http.Header{
 			headerContentType: {contentTypeTextHTML},
 		},
 	},
-	{ // get game
+	{
+		name:           "get game",
 		r:              httptest.NewRequest(methodGet, urlPathGame+"?"+qpGameID+"=5-"+board1257894001IDNumbers, nil),
 		wantStatusCode: 200,
 		wantHeader: http.Header{
 			headerContentType: {contentTypeTextHTML},
 		},
 	},
-	{ // get game (zero)
+	{
+		name:           "get game (zero)",
 		r:              httptest.NewRequest(methodGet, urlPathGame, nil),
 		wantStatusCode: 200,
 		wantHeader: http.Header{
 			headerContentType: {contentTypeTextHTML},
 		},
 	},
-	{ // check board - HasLine
+	{
+		name:           "check board - HasLine",
 		r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"=5-"+board1257894001IDNumbers+"&"+qpBoardID+"="+board1257894001ID+"&"+qpType+"="+typeHasLine, nil),
 		wantStatusCode: 303,
 		wantHeader: http.Header{
@@ -270,7 +286,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerLocation:    {urlPathGame + "?" + qpGameID + "=5-" + board1257894001IDNumbers + "&" + qpBoardID + "=" + board1257894001ID + "&" + qpBingo},
 		},
 	},
-	{ // check board - IsFilled
+	{
+		name:           "check board - IsFilled",
 		r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"=24-"+board1257894001IDNumbers+"&"+qpBoardID+"="+board1257894001ID+"&"+qpType+"="+typeIsFilled, nil),
 		wantStatusCode: 303,
 		wantHeader: http.Header{
@@ -278,7 +295,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerLocation:    {urlPathGame + "?" + qpGameID + "=24-" + board1257894001IDNumbers + "&" + qpBoardID + "=" + board1257894001ID + "&" + qpBingo},
 		},
 	},
-	{ // check board - IsFilled (false)
+	{
+		name:           "check board - IsFilled (false)",
 		r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"=1-"+board1257894001IDNumbers+"&"+qpBoardID+"="+board1257894001ID+"&"+qpType+"="+typeIsFilled, nil),
 		wantStatusCode: 303,
 		wantHeader: http.Header{
@@ -286,21 +304,24 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerLocation:    {urlPathGame + "?" + qpGameID + "=1-" + board1257894001IDNumbers + "&" + qpBoardID + "=" + board1257894001ID + ""},
 		},
 	},
-	{ // help
+	{
+		name:           "help",
 		r:              httptest.NewRequest(methodGet, urlPathHelp, nil),
 		wantStatusCode: 200,
 		wantHeader: http.Header{
 			headerContentType: {contentTypeTextHTML},
 		},
 	},
-	{ // about
+	{
+		name:           "about",
 		r:              httptest.NewRequest(methodGet, urlPathAbout, nil),
 		wantStatusCode: 200,
 		wantHeader: http.Header{
 			headerContentType: {contentTypeTextHTML},
 		},
 	},
-	{ // create game
+	{
+		name:           "create game",
 		gameInfos:      []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
 		wantGameInfos:  []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
 		r:              httptest.NewRequest(methodPost, urlPathGame, nil),
@@ -310,7 +331,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerLocation: {urlPathGame},
 		},
 	},
-	{ // draw number
+	{
+		name:      "draw number",
 		time:      func() string { return "the_past_a" },
 		gameInfos: append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 		wantGameInfos: []gameInfo{{
@@ -325,7 +347,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerLocation: {urlPathGame + "?" + qpGameID + "=9-" + board1257894001IDNumbers},
 		},
 	},
-	{ // draw number (and discard last in history)
+	{
+		name:      "draw number (and discard last in history)",
 		time:      func() string { return "the_past_b" },
 		gameInfos: []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
 		wantGameInfos: []gameInfo{{
@@ -340,7 +363,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerLocation: {urlPathGame + "?" + qpGameID + "=9-" + board1257894001IDNumbers},
 		},
 	},
-	{ // draw number - do not change game infos if all numbers are drawn
+	{
+		name:           "draw number - do not change game infos if all numbers are drawn",
 		gameInfos:      append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 		wantGameInfos:  append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 		r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=75-"+board1257894001IDNumbers)),
@@ -350,7 +374,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerLocation: {urlPathGame + "?" + qpGameID + "=75-" + board1257894001IDNumbers},
 		},
 	},
-	{ // create boards
+	{
+		name:           "create boards",
 		r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=5")),
 		header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 		wantStatusCode: 200,
@@ -359,7 +384,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerContentDisposition: {"attachment; filename=bingo-boards.zip"},
 		},
 	},
-	{ // get game - bad id
+	{
+		name:           "get game - bad id",
 		r:              httptest.NewRequest(methodGet, urlPathGame+"?"+qpGameID+"=BAD-ID", nil),
 		wantStatusCode: 400,
 		wantHeader: http.Header{
@@ -367,7 +393,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{ // check board - bad game id
+	{
+		name:           "check board - bad game id",
 		r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"=BAD-ID&"+qpBoardID+"="+board1257894001ID+"&"+qpType+"="+typeHasLine, nil),
 		wantStatusCode: 400,
 		wantHeader: http.Header{
@@ -375,7 +402,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{ // check board - bad board id
+	{
+		name:           "check board - bad board id",
 		r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"=5-"+board1257894001IDNumbers+"&"+qpBoardID+"=BAD-ID&"+qpType+"="+typeHasLine, nil),
 		wantStatusCode: 400,
 		wantHeader: http.Header{
@@ -383,7 +411,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{ // check board - bad check type
+	{
+		name:           "check board - bad check type",
 		r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"=5-"+board1257894001IDNumbers+"&"+qpBoardID+"="+board1257894001ID+"&"+qpType+"=UNKNOWN", nil),
 		wantStatusCode: 400,
 		wantHeader: http.Header{
@@ -391,7 +420,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{ // get - not found
+	{
+		name:           "get - not found",
 		r:              httptest.NewRequest(methodGet, "/UNKNOWN", nil),
 		wantStatusCode: 404,
 		wantHeader: http.Header{
@@ -399,7 +429,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{ // draw number - no form content type header (cannot parse game id)
+	{
+		name:           "draw number - no form content type header (cannot parse game id)",
 		time:           func() string { return "" },
 		gameInfos:      []gameInfo{{}},
 		wantGameInfos:  []gameInfo{{}},
@@ -410,7 +441,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{ // draw number - bad game id
+	{
+		name:           "draw number - bad game id",
 		r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=BAD-ID")),
 		header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 		wantStatusCode: 400,
@@ -419,7 +451,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{ // create boards - no form content type header (missing number)
+	{
+		name:           "create boards - no form content type header (missing number)",
 		r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=5")),
 		wantStatusCode: 400,
 		wantHeader: http.Header{
@@ -427,7 +460,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{ // create boards - missing number
+	{
+		name:           "create boards - missing number",
 		r:              httptest.NewRequest(methodPost, urlPathGameBoards, nil),
 		header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 		wantStatusCode: 400,
@@ -436,7 +470,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{ // create boards - number too small
+	{
+		name:           "create boards - number too small",
 		r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=0")),
 		header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 		wantStatusCode: 400,
@@ -445,7 +480,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{ // create boards - number too large
+	{
+		name:           "create boards - number too large",
 		r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=9999999")),
 		header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 		wantStatusCode: 400,
@@ -454,7 +490,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{ // post - not found
+	{
+		name:           "post - not found",
 		r:              httptest.NewRequest(methodPost, "/UNKNOWN", nil),
 		wantStatusCode: 404,
 		wantHeader: http.Header{
@@ -462,7 +499,8 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{ // bad method
+	{
+		name:           "bad method",
 		r:              httptest.NewRequest("DELETE", "/", nil),
 		wantStatusCode: 405,
 		wantHeader: http.Header{
@@ -473,15 +511,18 @@ var httpsHandlerServeHTTPTests = []struct {
 }
 
 var withGzipTests = []struct {
+	name           string
 	acceptEncoding string
 	wantGzip       bool
 	wantBodyStart  string
 	wantBody       string
 }{
 	{
+		name:          "no accept encoding",
 		wantBodyStart: "abc123",
 	},
 	{
+		name:           "with gzip accept encoding",
 		acceptEncoding: acceptEncodingsCommon,
 		wantGzip:       true,
 		wantBodyStart:  "\x1f\x8b\x08", // magic number (1f8b) and compression method for deflate (08)
