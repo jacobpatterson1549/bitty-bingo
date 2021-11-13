@@ -70,9 +70,9 @@ type httpsHandler struct {
 // ServeHTTP serves requests for GET and POST methods, not allowing others.
 func (h *httpsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-	case "GET":
+	case http.MethodGet:
 		h.serveGet(w, r)
-	case "POST":
+	case http.MethodPost:
 		h.servePost(w, r)
 	default:
 		httpError(w, "", http.StatusMethodNotAllowed)
@@ -100,7 +100,7 @@ func (h httpsHandler) serveGet(w http.ResponseWriter, r *http.Request) {
 // servePost handles various POST requests.
 func (h *httpsHandler) servePost(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
-	case "/game/create":
+	case "/game":
 		h.createGame(w, r)
 	case "/game/draw_number": // ?gameID=
 		h.drawNumber(w, r)
@@ -135,11 +135,9 @@ func (h httpsHandler) getGame(w http.ResponseWriter, r *http.Request) {
 	case 0:
 		g = new(bingo.Game)
 	default:
-		var err error
-		g, err = bingo.GameFromID(id)
-		if err != nil {
-			message := fmt.Sprintf("getting game from query parameter: %v", err)
-			httpError(w, message, http.StatusBadRequest)
+		var ok bool
+		g, ok = parseGame(id, w)
+		if !ok {
 			return
 		}
 	}
@@ -160,10 +158,8 @@ func (httpsHandler) getAbout(w http.ResponseWriter, r *http.Request) {
 // The results of the check are included as query parameters onto a redirect to the game page.'
 func (httpsHandler) checkBoard(w http.ResponseWriter, r *http.Request) {
 	gameID := r.URL.Query().Get("gameID")
-	g, err := bingo.GameFromID(gameID)
-	if err != nil {
-		message := fmt.Sprintf("getting game from query parameter: %v", err)
-		httpError(w, message, http.StatusBadRequest)
+	g, ok := parseGame(gameID, w)
+	if !ok {
 		return
 	}
 	boardID := r.URL.Query().Get("boardID")
@@ -200,23 +196,21 @@ func (h *httpsHandler) createGame(w http.ResponseWriter, r *http.Request) {
 // drawNumber draws a new number for the game specified by the request's 'gameID' form parameter.
 // The response is redirected to the updated game.  It's updated state is stored in the game infos slice.
 func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
-	id := r.FormValue("gameID")
-	g, err := bingo.GameFromID(id)
-	if err != nil {
-		message := fmt.Sprintf("getting game from query parameter: %v", err)
-		httpError(w, message, http.StatusBadRequest)
+	gameID := r.FormValue("gameID")
+	g, ok := parseGame(gameID, w)
+	if !ok {
 		return
 	}
 	before := g.NumbersLeft()
 	g.DrawNumber()
 	after := g.NumbersLeft()
 	if before == after {
-		http.Redirect(w, r, "/game?gameID="+id, http.StatusNotModified)
+		http.Redirect(w, r, "/game?gameID="+gameID, http.StatusNotModified)
 		return
 	}
 	id2, err := g.ID()
 	if err != nil {
-		message := fmt.Sprintf("unexpected problem getting id after drawing number from game with a VALID id %q: %v", id, err)
+		message := fmt.Sprintf("unexpected problem getting id after drawing number from game with a VALID id %q: %v", gameID, err)
 		httpError(w, message, http.StatusInternalServerError)
 		return
 	}
@@ -300,4 +294,15 @@ type wrappedResponseWriter struct {
 // Write delegates the write to the wrapped writer.
 func (wrw wrappedResponseWriter) Write(p []byte) (n int, err error) {
 	return wrw.Writer.Write(p)
+}
+
+// parseGame parses the game, writing parse errors to the response
+func parseGame(id string, w http.ResponseWriter) (g *bingo.Game, ok bool) {
+	g, err := bingo.GameFromID(id)
+	if err != nil {
+		message := fmt.Sprintf("getting game from query parameter: %v", err)
+		httpError(w, message, http.StatusBadRequest)
+		return nil, false
+	}
+	return g, true
 }
