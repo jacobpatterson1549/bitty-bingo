@@ -20,9 +20,10 @@ var embeddedTemplate = template.Must(template.ParseFS(templatesFS, "templates/*"
 
 // page contains all the data needed to render any html page.
 type page struct {
-	Name string
-	List []gameInfo
-	Game *game
+	Name  string
+	List  []gameInfo
+	Game  *game
+	Board *board
 }
 
 // game contains the fields to render a game page.
@@ -77,15 +78,24 @@ func handleGames(w io.Writer, gameInfos []gameInfo) error {
 	return p.handleIndex(embeddedTemplate, w)
 }
 
+// handleBoard renders the board on the html page.
+func handleBoard(w io.Writer, b bingo.Board) error {
+	templateBoard, err := newTemplateBoard(b)
+	if err != nil {
+		return err
+	}
+	p := page{
+		Name:  "board",
+		Board: templateBoard,
+	}
+	return p.handleIndex(embeddedTemplate, w)
+}
+
 // handleExportBoard renders the board onto an svg image.
 func handleExportBoard(w io.Writer, b bingo.Board) error {
-	data, err := freeSpace(b)
+	templateBoard, err := newTemplateBoard(b)
 	if err != nil {
-		return fmt.Errorf("getting center square free space for board, %v", err)
-	}
-	templateBoard := board{
-		Board:     b,
-		FreeSpace: data,
+		return err
 	}
 	return embeddedTemplate.ExecuteTemplate(w, "board.svg", templateBoard)
 }
@@ -105,4 +115,17 @@ func (p page) handleIndex(t *template.Template, w io.Writer) error {
 	}
 	_, err = buf.WriteTo(w)
 	return err
+}
+
+// newTemplateBoard creates a board to render from the bingo board
+func newTemplateBoard(b bingo.Board) (*board, error) {
+	data, err := freeSpace(b)
+	if err != nil {
+		return nil, fmt.Errorf("getting center square free space for board, %v", err)
+	}
+	templateBoard := board{
+		Board:     b,
+		FreeSpace: data,
+	}
+	return &templateBoard, nil
 }

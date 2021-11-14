@@ -86,8 +86,10 @@ func (h httpsHandler) serveGet(w http.ResponseWriter, r *http.Request) {
 		h.getGames(w, r)
 	case "/game": // ?gameID=&boardID=&bingo
 		h.getGame(w, r)
-	case "/game/check_board": // ?gameID=&boardID=&type=
+	case "/game/board/check": // ?gameID=&boardID=&type=
 		h.checkBoard(w, r)
+	case "/game/board": // ?boardID
+		h.getBoard(w, r)
 	case "/help":
 		h.getHelp(w, r)
 	case "/about":
@@ -127,21 +129,37 @@ func (h httpsHandler) getGames(w http.ResponseWriter, r *http.Request) {
 // getGame renders the game page onto the response with the game of the 'gameID' query parameter.
 // The 'boardID' and 'bingo' query parameters are also used to forward the results of a BINGO check.
 func (h httpsHandler) getGame(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("gameID")
+	gameID := r.URL.Query().Get("gameID")
 	boardID := r.URL.Query().Get("boardID")
 	hasBingo := r.URL.Query().Has("bingo")
 	var g *bingo.Game
-	switch len(id) {
+	switch len(gameID) {
 	case 0:
 		g = new(bingo.Game)
 	default:
 		var ok bool
-		g, ok = parseGame(id, w)
+		g, ok = parseGame(gameID, w)
 		if !ok {
 			return
 		}
 	}
 	handleGame(w, *g, boardID, hasBingo)
+}
+
+func (httpsHandler) getBoard(w http.ResponseWriter, r *http.Request) {
+	boardID := r.URL.Query().Get("boardID")
+	var b *bingo.Board
+	if len(boardID) == 0 {
+		b = bingo.NewBoard()
+		boardID, _ := b.ID()
+		http.Redirect(w, r, "/game/board?boardID="+boardID, http.StatusSeeOther)
+		return
+	}
+	b, ok := parseBoard(boardID, w)
+	if !ok {
+		return
+	}
+	handleBoard(w, *b)
 }
 
 // hetHelp renders the help page onto the response.
@@ -163,10 +181,8 @@ func (httpsHandler) checkBoard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	boardID := r.URL.Query().Get("boardID")
-	b, err := bingo.BoardFromID(boardID)
-	if err != nil {
-		message := fmt.Sprintf("getting board from query parameter: %v", err)
-		httpError(w, message, http.StatusBadRequest)
+	b, ok := parseBoard(boardID, w)
+	if !ok {
 		return
 	}
 	checkType := r.URL.Query().Get("type")
@@ -305,4 +321,15 @@ func parseGame(id string, w http.ResponseWriter) (g *bingo.Game, ok bool) {
 		return nil, false
 	}
 	return g, true
+}
+
+// parseBoard parses the board, writing parse errors to the response
+func parseBoard(id string, w http.ResponseWriter) (b *bingo.Board, ok bool) {
+	b, err := bingo.BoardFromID(id)
+	if err != nil {
+		message := fmt.Sprintf("getting board from query parameter: %v", err)
+		httpError(w, message, http.StatusBadRequest)
+		return nil, false
+	}
+	return b, true
 }

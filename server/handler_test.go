@@ -1,6 +1,7 @@
 package server
 
 import (
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -91,6 +92,7 @@ func TestHTTPSHandlerServeHTTP(t *testing.T) {
 			gameInfos: gameInfos,
 		}
 		test.r.Header = test.header
+		rand.Seed(1257894001) // hack to make board new board creation deterministic
 		h.ServeHTTP(w, test.r)
 		switch {
 		case w.Code != test.wantStatusCode:
@@ -140,6 +142,7 @@ const (
 	contentTypeTextPlain      = "text/plain; charset=utf-8"
 	contentTypeEncodedForm    = "application/x-www-form-urlencoded"
 	contentTypeGzip           = "application/x-gzip"
+	contentTypeSVG            = "application/svg"
 	contentEncodingGzip       = "gzip"
 	xContentTypeNoSniff       = "nosniff"
 	acceptEncodingsCommon     = "gzip, deflate, br"
@@ -147,7 +150,8 @@ const (
 	board1257894001ID         = "5zuTsMm6CTZAs7ad"
 	urlPathGames              = "/"
 	urlPathGame               = "/game"
-	urlPathGameCheckBoard     = "/game/check_board"
+	urlPathGameCheckBoard     = "/game/board/check"
+	urlPathGameBoard          = "/game/board"
 	urlPathgameCreate         = "/game/create"
 	urlPathGameDrawNumber     = "/game/draw_number"
 	urlPathGameBoards         = "/game/boards"
@@ -322,6 +326,23 @@ var httpsHandlerServeHTTPTests = []struct {
 		},
 	},
 	{
+		name:           "get new board",
+		r:              httptest.NewRequest(methodGet, urlPathGameBoard, nil),
+		wantStatusCode: 303,
+		wantHeader: http.Header{
+			headerContentType: {contentTypeTextHTML},
+			headerLocation:    {urlPathGameBoard + "?" + qpBoardID + "=" + board1257894001ID},
+		},
+	},
+	{
+		name:           "get board by id",
+		r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+board1257894001ID, nil),
+		wantStatusCode: 200,
+		wantHeader: http.Header{
+			headerContentType: {contentTypeTextHTML},
+		},
+	},
+	{
 		name:           "help",
 		r:              httptest.NewRequest(methodGet, urlPathHelp, nil),
 		wantStatusCode: 200,
@@ -404,6 +425,15 @@ var httpsHandlerServeHTTPTests = []struct {
 	{
 		name:           "get game - bad id",
 		r:              httptest.NewRequest(methodGet, urlPathGame+"?"+qpGameID+"=BAD-ID", nil),
+		wantStatusCode: 400,
+		wantHeader: http.Header{
+			headerContentType:         {contentTypeTextPlain},
+			headerXContentTypeOptions: {xContentTypeNoSniff},
+		},
+	},
+	{
+		name:           "get new board - bad id",
+		r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"=BAD-ID", nil),
 		wantStatusCode: 400,
 		wantHeader: http.Header{
 			headerContentType:         {contentTypeTextPlain},
