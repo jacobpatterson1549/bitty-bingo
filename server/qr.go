@@ -11,10 +11,7 @@ import (
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
 
-// qrEncoding provides the base64 encoding for encoding png qr images to base64: [A-Za-z0-9+/]
-var qrEncoding = base64.StdEncoding
-
-// freeSpace converts the id of the board into a base-64 encoded png image of the qr code of the id of the board.
+// freeSpace converts the id of the board to a qr code, to a png image, and then encodes it with standard base64 encoding.
 func freeSpace(b bingo.Board) (string, error) {
 	id, err := b.ID()
 	if err != nil {
@@ -33,6 +30,6 @@ func freeSpace(b bingo.Board) (string, error) {
 		return "", fmt.Errorf("converting barcode to png image: %v", err)
 	}
 	bytes := buf.Bytes()
-	data := qrEncoding.EncodeToString(bytes)
+	data := base64.StdEncoding.EncodeToString(bytes)
 	return data, nil
 }
