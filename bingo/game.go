@@ -11,7 +11,7 @@ import (
 
 // Game represents a bingo game.  The zero value can be used to start a new game.
 type Game struct {
-	numbers      [int(MaxNumber)]Number
+	numbers      [MaxNumber]Number
 	numbersDrawn int
 }
 
