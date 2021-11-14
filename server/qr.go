@@ -20,7 +20,7 @@ func freeSpace(b bingo.Board) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("getting board id %v", err)
 	}
-	qrcode, err := qr.Encode(id, qr.H, qr.Unicode)
+	qrcode, err := qr.Encode(id, qr.L, qr.Unicode)
 	if err != nil {
 		return "", fmt.Errorf("ecoding qr image: %v", err)
 	}
