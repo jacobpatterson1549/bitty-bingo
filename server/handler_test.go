@@ -52,9 +52,24 @@ func TestHTTPSHandler(t *testing.T) {
 			cfg  Config
 			name string
 		}{
-			{name: "zero values [zero game count]"},
-			{cfg: Config{GameCount: -9, Time: func() string { return "anything" }}, name: "nonPositiveGameCount"},
-			{cfg: Config{GameCount: 9}, name: "no time func"},
+			{
+				name: "zero values [zero game count]",
+			},
+			{
+				cfg: Config{
+					GameCount: -9,
+					Time: func() string {
+						return "anything"
+					},
+				},
+				name: "nonPositiveGameCount",
+			},
+			{
+				cfg: Config{
+					GameCount: 9,
+				},
+				name: "no time func",
+			},
 		}
 		for i, test := range tests {
 			if _, err := test.cfg.httpsHandler(); err == nil {
