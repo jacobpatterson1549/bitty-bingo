@@ -26,7 +26,12 @@ func (n Number) String() string {
 	if n < MinNumber || n > MaxNumber {
 		return "?"
 	}
-	var c rune
+	return string(n.letter()) + " " + strconv.Itoa(n.Value())
+}
+
+// letter gets the letter for the column of the number.
+// The letter is only set if the column is in [0,4]
+func (n Number) letter() (c rune) {
 	switch n.Column() {
 	case 0:
 		c = 'B'
@@ -39,7 +44,7 @@ func (n Number) String() string {
 	case 4:
 		c = 'O'
 	}
-	return string(c) + " " + strconv.Itoa(int(n))
+	return
 }
 
 // Column is the location on the board the Number should be located at.

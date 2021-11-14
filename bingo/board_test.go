@@ -9,10 +9,7 @@ import (
 func TestNewBoard(t *testing.T) {
 	rand.Seed(1257894001) // seed the available numbers for the first test
 	b := board1257894001
-	want := &b
-	got := NewBoard()
-	if !reflect.DeepEqual(want, got) {
-
+	if want, got := &b, NewBoard(); !reflect.DeepEqual(want, got) {
 		t.Errorf("boards not equal:\nwanted: %v\ngot:    %v", want, got)
 	}
 }
@@ -21,9 +18,8 @@ func TestHasLine(t *testing.T) {
 	b := board1257894001
 	for i, test := range hasLineTests {
 		g := createTestGame(t, test.nums)
-		got := b.HasLine(g)
-		if test.want != got {
-			t.Errorf("test %v (%v): wanted %v, got %v", i, test.name, test.want, got)
+		if want, got := test.want, b.HasLine(g); want != got {
+			t.Errorf("test %v (%v): wanted %v, got %v", i, test.name, want, got)
 		}
 	}
 }

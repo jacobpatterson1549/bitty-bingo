@@ -201,14 +201,14 @@ func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	before := g.NumbersLeft()
+	beforeNumsLeft := g.NumbersLeft()
 	g.DrawNumber()
-	after := g.NumbersLeft()
-	if before == after {
+	afterNumsLeft := g.NumbersLeft()
+	if beforeNumsLeft == afterNumsLeft {
 		http.Redirect(w, r, "/game?gameID="+gameID, http.StatusNotModified)
 		return
 	}
-	id2, err := g.ID()
+	afterID, err := g.ID()
 	if err != nil {
 		message := fmt.Sprintf("unexpected problem getting id after drawing number from game with a VALID id %q: %v", gameID, err)
 		httpError(w, message, http.StatusInternalServerError)
@@ -220,9 +220,9 @@ func (h *httpsHandler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	copy(h.gameInfos[1:], h.gameInfos) // shift right, overwriting last
 	modTime := h.time()
 	gi := gameInfo{
-		ID:          id2,
+		ID:          afterID,
 		ModTime:     modTime,
-		NumbersLeft: after,
+		NumbersLeft: afterNumsLeft,
 	}
 	h.gameInfos[0] = gi // set first
 	http.Redirect(w, r, "/game?gameID="+gi.ID, http.StatusSeeOther)

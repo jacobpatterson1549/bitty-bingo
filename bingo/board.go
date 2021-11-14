@@ -127,8 +127,7 @@ func (b Board) ID() (string, error) {
 		return "", errors.New("board has duplicate numbers")
 	}
 	for i, n := range b {
-		c := i / 5
-		if col := n.Column(); i != 12 && col != c {
+		if c, col := i/5, n.Column(); i != 12 && c != col {
 			return "", errors.New("board has number at incorrect column at index " + strconv.Itoa(i))
 		}
 	}

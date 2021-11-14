@@ -124,6 +124,8 @@ const (
 	contentTypeTextHTML       = "text/html; charset=utf-8"
 	contentTypeTextPlain      = "text/plain; charset=utf-8"
 	contentTypeEncodedForm    = "application/x-www-form-urlencoded"
+	contentTypeGzip           = "application/x-gzip"
+	contentEncodingGzip       = "gzip"
 	xContentTypeNoSniff       = "nosniff"
 	acceptEncodingsCommon     = "gzip, deflate, br"
 	board1257894001IDNumbers  = "DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"
@@ -183,7 +185,7 @@ var httpHandlerTests = []struct {
 			headerAcceptEncoding: {acceptEncodingsCommon},
 		},
 		wantHeader: http.Header{
-			headerContentEncoding: {"gzip"},
+			headerContentEncoding: {contentEncodingGzip},
 			headerContentType:     {contentTypeTextHTML},
 			headerLocation:        {schemeHTTPS + "://" + host + ":8000/"},
 		},
@@ -222,8 +224,8 @@ var httpsHandlerTests = []struct {
 		},
 		wantStatusCode: 200,
 		wantHeader: http.Header{
-			headerContentEncoding: {"gzip"},
-			headerContentType:     {"application/x-gzip"},
+			headerContentEncoding: {contentEncodingGzip},
+			headerContentType:     {contentTypeGzip},
 		},
 	},
 	{
@@ -334,7 +336,7 @@ var httpsHandlerServeHTTPTests = []struct {
 	{
 		name:      "draw number",
 		time:      func() string { return "the_past_a" },
-		gameInfos: append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
+		gameInfos: append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}), // use append on empty slice with capacity
 		wantGameInfos: []gameInfo{{
 			ID:          "9-" + board1257894001IDNumbers,
 			ModTime:     "the_past_a",

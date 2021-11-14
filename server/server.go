@@ -30,11 +30,11 @@ type Config struct {
 
 const (
 	// readDur is the maximum time taken to read a request before timing out.
-	readDur  = 60 * time.Second
+	readDur = 60 * time.Second
 	// writeDur is the maximum time taken to write a request before timing out.
 	writeDur = 60 * time.Second
 	// stopDur is the maximum time allowed for the server to shut down.
-	stopDur  = 5 * time.Second
+	stopDur = 5 * time.Second
 )
 
 // Server manages bingo games and creates boards.

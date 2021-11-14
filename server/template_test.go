@@ -96,11 +96,11 @@ func TestHandleGames(t *testing.T) {
 	case err != nil:
 		t.Error(err)
 	case !strings.Contains(got, gi.ID):
-		t.Errorf("game ID missing:\n%v", got)
+		t.Errorf("game ID missing: %v", got)
 	case !strings.Contains(got, gi.ModTime):
-		t.Errorf("game Modification Time missing:\nn%v", got)
+		t.Errorf("game Modification Time missing: %v", got)
 	case !strings.Contains(got, "36"):
-		t.Errorf("game Numbers Left missing:\n%v", got)
+		t.Errorf("game Numbers Left missing: %v", got)
 	}
 }
 
@@ -113,17 +113,12 @@ func TestHandleExport(t *testing.T) {
 		64, 72, 67, 70, 74, // O
 	}
 	var w bytes.Buffer
-	gotErr := handleExportBoard(&w, b)
-	if gotErr != nil {
-		t.Fatalf("unwanted export error: %v", gotErr)
+	if err := handleExportBoard(&w, b); err != nil {
+		t.Fatalf("unwanted export error: %v", err)
 	}
 	got := w.String()
 	for i, n := range b {
-		if i == 12 {
-			continue
-		}
-		s := ">" + strconv.Itoa(int(n)) + "<"
-		if !strings.Contains(got, s) {
+		if s := ">" + strconv.Itoa(int(n)) + "<"; i != 12 && !strings.Contains(got, s) {
 			t.Errorf("wanted board export to contain %q:\n%v", s, got)
 			break
 		}
