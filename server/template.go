@@ -11,7 +11,7 @@ import (
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
 
-// templateFS is the embedded filesystem containing the template files.
+// templatesFS is the embedded filesystem containing the template files.
 //go:embed templates
 var templatesFS embed.FS
 
