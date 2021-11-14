@@ -105,14 +105,14 @@ func httpServer(port string, h http.Handler) *http.Server {
 func (cfg Config) serveTCP(svr *http.Server, name string, errC chan<- error, https bool) {
 	l, err := net.Listen("tcp", svr.Addr)
 	if err != nil {
-		errC <- err
+		errC <- fmt.Errorf("listening to tcp at address %q: %v", svr.Addr, err)
 		return
 	}
 	defer l.Close()
 	if https && cfg.HTTPSRedirect {
 		certificate, err := tls.LoadX509KeyPair(cfg.TLSCertFile, cfg.TLSKeyFile)
 		if err != nil {
-			errC <- fmt.Errorf("loading TLS certificates: %v", err)
+			errC <- fmt.Errorf("loading TLS certificates (%q and %q): %v", cfg.TLSCertFile, cfg.TLSKeyFile, err)
 			return
 		}
 		cfg := tls.Config{
