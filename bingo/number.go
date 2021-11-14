@@ -14,11 +14,6 @@ const (
 	MinNumber Number = 1
 	// MaxNumber is the maximum allowed value of a Number.
 	MaxNumber Number = 75
-	column0   rune   = 'B'
-	column1   rune   = 'I'
-	column2   rune   = 'N'
-	column3   rune   = 'G'
-	column4   rune   = 'O'
 )
 
 // String is the concatenation of the Number's column letter, a space, and integer value as a string.
