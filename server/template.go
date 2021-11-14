@@ -32,6 +32,12 @@ type game struct {
 	HasBingo bool
 }
 
+// board contains the field to export a board
+type board struct {
+	bingo.Board
+	FreeSpace string
+}
+
 // handleHelp renders the help html page.
 func handleHelp(w io.Writer) error {
 	p := page{
@@ -73,7 +79,15 @@ func handleGames(w io.Writer, gameInfos []gameInfo) error {
 
 // handleExportBoard renders the board onto an svg image.
 func handleExportBoard(w io.Writer, b bingo.Board) error {
-	return embeddedTemplate.ExecuteTemplate(w, "board.svg", b)
+	data, err := freeSpace(b)
+	if err != nil {
+		return fmt.Errorf("getting center square free space for board, %v", err)
+	}
+	templateBoard := board{
+		Board:     b,
+		FreeSpace: data,
+	}
+	return embeddedTemplate.ExecuteTemplate(w, "board.svg", templateBoard)
 }
 
 // handleIndex renders the page on the index HTML template.
