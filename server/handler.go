@@ -238,7 +238,7 @@ func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if n < 1 || n > 1000 {
-		httpError(w, "n must be be between 1 and 100", http.StatusBadRequest)
+		httpError(w, "n must be be between 1 and 1000", http.StatusBadRequest)
 		return
 	}
 	var buf bytes.Buffer
