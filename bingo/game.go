@@ -11,7 +11,7 @@ import (
 
 // Game represents a bingo game.  The zero value can be used to start a new game.
 type Game struct {
-	numbers      [MaxNumber]Number
+	numbers      [MaxNumber - MinNumber + 1]Number
 	numbersDrawn int
 }
 
@@ -122,13 +122,10 @@ func GameFromID(id string) (*Game, error) {
 
 // validNumbers determines if the all the valid numbers are in the game and there are no duplicates.
 func (g Game) validNumbers() bool {
-	m := make(map[Number]struct{}, MaxNumber)
+	m := make(map[Number]struct{}, len(g.numbers))
 	for _, n := range g.numbers {
-		if n < MinNumber || n > MaxNumber {
-			return false // not valid
-		}
-		if _, ok := m[n]; ok {
-			return false // duplicate
+		if _, ok := m[n]; ok || !n.Valid() {
+			return false // duplicate or invalid
 		}
 		m[n] = struct{}{}
 	}

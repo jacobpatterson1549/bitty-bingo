@@ -35,8 +35,14 @@ func TestHandleAbout(t *testing.T) {
 
 func TestHandleGame(t *testing.T) {
 	var allDrawnGame bingo.Game
-	for i := 0; i < int(bingo.MaxNumber); i++ {
+	prevNumbersLeft := allDrawnGame.NumbersLeft()
+	for {
 		allDrawnGame.DrawNumber()
+		numbersLeft := allDrawnGame.NumbersLeft()
+		if prevNumbersLeft == numbersLeft {
+			break
+		}
+		prevNumbersLeft = numbersLeft
 	}
 	tests :=
 		[]struct {

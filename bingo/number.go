@@ -18,7 +18,7 @@ const (
 
 // String is the concatenation of the Number's column letter, a space, and integer value as a string.
 func (n Number) String() string {
-	if n < MinNumber || n > MaxNumber {
+	if !n.Valid() {
 		return "?"
 	}
 	return string("BINGO"[n.Column()]) + " " + strconv.Itoa(n.Value())
@@ -32,4 +32,9 @@ func (n Number) Column() int {
 // Value is integer numeric value of the Number.
 func (n Number) Value() int {
 	return int(n)
+}
+
+// Valid returns whether or not the number is valid, that is, it is between 1 and 75.
+func (n Number) Valid() bool {
+	return n >= MinNumber && n <= MaxNumber
 }
