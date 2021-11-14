@@ -26,25 +26,7 @@ func (n Number) String() string {
 	if n < MinNumber || n > MaxNumber {
 		return "?"
 	}
-	return string(n.letter()) + " " + strconv.Itoa(n.Value())
-}
-
-// letter gets the letter for the column of the number.
-// The letter is only set if the column is in [0,4]
-func (n Number) letter() (c rune) {
-	switch n.Column() {
-	case 0:
-		c = 'B'
-	case 1:
-		c = 'I'
-	case 2:
-		c = 'N'
-	case 3:
-		c = 'G'
-	case 4:
-		c = 'O'
-	}
-	return
+	return string("BINGO"[n.Column()]) + " " + strconv.Itoa(n.Value())
 }
 
 // Column is the location on the board the Number should be located at.
