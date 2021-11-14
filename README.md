@@ -24,6 +24,10 @@ To build for specifically for Windows, run `make GO_ARGS="GOOS=windows" OBJ="bit
 
 To build for other CPU architectures, use the `GOARCH` build flag. Example: `make GO_ARGS="GOOS=linux GOARCH=386"`.  Common values are `amd64`, and `386`.
 
+### go dependencies
+
+[boombuler/barcode](https://github.com/boombuler/barcode/) is used to generate the qr codes.
+
 ## Testing
 
 Run `make test` to run the tests for the application.
