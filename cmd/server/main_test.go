@@ -37,21 +37,16 @@ func TestFlagSet(t *testing.T) {
 
 func TestParseServerConfig(t *testing.T) {
 	for i, test := range parseServerConfigTests {
-		t.Run(test.name, func(t *testing.T) {
-			var cfg server.Config
-			fs := flagSet(&cfg, "")
-			if len(test.envPORT) != 0 {
-				t.Setenv("PORT", test.envPORT)
-			}
-			parseServerConfig(&cfg, fs, test.programArgs)
-			if cfg.Time == nil || len(cfg.Time()) == 0 {
-				t.Errorf("test %v (%v): time func not set or returns nothing", i, test.name)
-			}
-			cfg.Time = nil // funcs are not comparable
-			if want, got := test.wantConfig, cfg; !reflect.DeepEqual(want, got) {
-				t.Errorf("test %v (%v): configs are not equal:\nwanted: %#v\ngot:    %#v", i, test.name, want, got)
-			}
-		})
+		var cfg server.Config
+		fs := flagSet(&cfg, "")
+		parseServerConfig(&cfg, fs, test.programArgs, test.portOverride, test.hasPortOverride)
+		if cfg.Time == nil || len(cfg.Time()) == 0 {
+			t.Errorf("test %v (%v): time func not set or returns nothing", i, test.name)
+		}
+		cfg.Time = nil // funcs are not comparable
+		if want, got := test.wantConfig, cfg; !reflect.DeepEqual(want, got) {
+			t.Errorf("test %v (%v): configs are not equal:\nwanted: %#v\ngot:    %#v", i, test.name, want, got)
+		}
 	}
 }
 
@@ -64,10 +59,11 @@ var sampleProgramArgs = []string{
 }
 
 var parseServerConfigTests = []struct {
-	name        string
-	programArgs []string
-	wantConfig  server.Config
-	envPORT     string
+	name            string
+	programArgs     []string
+	wantConfig      server.Config
+	portOverride    string
+	hasPortOverride bool
 }{
 	{
 		name: "no args (use defaults)",
@@ -101,6 +97,7 @@ var parseServerConfigTests = []struct {
 			TLSKeyFile:    "/home/jacobpatterson1549/tls-key.pem",
 			HTTPSRedirect: false,
 		},
-		envPORT: "444",
+		portOverride:    "444",
+		hasPortOverride: true,
 	},
 }

@@ -17,9 +17,10 @@ import (
 // main runs a bingo server
 func main() {
 	programName, programArgs := os.Args[0], os.Args[1:]
+	portOverride, hasPortOverride := os.LookupEnv("PORT")
 	var cfg server.Config
 	fs := flagSet(&cfg, programName)
-	parseServerConfig(&cfg, fs, programArgs)
+	parseServerConfig(&cfg, fs, programArgs, portOverride, hasPortOverride)
 	runServer(cfg) // BLOCKING
 }
 
@@ -40,9 +41,8 @@ func flagSet(cfg *server.Config, programName string) *flag.FlagSet {
 }
 
 // parseServerConfig parses command line flag set and environment variables into a server config
-func parseServerConfig(cfg *server.Config, fs *flag.FlagSet, programArgs []string) {
+func parseServerConfig(cfg *server.Config, fs *flag.FlagSet, programArgs []string, portOverride string, hasPortOverride bool) {
 	fs.Parse(programArgs)
-	portOverride, hasPortOverride := os.LookupEnv("PORT")
 	cfg.HTTPSRedirect = !hasPortOverride
 	if hasPortOverride {
 		cfg.HTTPSPort = portOverride
