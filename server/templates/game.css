@@ -1,0 +1,17 @@
+#check-board video {
+    border: 1px solid;
+    height: 100px;
+    width: 100px;
+}
+
+#check-board .hide-qr-controls + * {
+    display: none;
+}
+
+#check-board .hide-qr-controls:not(:checked) + * {
+    display: block;
+}
+
+#check-board .log {
+    color: gray;
+}

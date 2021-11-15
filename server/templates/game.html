@@ -1,3 +1,4 @@
+<style>{{template "game.css"}}</style>
 
 <table>
     <caption>Game Drawn Numbers</caption>
@@ -39,6 +40,14 @@
 
 <form id="check-board" method="GET" action="/game/board/check">
     <fieldset>
+    <input class="hide-qr-controls" type="checkbox" hidden checked>
+    <div class="qr-controls">
+        <video autoplay hidden></video>
+        <input type="button" class="toggle-video" value="Enable Scanner" onclick="checkBoard.toggleVideo()">
+        <input type="button" class="flip-camera" value="Flip camera" onclick="checkBoard.flipCamera()" hidden>
+        <input type="range" class="camera-zoom" oninput="checkBoard.setCameraZoom(event)" hidden>
+    </div>
+    <span class="log"></span>
         <legend>Check Board</legend>
         <input type="text" hidden name="gameID" value="{{.ID}}">
         <label>
@@ -67,3 +76,5 @@
         {{end}}
     </fieldset>
 </form>
+
+<script>{{template "game.js"}}</script>
