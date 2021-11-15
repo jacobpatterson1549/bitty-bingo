@@ -33,10 +33,10 @@
 <form id="create-boards" method="post" action="/game/boards">
     <fieldset>
         <legend>Create Boards (zip)</legend>
-        <label>
-            <div>Count</div>
-            <input type="number" name="n" value="5" min="1" max="1000">
-        </label>
+        <div>
+            <label for="board-count">Count</label>
+            <input id="board-count" type="number" name="n" value="5" min="1" max="1000">
+        </div>
         <input type="submit">
     </fieldset>
 </form>

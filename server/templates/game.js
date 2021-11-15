@@ -5,7 +5,7 @@
     const cameraZoomRange = document.querySelector('#camera-zoom-range');
     const cameraLog = document.querySelector('#camera-log');
     const video = document.querySelector('#check-board video');
-    const boardIdInput = document.querySelector('#check-board input[name="boardID"]');
+    const boardIdInput = document.querySelector('#board-id');
 
     let track = null;
     let imageCapture = null;

@@ -30,10 +30,8 @@
 <form id="draw-number" method="POST" action="/game/draw_number">
     <fieldset>
         <legend>Draw Number</legend>
-        <label>
-            <input type="text" hidden name="gameID" value="{{.ID}}">
-            <input type="submit">
-        </label>
+        <input type="text" name="gameID" value="{{.ID}}" hidden>
+        <input type="submit">
     </fieldset>
 </form>
 {{end}}
@@ -42,32 +40,40 @@
     <fieldset>
         <input id="allow-camera-checkbox" type="checkbox" hidden>
         <div>
-            <input id="enable-camera-checkbox" type="checkbox">
-            <label for="enable-camera-checkbox">Enable Scanner</label>
-            <input id="front-camera-checkbox" type="checkbox" hidden>
-            <label for="front-camera-checkbox">Front camera</label>
-            <input id="camera-zoom-range" type="range" hidden>
-            <label for="camera-zoom-range">Camera zoom</label>
-            <video autoplay hidden></video>
+            <div>
+                <input id="enable-camera-checkbox" type="checkbox">
+                <label for="enable-camera-checkbox">Enable Scanner</label>
+            </div>
+            <div>
+                <input id="front-camera-checkbox" type="checkbox" hidden>
+                <label for="front-camera-checkbox">Front camera</label>
+            </div>
+                <input id="camera-zoom-range" type="range" hidden>
+                <label for="camera-zoom-range">Camera zoom</label>
+            </div>
+            <div>
+                <video autoplay hidden></video>
+            </div>
         </div>
         <span id="camera-log"></span>
         <legend>Check Board</legend>
         <input type="text" hidden name="gameID" value="{{.ID}}">
-        <label>
-            <div>Board</div>
-            <input type="string" name="boardID" value="{{.BoardID}}" required
+        <div>
+            <label for="board-id">Board<label>
+            <input id="board-id" type="string" name="boardID" value="{{.BoardID}}" required
                 minLength="16" maxLength="16" pattern="[A-za-z0-9-]{16}"/>
-        </label>
+        </div>
         <fieldset>
             <legend>type</legend>
-            <label>
-                <div>Line</div>
-                <input type="radio" name="type" value="HasLine" checked>
-            </label>
-            <label>
-                <div>All cells</div>
-                <input type="radio" name="type" value="IsFilled">
-            </label>
+            <div>
+                <input id="type-has-line" type="radio" name="type" value="HasLine" checked>
+                <label for="type-has-line">Line</label>
+            </div>
+            <div>
+            <div>
+                <input id="type-is-filled" type="radio" name="type" value="IsFilled">
+                <label for="type-is-filled">All cells</label>
+            </div>
         </fieldset>
         <input type="submit">
         {{if .BoardID}}
