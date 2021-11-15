@@ -4,14 +4,11 @@
     width: 100px;
 }
 
-#check-board .hide-qr-controls + * {
+input[hidden] + label,
+#allow-camera-checkbox:not(:checked) + * {
     display: none;
 }
 
-#check-board .hide-qr-controls:not(:checked) + * {
-    display: block;
-}
-
-#check-board .log {
+#camera-log {
     color: gray;
 }

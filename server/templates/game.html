@@ -40,14 +40,17 @@
 
 <form id="check-board" method="GET" action="/game/board/check">
     <fieldset>
-        <input class="hide-qr-controls" type="checkbox" checked hidden>
-        <div class="qr-controls">
+        <input id="allow-camera-checkbox" type="checkbox" hidden>
+        <div>
+            <input id="enable-camera-checkbox" type="checkbox">
+            <label for="enable-camera-checkbox">Enable Scanner</label>
+            <input id="front-camera-checkbox" type="checkbox" hidden>
+            <label for="front-camera-checkbox">Front camera</label>
+            <input id="camera-zoom-range" type="range" hidden>
+            <label for="camera-zoom-range">Camera zoom</label>
             <video autoplay hidden></video>
-            <input class="toggle-video" type="button" value="Enable Scanner">
-            <input class="flip-camera" type="button" value="Flip camera" hidden>
-            <input class="camera-zoom" type="range" hidden>
         </div>
-        <span class="log"></span>
+        <span id="camera-log"></span>
         <legend>Check Board</legend>
         <input type="text" hidden name="gameID" value="{{.ID}}">
         <label>
