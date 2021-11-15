@@ -108,7 +108,13 @@ const checkBoard = {
                     return;
                 }
                 checkBoard.barcodeDetector = new BarcodeDetector({formats});
+                const toggleVideoButton = document.querySelector('#check-board .toggle-video');
+                const flipCameraButton = document.querySelector('#check-board .flip-camera');
+                const cameraZoomRange = document.querySelector('#check-board .camera-zoom');
                 const checkbox = document.querySelector('#check-board .hide-qr-controls');
+                toggleVideoButton.onclick = checkBoard.toggleVideo;
+                flipCameraButton.onclick = checkBoard.flipCamera
+                cameraZoomRange.oninput = checkBoard.setCameraZoom;
                 checkbox.checked = false;
             });
     },
