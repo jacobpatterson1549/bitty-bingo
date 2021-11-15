@@ -10,6 +10,10 @@ The application runs as a web server that creates bingo board SVG images.
 It also manages games, whose previous states can be reverted to.
 Boards can be checked in each game to verify if they have a "bingo".
 
+## Screenshot
+
+![bitty-bingo screenshot](screenshot.png)
+
 ## Dependencies
 
 [Go 1.17](https://golang.org/dl/) is used to build the application.
@@ -26,7 +30,7 @@ To build for other CPU architectures, use the `GOARCH` build flag. Example: `mak
 
 ### go dependencies
 
-[boombuler/barcode](https://github.com/boombuler/barcode/) is used to generate the qr codes.
+[boombuler/barcode](https://github.com/boombuler/barcode/) is used to generate QR codes for boards as the center "free cell"
 
 ## Testing
 
