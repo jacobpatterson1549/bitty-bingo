@@ -1,0 +1,19 @@
+line {
+stroke: black;
+stroke-width: 3;
+}
+text {
+font-weight: bold;
+font-family: sans-serif;
+text-anchor: middle;
+dominant-baseline: central;
+}
+.header {
+font-size: 80px;
+}
+.number {
+font-size: 75px;
+}
+.id {
+font-size: 8px;
+}
