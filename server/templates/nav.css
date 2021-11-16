@@ -1,0 +1,9 @@
+nav {
+width: fit-content;
+padding: 1em;
+border: .2em groove;
+margin-bottom: 1em;;
+}
+nav * {
+margin: 1em;
+}
