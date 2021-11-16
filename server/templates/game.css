@@ -19,6 +19,9 @@ text-shadow: 1px 1px red;
 .previous-number {
 font-size: 6em;
 }
-.game-drawn-numbers th {
+#game-drawn-numbers th {
 font-size: 4em;
+}
+#game-drawn-numbers td {
+width: 4em;
 }
