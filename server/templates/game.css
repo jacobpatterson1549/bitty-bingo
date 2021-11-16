@@ -10,3 +10,9 @@ display: none;
 #camera-log {
 color: gray;
 }
+.has-bingo {
+ text-shadow: 1px 1px blue;
+}
+.no-bingo {
+text-shadow: 1px 1px red;
+}
