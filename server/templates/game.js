@@ -55,7 +55,7 @@
     };
     const startVideo = () => {
         stopVideo();
-        const facingMode = frontCameraCheckbox.checked ? "user" : "environment";
+        const facingMode = frontCameraCheckbox.checked ? 'user' : 'environment';
         const constraints = { video: { facingMode } };
         navigator.mediaDevices.getUserMedia(constraints)
             .then(mediaStream => {
