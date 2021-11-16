@@ -17,9 +17,12 @@ table {
 border: .2em groove;
 }
 table caption {
-text-align: left;
+    text-align: left;
 }
 body {
-background-color: beige;
-color: darkslateblue;
+    background-color: beige;
+    color: darkslateblue;
+}
+form {
+    margin-bottom: 1em;
 }
