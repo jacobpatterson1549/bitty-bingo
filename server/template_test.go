@@ -66,13 +66,13 @@ func TestHandleGame(t *testing.T) {
 				name:     "checked board has no bingo",
 				boardID:  "board_id_input_value",
 				hasBingo: false,
-				want:     "No Bingo :(",
+				want:     "No Bingo :(</a>",
 			},
 			{
 				name:     "checked board has bingo",
 				boardID:  "board_id_input_value",
 				hasBingo: true,
-				want:     "BINGO !!!",
+				want:     "BINGO !!!</a>",
 			},
 		}
 	for i, test := range tests {

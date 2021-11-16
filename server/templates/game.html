@@ -78,9 +78,9 @@
         <input type="submit">
         {{if .BoardID}}
             {{if .HasBingo}}
-                <span class="has-bingo">BINGO !!!</span>
+                <a href="/game/board?boardID={{.BoardID}}" class="has-bingo">BINGO !!!</a>
             {{else}}
-                <span class="no-bingo">No Bingo :(</span>
+                <a href="/game/board?boardID={{.BoardID}}" class="no-bingo">No Bingo :(</a>
             {{end}}
         {{end}}
     </fieldset>
