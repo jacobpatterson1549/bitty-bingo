@@ -7,6 +7,7 @@ width: 100px;
 #allow-camera-checkbox:not(:checked) + * {
 display: none;
 }
+#check-board noscript,
 #camera-log {
 color: gray;
 }
