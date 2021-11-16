@@ -8,7 +8,8 @@
 
 The application runs as a web server that creates bingo board SVG images.
 It also manages games, whose previous states can be reverted to.
-Boards can be checked in each game to verify if they have a "bingo".
+Boards can be checked to verify if they have a "bingo" in a game.
+Using a phone, the built in QR scanner simplifies checking boards.
 
 ## Screenshot
 
