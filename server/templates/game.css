@@ -3,7 +3,7 @@ border: 1px solid;
 height: 100px;
 width: 100px;
 }
-input[hidden] + label,
+#check-board input[hidden] + label,
 #allow-camera-checkbox:not(:checked) + * {
 display: none;
 }
@@ -19,6 +19,6 @@ text-shadow: 1px 1px red;
 .previous-number {
 font-size: 6em;
 }
-th {
+.game-drawn-numbers th {
 font-size: 4em;
 }
