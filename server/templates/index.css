@@ -24,3 +24,14 @@ color: darkslateblue;
 form {
 margin-bottom: 1em;
 }
+.forms-and-table {
+display: flex;
+flex-direction: column;
+justify-content: space-evenly;
+}
+@media (min-width:700px) {
+.forms-and-table {
+flex-direction: row;
+max-width: 800px;
+}
+}

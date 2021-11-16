@@ -1,5 +1,8 @@
 <style>{{template "games.css"}}</style>
 
+<div class="forms-and-table">
+<div>
+
 <form id="new-game" method="post" action="/game">
     <fieldset>
         <legend>New Game</legend>
@@ -25,6 +28,9 @@
     </fieldset>
 </form>
 
+</div>
+<div>
+
 <table id="games-list">
     <caption>Games</caption>
     <thead>
@@ -42,3 +48,5 @@
         </tr>{{end}}
     </tbody>
 </table>
+
+</div>

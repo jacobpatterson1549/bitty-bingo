@@ -1,5 +1,8 @@
 <style>{{template "game.css"}}</style>
 
+<div class="forms-and-table">
+<div>
+
 <form id="draw-number" method="POST" action="/game/draw_number">
     <fieldset>
         <input type="text" name="gameID" value="{{.ID}}" hidden>
@@ -67,6 +70,9 @@
     </fieldset>
 </form>
 
+</div>
+<div>
+
 <table id="game-drawn-numbers">
     <caption>Game Drawn Numbers</caption>
     <thead>
@@ -90,5 +96,7 @@
         <tr>
     </tbody>
 </table>
+
+</div>
 
 <script>{{template "game.js"}}</script>
