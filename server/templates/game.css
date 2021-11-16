@@ -1,14 +1,12 @@
 #camera-video {
-    border: 1px solid;
-    height: 100px;
-    width: 100px;
+border: 1px solid;
+height: 100px;
+width: 100px;
 }
-
 input[hidden] + label,
 #allow-camera-checkbox:not(:checked) + * {
-    display: none;
+display: none;
 }
-
 #camera-log {
-    color: gray;
+color: gray;
 }
