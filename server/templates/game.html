@@ -1,40 +1,15 @@
 <style>{{template "game.css"}}</style>
 
-<table>
-    <caption>Game Drawn Numbers</caption>
-    <thead>
-        <tr>
-            <th scope="col">B</th>
-            <th scope="col">I</th>
-            <th scope="col">N</th>
-            <th scope="col">G</th>
-            <th scope="col">O</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            {{with $cols := .DrawnNumberColumns}}
-            <td>{{range index $cols 0}}<p>{{.}}</p>{{end}}</td>
-            <td>{{range index $cols 1}}<p>{{.}}</p>{{end}}</td>
-            <td>{{range index $cols 2}}<p>{{.}}</p>{{end}}</td>
-            <td>{{range index $cols 3}}<p>{{.}}</p>{{end}}</td>
-            <td>{{range index $cols 4}}<p>{{.}}</p>{{end}}</td>
-            {{end}}
-        <tr>
-    </tbody>
-</table>
-
-<div id="numbers-left"><span>Numbers left: {{.NumbersLeft}}</span></div>
-
-{{if .NumbersLeft}}
 <form id="draw-number" method="POST" action="/game/draw_number">
     <fieldset>
         <legend>Draw Number</legend>
+        <div>
+            <label>Numbers left: {{.NumbersLeft}}</label>
+        </div>
         <input type="text" name="gameID" value="{{.ID}}" hidden>
-        <input type="submit">
+        <input type="submit" {{if  le .NumbersLeft 0}}disabled{{end}}>
     </fieldset>
 </form>
-{{end}}
 
 <form id="check-board" method="GET" action="/game/board/check">
     <fieldset>
@@ -85,5 +60,29 @@
         {{end}}
     </fieldset>
 </form>
+
+<table>
+    <caption>Game Drawn Numbers</caption>
+    <thead>
+        <tr>
+            <th scope="col">B</th>
+            <th scope="col">I</th>
+            <th scope="col">N</th>
+            <th scope="col">G</th>
+            <th scope="col">O</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            {{with $cols := .DrawnNumberColumns}}
+            <td>{{range index $cols 0}}<p>{{.}}</p>{{end}}</td>
+            <td>{{range index $cols 1}}<p>{{.}}</p>{{end}}</td>
+            <td>{{range index $cols 2}}<p>{{.}}</p>{{end}}</td>
+            <td>{{range index $cols 3}}<p>{{.}}</p>{{end}}</td>
+            <td>{{range index $cols 4}}<p>{{.}}</p>{{end}}</td>
+            {{end}}
+        <tr>
+    </tbody>
+</table>
 
 <script>{{template "game.js"}}</script>
