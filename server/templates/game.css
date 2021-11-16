@@ -11,7 +11,7 @@ display: none;
 color: gray;
 }
 .has-bingo {
- text-shadow: 1px 1px blue;
+text-shadow: 1px 1px blue;
 }
 .no-bingo {
 text-shadow: 1px 1px red;
