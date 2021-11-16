@@ -110,25 +110,50 @@ func TestHandleGames(t *testing.T) {
 	}
 }
 
-func TestHandleExport(t *testing.T) {
-	b := bingo.Board{
-		15, 8, 4, 12, 10, // B
-		19, 27, 16, 28, 25, // I
-		42, 41, 0, 31, 40, // N
-		49, 52, 50, 46, 57, // G
-		64, 72, 67, 70, 74, // O
-	}
-	var w bytes.Buffer
-	if err := handleExportBoard(&w, b); err != nil {
-		t.Fatalf("unwanted export error: %v", err)
-	}
-	got := w.String()
-	for i, n := range b {
-		if s := ">" + strconv.Itoa(int(n)) + "<"; i != 12 && !strings.Contains(got, s) {
-			t.Errorf("wanted board export to contain %q:\n%v", s, got)
-			break
+func TestHandleBoard(t *testing.T) {
+	t.Run("ok", func(t *testing.T) {
+		var w bytes.Buffer
+		b := board1257894001
+		err := handleBoard(&w, b)
+		got := w.String()
+		switch {
+		case err != nil:
+			t.Error(err)
+		case !strings.Contains(got, board1257894001ID):
+			t.Errorf("board ID missing: %v", got)
 		}
-	}
+	})
+	t.Run("bad", func(t *testing.T) {
+		var w bytes.Buffer
+		var b bingo.Board
+		if err := handleBoard(&w, b); err == nil {
+			t.Error("wanted export error rending board with bad id")
+		}
+	})
+}
+
+func TestHandleExportBoard(t *testing.T) {
+	t.Run("ok", func(t *testing.T) {
+		b := board1257894001
+		var w bytes.Buffer
+		if err := handleExportBoard(&w, b); err != nil {
+			t.Fatalf("unwanted export error: %v", err)
+		}
+		got := w.String()
+		for i, n := range b {
+			if s := ">" + strconv.Itoa(int(n)) + "<"; i != 12 && !strings.Contains(got, s) {
+				t.Errorf("wanted board export to contain %q:\n%v", s, got)
+				break
+			}
+		}
+	})
+	t.Run("bad", func(t *testing.T) {
+		var b bingo.Board
+		var w bytes.Buffer
+		if err := handleExportBoard(&w, b); err == nil {
+			t.Error("wanted export error exporting board with bad id")
+		}
+	})
 }
 
 func TestHandleIndexResponseWriter(t *testing.T) {
@@ -164,4 +189,12 @@ func TestHandleIndexResponseWriter(t *testing.T) {
 			t.Errorf("test %v (%v): status codes not equal: wanted %v, got %v", i, test.name, test.wantStatusCode, gotStatusCode)
 		}
 	}
+}
+
+var board1257894001 = bingo.Board{
+	15, 8, 4, 12, 10, // B
+	19, 27, 16, 28, 25, // I
+	42, 41, 0, 31, 40, // N
+	49, 52, 50, 46, 57, // G
+	64, 72, 67, 70, 74, // O
 }
