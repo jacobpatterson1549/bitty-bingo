@@ -4,7 +4,7 @@
     const frontCameraCheckbox = document.querySelector('#front-camera-checkbox');
     const cameraZoomRange = document.querySelector('#camera-zoom-range');
     const cameraLog = document.querySelector('#camera-log');
-    const video = document.querySelector('#check-board video');
+    const video = document.querySelector('#camera-video');
     const boardIdInput = document.querySelector('#board-id');
 
     let track = null;
