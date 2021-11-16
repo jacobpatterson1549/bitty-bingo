@@ -109,15 +109,53 @@ func TestGameFromID(t *testing.T) {
 	})
 }
 
+func TestLastNumberDrawn(t *testing.T) {
+	t.Run("ok numbersDrawn", func(t *testing.T) {
+		for i, test := range gameTests {
+			want := test.wantPreviousNumberDrawn
+			got := test.game.PreviousNumberDrawn()
+			if want != got {
+				t.Errorf("test %v (%v): previous numbers drawn not equal: wanted %v, got %v", i, test.name, want, got)
+			}
+		}
+	})
+	t.Run("bad numbersDrawn", func(t *testing.T) {
+		tests := []struct {
+			name         string
+			numbersDrawn int
+		}{
+			{
+				name:         "negative",
+				numbersDrawn: -1,
+			},
+			{
+				name:         "too large",
+				numbersDrawn: 100000,
+			},
+		}
+		for i, test := range tests {
+			g := Game{
+				numbersDrawn: test.numbersDrawn,
+			}
+			want := Number(0)
+			got := g.PreviousNumberDrawn()
+			if want != got {
+				t.Errorf("test %v (%v): previous numbers drawn not equal: wanted %v, got %v", i, test.name, want, got)
+			}
+		}
+	})
+}
+
 const numbersLength int = len(Game{}.numbers)
 
 var gameTests = []struct {
-	name                   string
-	game                   Game
-	wantAvailableAfterDraw Game
-	wantNumbersLeft        int
-	wantColumns            map[int][]Number
-	wantID                 string
+	name                    string
+	game                    Game
+	wantAvailableAfterDraw  Game
+	wantNumbersLeft         int
+	wantColumns             map[int][]Number
+	wantID                  string
+	wantPreviousNumberDrawn Number
 }{
 	{
 		name: "shuffle numbers if game is not initialized; random generator is seeded at 1257894000 for these results",
@@ -129,6 +167,7 @@ var gameTests = []struct {
 		wantNumbersLeft: 75,
 		wantColumns:     map[int][]Number{},
 		wantID:          "0",
+		wantPreviousNumberDrawn: 0,
 	},
 	{
 		name: "draw from front of available numbers, add to end of drawn numbers",
@@ -146,6 +185,8 @@ var gameTests = []struct {
 			4: {65},
 		},
 		wantID: "3-QSMsSRIBJSlFPkgNCR4OPAIQQEcYFQZLNx09NgwXNSowKxxGDzEuP0QbHy9DNDgZCwQnO0ITGkoWJC0KMiIDBTkUIBEoCDoHMyYh",
+		wantPreviousNumberDrawn: 44,
+
 	},
 	{
 		name: "do not draw if all numbers have been drawn",
@@ -166,6 +207,7 @@ var gameTests = []struct {
 			4: {61, 67, 72, 69, 65, 63, 62, 66, 74, 68, 71, 73, 75, 70, 64},
 		},
 		wantID: "75-Oh0hOyw9JDwQDC4yKS8aQzk3HiI1GBUmCzgjMA80BBsDKicIDQIBLTMxGSBIHyUoEUUSKxdBNgc_HBMFBgkWPg4UCkJKREdJS0ZA",
+		wantPreviousNumberDrawn: 64,
 	},
 	{
 		name: "first 5 numbers are for '5zuTsMm6CTZAs7ad' the rest are sequential",
@@ -182,6 +224,7 @@ var gameTests = []struct {
 			0: {15, 8, 4, 12, 10},
 		},
 		wantID: "5-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL",
+		wantPreviousNumberDrawn: 10,
 	},
 	{
 		name: "first 24 numbers are for '5zuTsMm6CTZAs7ad' the rest are sequential",
@@ -202,5 +245,6 @@ var gameTests = []struct {
 			4: {64, 72, 67, 70, 74},
 		},
 		wantID: "24-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL",
+		wantPreviousNumberDrawn: 74,
 	},
 }

@@ -16,3 +16,6 @@ text-shadow: 1px 1px blue;
 .no-bingo {
 text-shadow: 1px 1px red;
 }
+.previous-number {
+font-size: 6em;
+}

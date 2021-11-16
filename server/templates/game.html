@@ -2,12 +2,17 @@
 
 <form id="draw-number" method="POST" action="/game/draw_number">
     <fieldset>
+        <input type="text" name="gameID" value="{{.ID}}" hidden>
+        <input type="submit" {{if  le .NumbersLeft 0}}disabled{{end}}>
         <legend>Draw Number</legend>
+        {{with $n := .PreviousNumberDrawn}}
+        <div>
+            <label>Previous number: <span class="previous-number">{{$n}}</span></label>
+        </div>
+        {{end}}
         <div>
             <label>Numbers left: {{.NumbersLeft}}</label>
         </div>
-        <input type="text" name="gameID" value="{{.ID}}" hidden>
-        <input type="submit" {{if  le .NumbersLeft 0}}disabled{{end}}>
     </fieldset>
 </form>
 

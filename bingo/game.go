@@ -43,6 +43,14 @@ func (g *Game) DrawNumber() {
 	}
 }
 
+// PreviousNumberDrawn is the last number drawn, or 0 of no numbers have been drawn.
+func (g Game) PreviousNumberDrawn() Number {
+	if 0 < g.numbersDrawn && g.numbersDrawn <= len(g.numbers) {
+		return g.numbers[g.numbersDrawn-1]
+	}
+	return 0
+}
+
 // init seeds the random number generator to randomly shuffle numbers.
 func init() {
 	seed := time.Now().UnixNano()
