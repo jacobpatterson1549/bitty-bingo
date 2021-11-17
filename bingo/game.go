@@ -9,10 +9,33 @@ import (
 	"time"
 )
 
-// Game represents a bingo game.  The zero value can be used to start a new game.
-type Game struct {
-	numbers      [MaxNumber - MinNumber + 1]Number
-	numbersDrawn int
+type (
+	// Game represents a bingo game.  The zero value can be used to start a new game.
+	Game struct {
+		numbers      [MaxNumber - MinNumber + 1]Number
+		numbersDrawn int
+	}
+	// Resetter resets games to valid, shuffled states.  It can be seeded to be predictable reset the next reset game.
+	Resetter interface {
+		// Reset resets the game.
+		Reset(g *Game)
+		// Seed sets the GameResetter to reset the next game from a starting point.
+		Seed(seed int64)
+	}
+	shuffler struct {
+		*rand.Rand
+		swap func(numbers []Number) func(i, j int)
+	}
+)
+
+// GameResetter shuffles the game numbers.  It is seeded to the time it is created; it should only be used when testing.
+var GameResetter Resetter = &shuffler{
+	Rand: rand.New(rand.NewSource(time.Now().UnixNano())),
+	swap: func(numbers []Number) func(i, j int) {
+		return func(i, j int) {
+			numbers[i], numbers[j] = numbers[j], numbers[i]
+		}
+	},
 }
 
 // NumbersLeft reports how many available numbers in the game can be drawn.
@@ -21,7 +44,7 @@ func (g Game) NumbersLeft() int {
 	case len(g.numbers) <= g.numbersDrawn:
 		return 0
 	case g.numbers[0] == 0:
-		g.Reset()
+		GameResetter.Reset(&g)
 	}
 	return len(g.numbers) - g.numbersDrawn
 }
@@ -36,7 +59,7 @@ func (g Game) DrawnNumbers() []Number {
 func (g *Game) DrawNumber() {
 	switch {
 	case g.numbersDrawn <= 0:
-		g.Reset()
+		GameResetter.Reset(g)
 		g.numbersDrawn = 1
 	case g.numbersDrawn < len(g.numbers):
 		g.numbersDrawn++
@@ -63,19 +86,13 @@ func (g Game) PreviousNumberDrawn() Number {
 	return g.numbers[g.numbersDrawn-1]
 }
 
-// init seeds the random number generator to randomly shuffle numbers.
-func init() {
-	seed := time.Now().UnixNano()
-	rand.Seed(seed)
-}
-
 // Reset clears drawn numbers and resets/shuffles all the possible available numbers.
 // To shuffle the numbers to a specific order, call rand.Seed() with a constant value.
-func (g *Game) Reset() {
+func (s *shuffler) Reset(g *Game) {
 	for i := range g.numbers {
 		g.numbers[i] = Number(i + 1)
 	}
-	rand.Shuffle(len(g.numbers), func(i, j int) {
+	s.Rand.Shuffle(len(g.numbers), func(i, j int) {
 		g.numbers[i], g.numbers[j] = g.numbers[j], g.numbers[i]
 	})
 	g.numbersDrawn = 0

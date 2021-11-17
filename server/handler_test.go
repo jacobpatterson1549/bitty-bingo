@@ -1,12 +1,13 @@
 package server
 
 import (
-	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
 
 func TestHTTPHandler(t *testing.T) {
@@ -92,7 +93,7 @@ func TestHTTPSHandlerServeHTTP(t *testing.T) {
 			gameInfos: gameInfos,
 		}
 		test.r.Header = test.header
-		rand.Seed(1257894001) // hack to make board new board creation deterministic
+		bingo.GameResetter.Seed(1257894001) // make board new board creation deterministic
 		h.ServeHTTP(w, test.r)
 		switch {
 		case w.Code != test.wantStatusCode:

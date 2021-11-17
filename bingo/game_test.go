@@ -1,10 +1,18 @@
 package bingo
 
 import (
-	"math/rand"
 	"reflect"
 	"testing"
 )
+
+func TestGameResetterSwap(t *testing.T) {
+	nums := []Number{1, 2, 3, 4, 5}
+	swap := GameResetter.(*shuffler).swap(nums)
+	swap(1, 3)
+	if want, got := []Number{1, 4, 3, 2, 5}, nums; !reflect.DeepEqual(want, got) {
+		t.Errorf("swap did not work as expected on GameSetter: nums not equal:\nwanted: %v\ngot:    %v", want, got)
+	}
+}
 
 func TestGameNumbersLeft(t *testing.T) {
 	for i, test := range gameTests {
@@ -15,7 +23,7 @@ func TestGameNumbersLeft(t *testing.T) {
 }
 
 func TestGameDrawNumber(t *testing.T) {
-	rand.Seed(1257894000) // seed the available numbers for the first test
+	GameResetter.Seed(1257894000) // seed the available numbers for the first test
 	for i, test := range gameTests {
 		test.game.DrawNumber()
 		if want, got := test.wantAvailableAfterDraw, test.game; !reflect.DeepEqual(want, got) {
@@ -26,7 +34,7 @@ func TestGameDrawNumber(t *testing.T) {
 
 func TestResetGame(t *testing.T) {
 	for i, test := range gameTests {
-		test.game.Reset()
+		GameResetter.Reset(&test.game)
 		got := test.game.DrawnNumbers()
 		switch {
 		case len(got) != 0:

@@ -1,13 +1,12 @@
 package bingo
 
 import (
-	"math/rand"
 	"reflect"
 	"testing"
 )
 
 func TestNewBoard(t *testing.T) {
-	rand.Seed(1257894001) // seed the available numbers for the first test
+	GameResetter.Seed(1257894001) // seed the available numbers for the first test
 	b := board1257894001
 	if want, got := &b, NewBoard(); !reflect.DeepEqual(want, got) {
 		t.Errorf("boards not equal:\nwanted: %v\ngot:    %v", want, got)
