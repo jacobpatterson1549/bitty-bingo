@@ -34,16 +34,7 @@ func TestHandleAbout(t *testing.T) {
 }
 
 func TestHandleGame(t *testing.T) {
-	var allDrawnGame bingo.Game
-	prevNumbersLeft := allDrawnGame.NumbersLeft()
-	for {
-		allDrawnGame.DrawNumber()
-		numbersLeft := allDrawnGame.NumbersLeft()
-		if prevNumbersLeft == numbersLeft {
-			break
-		}
-		prevNumbersLeft = numbersLeft
-	}
+
 	tests :=
 		[]struct {
 			name     string
@@ -54,7 +45,7 @@ func TestHandleGame(t *testing.T) {
 		}{
 			{
 				name: "game has drawn tile",
-				game: allDrawnGame,
+				game: *allNumbersDrawnGame(t),
 				want: "B 2",
 			},
 			{
@@ -141,8 +132,8 @@ func TestHandleExportBoard(t *testing.T) {
 		}
 		got := w.String()
 		for i, n := range b {
-			if s := ">" + strconv.Itoa(int(n)) + "<"; i != 12 && !strings.Contains(got, s) {
-				t.Errorf("wanted board export to contain %q:\n%v", s, got)
+			if want := ">" + strconv.Itoa(int(n)) + "<"; i != 12 && !strings.Contains(got, want) {
+				t.Errorf("wanted board export to contain %q:\n%v", want, got)
 				break
 			}
 		}
@@ -197,4 +188,18 @@ var board1257894001 = bingo.Board{
 	42, 41, 0, 31, 40, // N
 	49, 52, 50, 46, 57, // G
 	64, 72, 67, 70, 74, // O
+}
+
+func allNumbersDrawnGame(t *testing.T) *bingo.Game {
+	t.Helper()
+	var allDrawnGame bingo.Game
+	prevNumbersLeft := allDrawnGame.NumbersLeft()
+	for {
+		allDrawnGame.DrawNumber()
+		numbersLeft := allDrawnGame.NumbersLeft()
+		if prevNumbersLeft == numbersLeft {
+			return &allDrawnGame
+		}
+		prevNumbersLeft = numbersLeft
+	}
 }

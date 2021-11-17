@@ -67,8 +67,7 @@ func TestBoardID(t *testing.T) {
 		var b Board
 		copy(b[:], board1257894001[:])
 		b[0], b[len(b)-1] = b[len(b)-1], b[0]
-		id, err := b.ID()
-		if err == nil {
+		if id, err := b.ID(); err == nil {
 			t.Errorf("wanted error when swapping first and last values of board (B and O columns), got %q", id)
 		}
 	})
@@ -76,8 +75,7 @@ func TestBoardID(t *testing.T) {
 		var b Board
 		copy(b[:], board1257894001[:])
 		b[1] = b[0]
-		id, err := b.ID() // 7juTsMm6CTZAs7ad
-		if err == nil {
+		if id, err := b.ID(); err == nil { // 7juTsMm6CTZAs7ad
 			t.Errorf("wanted when first number repeated, got %q", id)
 		}
 	})
@@ -108,8 +106,7 @@ func TestBoardFromID(t *testing.T) {
 			{"7juTsMm6CTZAs7ad", "first number duplicated"},
 		}
 		for i, test := range invalidIds {
-			_, err := BoardFromID(test.id)
-			if err == nil {
+			if _, err := BoardFromID(test.id); err == nil {
 				t.Errorf("test %v (%v): wanted id to be invalid", i, test.name)
 			}
 		}
@@ -123,7 +120,8 @@ var board1257894001 = Board{
 	49, 52, 50, 46, 57, // G
 	64, 72, 67, 70, 74, // O
 }
-var board1257894001ID = "5zuTsMm6CTZAs7ad"
+
+const board1257894001ID = "5zuTsMm6CTZAs7ad"
 
 func createTestGame(t *testing.T, nums []Number) Game {
 	t.Helper()

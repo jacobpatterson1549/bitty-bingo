@@ -27,10 +27,11 @@ func TestGameDrawNumber(t *testing.T) {
 func TestResetGame(t *testing.T) {
 	for i, test := range gameTests {
 		test.game.Reset()
-		if got := test.game.DrawnNumbers(); len(got) != 0 {
+		got := test.game.DrawnNumbers()
+		switch {
+		case len(got) != 0:
 			t.Errorf("test %v (%v): drawn numbers not empty after reset: got %v", i, test.name, got)
-		}
-		if !test.game.validNumbers() {
+		case !test.game.validNumbers():
 			t.Errorf("test %v (%v): not all numbers available after reset: %v", i, test.name, test.game.numbers)
 		}
 	}
@@ -101,8 +102,7 @@ func TestGameFromID(t *testing.T) {
 			{"75-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "numbers not valid (all zeroes)"},
 		}
 		for i, test := range tests {
-			_, err := GameFromID(test.id)
-			if err == nil {
+			if _, err := GameFromID(test.id); err == nil {
 				t.Errorf("test %v (%v): wanted error getting game from %q", i, test.name, test.id)
 			}
 		}
@@ -112,9 +112,7 @@ func TestGameFromID(t *testing.T) {
 func TestLastNumberDrawn(t *testing.T) {
 	t.Run("ok numbersDrawn", func(t *testing.T) {
 		for i, test := range gameTests {
-			want := test.wantPreviousNumberDrawn
-			got := test.game.PreviousNumberDrawn()
-			if want != got {
+			if want, got := test.wantPreviousNumberDrawn, test.game.PreviousNumberDrawn(); want != got {
 				t.Errorf("test %v (%v): previous numbers drawn not equal: wanted %v, got %v", i, test.name, want, got)
 			}
 		}
@@ -133,13 +131,12 @@ func TestLastNumberDrawn(t *testing.T) {
 				numbersDrawn: 100000,
 			},
 		}
+		const want = Number(0)
 		for i, test := range tests {
 			g := Game{
 				numbersDrawn: test.numbersDrawn,
 			}
-			want := Number(0)
-			got := g.PreviousNumberDrawn()
-			if want != got {
+			if got := g.PreviousNumberDrawn(); want != got {
 				t.Errorf("test %v (%v): previous numbers drawn not equal: wanted %v, got %v", i, test.name, want, got)
 			}
 		}
@@ -164,9 +161,9 @@ var gameTests = []struct {
 			numbers:      [numbersLength]Number{24, 20, 64, 54, 6, 62, 25, 43, 22, 57, 10, 40, 28, 29, 30, 73, 75, 69, 68, 23, 2, 37, 36, 15, 38, 26, 8, 18, 51, 49, 53, 42, 1, 32, 52, 71, 16, 65, 5, 35, 31, 9, 12, 59, 34, 4, 33, 39, 17, 41, 27, 67, 70, 11, 55, 56, 13, 72, 46, 19, 58, 3, 47, 14, 74, 45, 66, 48, 44, 63, 21, 50, 61, 60, 7},
 			numbersDrawn: 1,
 		},
-		wantNumbersLeft: 75,
-		wantColumns:     map[int][]Number{},
-		wantID:          "0",
+		wantNumbersLeft:         75,
+		wantColumns:             map[int][]Number{},
+		wantID:                  "0",
 		wantPreviousNumberDrawn: 0,
 	},
 	{
@@ -184,9 +181,8 @@ var gameTests = []struct {
 			2: {35, 44},
 			4: {65},
 		},
-		wantID: "3-QSMsSRIBJSlFPkgNCR4OPAIQQEcYFQZLNx09NgwXNSowKxxGDzEuP0QbHy9DNDgZCwQnO0ITGkoWJC0KMiIDBTkUIBEoCDoHMyYh",
+		wantID:                  "3-QSMsSRIBJSlFPkgNCR4OPAIQQEcYFQZLNx09NgwXNSowKxxGDzEuP0QbHy9DNDgZCwQnO0ITGkoWJC0KMiIDBTkUIBEoCDoHMyYh",
 		wantPreviousNumberDrawn: 44,
-
 	},
 	{
 		name: "do not draw if all numbers have been drawn",
@@ -206,7 +202,7 @@ var gameTests = []struct {
 			3: {58, 59, 60, 46, 50, 47, 57, 55, 53, 56, 48, 52, 51, 49, 54},
 			4: {61, 67, 72, 69, 65, 63, 62, 66, 74, 68, 71, 73, 75, 70, 64},
 		},
-		wantID: "75-Oh0hOyw9JDwQDC4yKS8aQzk3HiI1GBUmCzgjMA80BBsDKicIDQIBLTMxGSBIHyUoEUUSKxdBNgc_HBMFBgkWPg4UCkJKREdJS0ZA",
+		wantID:                  "75-Oh0hOyw9JDwQDC4yKS8aQzk3HiI1GBUmCzgjMA80BBsDKicIDQIBLTMxGSBIHyUoEUUSKxdBNgc_HBMFBgkWPg4UCkJKREdJS0ZA",
 		wantPreviousNumberDrawn: 64,
 	},
 	{
@@ -223,7 +219,7 @@ var gameTests = []struct {
 		wantColumns: map[int][]Number{
 			0: {15, 8, 4, 12, 10},
 		},
-		wantID: "5-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL",
+		wantID:                  "5-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL",
 		wantPreviousNumberDrawn: 10,
 	},
 	{
@@ -244,7 +240,7 @@ var gameTests = []struct {
 			3: {49, 52, 50, 46, 57},
 			4: {64, 72, 67, 70, 74},
 		},
-		wantID: "24-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL",
+		wantID:                  "24-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL",
 		wantPreviousNumberDrawn: 74,
 	},
 }

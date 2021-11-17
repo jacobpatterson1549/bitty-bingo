@@ -14,8 +14,7 @@ func TestFlagSet(t *testing.T) {
 		var cfg server.Config
 		wantName := "program_name_325"
 		fs := flagSet(&cfg, wantName)
-		gotName := fs.Name()
-		if wantName != gotName {
+		if gotName := fs.Name(); wantName != gotName {
 			t.Errorf("names not equal:\nwanted: %q\ngot:    %q", wantName, gotName)
 		}
 	})
