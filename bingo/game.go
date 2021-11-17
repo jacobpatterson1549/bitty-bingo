@@ -40,25 +40,22 @@ var GameResetter Resetter = &shuffler{
 
 // NumbersLeft reports how many available numbers in the game can be drawn.
 func (g Game) NumbersLeft() int {
-	switch {
-	case len(g.numbers) <= g.numbersDrawn:
-		return 0
-	case g.numbers[0] == 0:
-		GameResetter.Reset(&g)
-	}
+	g.normalizeNumbersDrawn()
 	return len(g.numbers) - g.numbersDrawn
 }
 
 // DrawnNumbers is the numbers in the game that have been drawn
 func (g Game) DrawnNumbers() []Number {
+	g.normalizeNumbersDrawn()
 	return g.numbers[:g.numbersDrawn]
 }
 
 // DrawNumber move the next available number to DrawnNumbers.
-// The game is reset if no numbers are available or have been drawn.
+// The game is reset if no numbers have been drawn.
 func (g *Game) DrawNumber() {
+	g.normalizeNumbersDrawn()
 	switch {
-	case g.numbersDrawn <= 0:
+	case g.numbersDrawn == 0:
 		GameResetter.Reset(g)
 		g.numbersDrawn = 1
 	case g.numbersDrawn < len(g.numbers):
@@ -79,8 +76,8 @@ func (g Game) DrawnNumberColumns() map[int][]Number {
 
 // PreviousNumberDrawn is the last number drawn, or 0 of no numbers have been drawn.
 func (g Game) PreviousNumberDrawn() Number {
-	switch {
-	case g.numbersDrawn <= 0, g.numbersDrawn > len(g.numbers):
+	g.normalizeNumbersDrawn()
+	if g.numbersDrawn == 0 {
 		return 0
 	}
 	return g.numbers[g.numbersDrawn-1]
@@ -98,12 +95,23 @@ func (s *shuffler) Reset(g *Game) {
 	g.numbersDrawn = 0
 }
 
+// normalizeNumbersDrawn clamps numbersDrawn to [0,75]
+func (g *Game) normalizeNumbersDrawn() {
+	switch {
+	case g.numbersDrawn < 0:
+		g.numbersDrawn = 0
+	case g.numbersDrawn > len(g.numbers):
+		g.numbersDrawn = len(g.numbers)
+	}
+}
+
 // ID encodes the game into an easy to transport string.
 func (g Game) ID() (string, error) {
-	if g.numbersDrawn <= 0 {
+	g.normalizeNumbersDrawn()
+	switch {
+	case g.numbersDrawn == 0:
 		return "0", nil
-	}
-	if !validNumbers(g.numbers[:], false) {
+	case !validNumbers(g.numbers[:], false):
 		return "", errors.New("game has duplicate/invalid numbers")
 	}
 	data := make([]byte, len(g.numbers))
@@ -117,11 +125,11 @@ func (g Game) ID() (string, error) {
 
 // GameFromID creates a game from the identifying string.
 func GameFromID(id string) (*Game, error) {
-	if id == "0" {
-		return new(Game), nil
-	}
 	i := strings.IndexAny(id, "-")
-	if i < 0 || i >= len(id) {
+	switch {
+	case id == "0":
+		return new(Game), nil
+	case i < 0, i >= len(id):
 		return nil, errors.New("could not split id string into numbersDrawn and numbers")
 	}
 	numbersDrawnStr, numsStr := id[:i], id[i+1:]
