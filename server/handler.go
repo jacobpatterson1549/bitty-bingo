@@ -269,7 +269,7 @@ func (h httpsHandler) createBoards(w http.ResponseWriter, r *http.Request) {
 		}
 		board := bingo.NewBoard()
 		if err := handleExportBoard(f, *board); err != nil {
-			message := fmt.Sprintf("unexpected problam adding board %v to zip file: %v", i, err)
+			message := fmt.Sprintf("unexpected problem adding board #%v to zip file: %v", i, err)
 			httpError(w, message, http.StatusInternalServerError)
 			return
 		}

@@ -117,7 +117,7 @@ func TestGameFromID(t *testing.T) {
 	})
 }
 
-func TestLastNumberDrawn(t *testing.T) {
+func TestPreviousNumberDrawn(t *testing.T) {
 	t.Run("ok numbersDrawn", func(t *testing.T) {
 		for i, test := range gameTests {
 			if want, got := test.wantPreviousNumberDrawn, test.game.PreviousNumberDrawn(); want != got {

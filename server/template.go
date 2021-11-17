@@ -47,7 +47,7 @@ type (
 func newTemplateBoard(b bingo.Board) (*board, error) {
 	data, err := freeSpace(b)
 	if err != nil {
-		return nil, fmt.Errorf("getting center square free space for board, %v", err)
+		return nil, fmt.Errorf("getting center square free space for board: %v", err)
 	}
 	templateBoard := board{
 		Board:     b,
@@ -122,14 +122,15 @@ func handleExportBoard(w io.Writer, b bingo.Board) error {
 // Templates are written a buffer to ensure they execute correctly before they are written to the response
 func (p page) handleIndex(t *template.Template, w io.Writer) error {
 	var buf bytes.Buffer
-	err := t.ExecuteTemplate(&buf, "index.html", p)
-	if err != nil {
+	if err := t.ExecuteTemplate(&buf, "index.html", p); err != nil {
 		if rw, ok := w.(http.ResponseWriter); ok {
 			message := fmt.Sprintf("unexpected problem rendering %v template: %v", p.Name, err)
 			httpError(rw, message, http.StatusInternalServerError)
 		}
 		return err
 	}
-	_, err = buf.WriteTo(w)
-	return err
+	if _, err := buf.WriteTo(w); err != nil {
+		return err
+	}
+	return nil
 }

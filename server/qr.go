@@ -19,15 +19,15 @@ func freeSpace(b bingo.Board) (string, error) {
 	}
 	qrcode, err := qr.Encode(id, qr.L, qr.Unicode)
 	if err != nil {
-		return "", fmt.Errorf("ecoding qr image: %v", err)
+		return "", fmt.Errorf("unexpected problem ecoding qr image: %v", err)
 	}
 	qrcode, err = barcode.Scale(qrcode, 80, 80)
 	if err != nil {
-		return "", fmt.Errorf("scaling qr code: %v", err)
+		return "", fmt.Errorf("unexpected problem scaling qr code: %v", err)
 	}
 	var buf bytes.Buffer
 	if err := png.Encode(&buf, qrcode); err != nil {
-		return "", fmt.Errorf("converting barcode to png image: %v", err)
+		return "", fmt.Errorf("unexpected problem converting barcode to png image: %v", err)
 	}
 	bytes := buf.Bytes()
 	data := base64.StdEncoding.EncodeToString(bytes)

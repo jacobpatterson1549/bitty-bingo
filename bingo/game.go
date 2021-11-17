@@ -17,10 +17,10 @@ type Game struct {
 
 // NumbersLeft reports how many available numbers in the game can be drawn.
 func (g Game) NumbersLeft() int {
-	if len(g.numbers) <= g.numbersDrawn {
+	switch {
+	case len(g.numbers) <= g.numbersDrawn:
 		return 0
-	}
-	if g.numbers[0] == 0 {
+	case g.numbers[0] == 0:
 		g.Reset()
 	}
 	return len(g.numbers) - g.numbersDrawn
@@ -48,17 +48,19 @@ func (g Game) DrawnNumberColumns() map[int][]Number {
 	cols := make(map[int][]Number, 5)
 	drawnNumbers := g.DrawnNumbers()
 	for _, n := range drawnNumbers {
-		cols[n.Column()] = append(cols[n.Column()], n)
+		c := n.Column()
+		cols[c] = append(cols[c], n)
 	}
 	return cols
 }
 
 // PreviousNumberDrawn is the last number drawn, or 0 of no numbers have been drawn.
 func (g Game) PreviousNumberDrawn() Number {
-	if 0 < g.numbersDrawn && g.numbersDrawn <= len(g.numbers) {
-		return g.numbers[g.numbersDrawn-1]
+	switch {
+	case g.numbersDrawn <= 0, g.numbersDrawn > len(g.numbers):
+		return 0
 	}
-	return 0
+	return g.numbers[g.numbersDrawn-1]
 }
 
 // init seeds the random number generator to randomly shuffle numbers.
@@ -87,11 +89,11 @@ func (g Game) ID() (string, error) {
 	if !g.validNumbers() {
 		return "", errors.New("game numbers not valid")
 	}
-	b := make([]byte, len(g.numbers))
+	data := make([]byte, len(g.numbers))
 	for i, n := range g.numbers {
-		b[i] = byte(n)
+		data[i] = byte(n)
 	}
-	nums := base64Encoding.EncodeToString(b)
+	nums := base64Encoding.EncodeToString(data)
 	id := strconv.Itoa(g.numbersDrawn) + "-" + nums
 	return id, nil
 }
@@ -110,15 +112,15 @@ func GameFromID(id string) (*Game, error) {
 	if err != nil {
 		return nil, errors.New("parsing numbersLeft: " + err.Error())
 	}
-	b, err := base64Encoding.DecodeString(numsStr)
+	data, err := base64Encoding.DecodeString(numsStr)
 	if err != nil {
 		return nil, errors.New("decoding game numbers: " + err.Error())
 	}
 	var g Game
-	if len(b) != len(g.numbers) {
+	if len(data) != len(g.numbers) {
 		return nil, errors.New("decoded numbers too large/small")
 	}
-	for i, n := range b {
+	for i, n := range data {
 		g.numbers[i] = Number(n)
 	}
 	if !g.validNumbers() {

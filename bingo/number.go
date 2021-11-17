@@ -36,5 +36,9 @@ func (n Number) Value() int {
 
 // Valid returns whether or not the number is valid, that is, it is between 1 and 75.
 func (n Number) Valid() bool {
-	return n >= MinNumber && n <= MaxNumber
+	switch {
+	case n < MinNumber, n > MaxNumber:
+		return false
+	}
+	return true
 }

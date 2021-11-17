@@ -61,13 +61,13 @@ func (b Board) IsFilled(g Game) bool {
 // NumberSet creates a map of all the drawn numbers in the game.
 // It also includes the zero number to always accout for the middle free cell.
 func numberSet(g Game) map[Number]struct{} {
-	s := make(map[Number]struct{}, g.numbersDrawn+1)
-	s[0] = struct{}{} // free cell
+	nums := make(map[Number]struct{}, g.numbersDrawn+1)
+	nums[0] = struct{}{} // free cell
 	drawnNumbers := g.DrawnNumbers()
 	for _, n := range drawnNumbers {
-		s[n] = struct{}{}
+		nums[n] = struct{}{}
 	}
-	return s
+	return nums
 }
 
 // hasColumn checks to see if the column on the board is completely included in nums.
@@ -131,18 +131,18 @@ func (b Board) ID() (string, error) {
 			return "", errors.New("board has number at incorrect column at index " + strconv.Itoa(i))
 		}
 	}
-	tinyBoard := make([]byte, 0, 12)
+	data := make([]byte, 0, 12)
 	for i := 0; i < len(b); i++ {
 		l := encodeNumber(b[i])
 		i++
 		r := encodeNumber(b[i])
 		ch := byte(l<<4 | r)
-		tinyBoard = append(tinyBoard, ch)
+		data = append(data, ch)
 		if i == 11 { // free cell
 			i++
 		}
 	}
-	id := base64Encoding.EncodeToString(tinyBoard)
+	id := base64Encoding.EncodeToString(data)
 	return id, nil
 }
 
@@ -152,13 +152,13 @@ func BoardFromID(id string) (*Board, error) {
 	if len(id) != 16 {
 		return nil, errors.New("id must be 16 characters long")
 	}
-	tinyBoard, err := base64Encoding.Strict().DecodeString(id)
+	data, err := base64Encoding.Strict().DecodeString(id)
 	if err != nil {
 		return nil, errors.New("decoding board from id: " + err.Error())
 	}
 	var b Board
 	i := 0
-	for _, ch := range tinyBoard {
+	for _, ch := range data {
 		l, err := decodeNumber(ch>>4, i)
 		if err != nil {
 			return nil, err
@@ -169,7 +169,7 @@ func BoardFromID(id string) (*Board, error) {
 		}
 		b[i], b[i+1] = l, r
 		i += 2
-		if i == 12 {
+		if i == 12 { // free cell
 			i++
 		}
 	}
