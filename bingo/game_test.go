@@ -22,6 +22,14 @@ func TestGameNumbersLeft(t *testing.T) {
 	}
 }
 
+func TestDrawnNumbers(t *testing.T) {
+	for i, test := range gameTests {
+		if want, got := test.wantDrawnNumbers, test.game.DrawnNumbers(); !reflect.DeepEqual(want, got) {
+			t.Errorf("test %v (%v): drawn numbers not equal:\nwanted: %v\ngot:    %v", i, test.name, want, got)
+		}
+	}
+}
+
 func TestGameDrawNumber(t *testing.T) {
 	for i, test := range gameTests {
 		GameResetter.Seed(1257894000) // seed the available when a game is reset
@@ -32,31 +40,18 @@ func TestGameDrawNumber(t *testing.T) {
 	}
 }
 
-func TestResetGame(t *testing.T) {
-	for i, test := range gameTests {
-		GameResetter.Reset(&test.game)
-		got := test.game.DrawnNumbers()
-		switch {
-		case len(got) != 0:
-			t.Errorf("test %v (%v): drawn numbers not empty after reset: got %v", i, test.name, got)
-		case !validNumbers(test.game.numbers[:], false):
-			t.Errorf("test %v (%v): not all numbers available after reset: %v", i, test.name, test.game.numbers)
-		}
-	}
-}
-
-func TestDrawnNumbers(t *testing.T) {
-	for i, test := range gameTests {
-		if want, got := test.wantDrawnNumbers, test.game.DrawnNumbers(); !reflect.DeepEqual(want, got) {
-			t.Errorf("test %v (%v): drawn numbers not equal:\nwanted: %v\ngot:    %v", i, test.name, want, got)
-		}
-	}
-}
-
 func TestDrawnNumberColumns(t *testing.T) {
 	for i, test := range gameTests {
 		if want, got := test.wantDrawnNumberColumns, test.game.DrawnNumberColumns(); !reflect.DeepEqual(want, got) {
 			t.Errorf("test %v (%v): drawn number columns not equal:\nwanted: %v\ngot:    %v", i, test.name, want, got)
+		}
+	}
+}
+
+func TestPreviousNumberDrawn(t *testing.T) {
+	for i, test := range gameTests {
+		if want, got := test.wantPreviousNumberDrawn, test.game.PreviousNumberDrawn(); want != got {
+			t.Errorf("test %v (%v): previous numbers drawn not equal: wanted %v, got %v", i, test.name, want, got)
 		}
 	}
 }
@@ -125,10 +120,14 @@ func TestGameFromID(t *testing.T) {
 	})
 }
 
-func TestPreviousNumberDrawn(t *testing.T) {
+func TestResetGame(t *testing.T) {
 	for i, test := range gameTests {
-		if want, got := test.wantPreviousNumberDrawn, test.game.PreviousNumberDrawn(); want != got {
-			t.Errorf("test %v (%v): previous numbers drawn not equal: wanted %v, got %v", i, test.name, want, got)
+		GameResetter.Reset(&test.game)
+		switch {
+		case test.game.numbersDrawn != 0:
+			t.Errorf("test %v (%v): drawn numbers not empty after reset: got %v", i, test.name, test.game.numbersDrawn)
+		case !validNumbers(test.game.numbers[:], false):
+			t.Errorf("test %v (%v): not all numbers available after reset: %v", i, test.name, test.game.numbers)
 		}
 	}
 }
