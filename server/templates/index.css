@@ -24,6 +24,9 @@ color: darkslateblue;
 form {
 margin-bottom: 1em;
 }
+svg {
+    background-color: white;
+}
 .forms-and-table {
 display: flex;
 flex-direction: column;
