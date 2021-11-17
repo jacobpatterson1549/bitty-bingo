@@ -57,6 +57,7 @@ func runServer(cfg server.Config) {
 	s, err := cfg.NewServer()
 	if err != nil {
 		log.Fatalf("creating server: %v", err)
+		return
 	}
 	done := make(chan os.Signal, 2)
 	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
@@ -78,6 +79,7 @@ func runServer(cfg server.Config) {
 	ctx := context.Background()
 	if err := s.Shutdown(ctx); err != nil {
 		log.Fatalf("stopping server: %v", err)
+		return
 	}
 	log.Printf("server stopped successfully")
 }
