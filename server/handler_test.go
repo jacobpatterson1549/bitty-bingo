@@ -88,7 +88,7 @@ func TestHTTPSHandlerServeHTTP(t *testing.T) {
 		copy(gameInfos, test.gameInfos) // do not modify the test value
 		wantGameInfos := make([]gameInfo, len(test.wantGameInfos))
 		copy(wantGameInfos, test.wantGameInfos)
-		h := httpsHandler{
+		h := handler{
 			time:      test.time,
 			gameInfos: gameInfos,
 		}
@@ -114,7 +114,7 @@ func TestWithGzip(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest(methodGet, "/", nil)
 		r.Header.Add(headerAcceptEncoding, test.acceptEncoding)
-		withGzip(h).ServeHTTP(w, r)
+		withGzipHandler(h).ServeHTTP(w, r)
 		contentEncoding := w.Header().Get(headerContentEncoding)
 		gotGzip := contentEncoding == "gzip"
 		gotMessage := w.Body.String()
