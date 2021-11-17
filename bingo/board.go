@@ -16,9 +16,11 @@ func NewBoard() *Board {
 	var g Game
 	columnRowCounts := 0
 	var b Board
+	// each column must have 5 values - an octal bit flag is used to determine which numbers on the board have been populated
+	// each row takes up 3 bits in the flag (2^3 = 8, but only the first 1-5 are used); break whin all positions have been populated
 	for columnRowCounts < 055555 {
 		g.DrawNumber()
-		n := g.numbers[g.numbersDrawn-1]
+		n := g.PreviousNumberDrawn()
 		c := n.Column()
 		r := (columnRowCounts >> (3 * c)) & 07
 		if r < 5 {
