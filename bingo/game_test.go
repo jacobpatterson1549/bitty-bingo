@@ -31,7 +31,7 @@ func TestResetGame(t *testing.T) {
 		switch {
 		case len(got) != 0:
 			t.Errorf("test %v (%v): drawn numbers not empty after reset: got %v", i, test.name, got)
-		case !test.game.validNumbers():
+		case !validNumbers(test.game.numbers[:], false):
 			t.Errorf("test %v (%v): not all numbers available after reset: %v", i, test.name, test.game.numbers)
 		}
 	}

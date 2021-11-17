@@ -123,8 +123,8 @@ var base64Encoding = base64.URLEncoding
 // Since there are 8 bits in a byte the array uses 8 * 12 = 96 bits.
 // Base 64 uses 6 bits for each character, so the string will be 96 / 6 = 16 characters long
 func (b Board) ID() (string, error) {
-	if b.hasDuplicateNumbers() {
-		return "", errors.New("board has duplicate numbers")
+	if !b.isValid() {
+		return "", errors.New("board has duplicate/invalid numbers")
 	}
 	for i, n := range b {
 		if c, col := i/5, n.Column(); i != 12 && c != col {
@@ -173,8 +173,8 @@ func BoardFromID(id string) (*Board, error) {
 			i++
 		}
 	}
-	if b.hasDuplicateNumbers() {
-		return nil, errors.New("board has duplicate numbers")
+	if !b.isValid() {
+		return nil, errors.New("board has duplicate/invalid numbers")
 	}
 	return &b, nil
 }
@@ -195,14 +195,7 @@ func decodeNumber(h byte, i int) (Number, error) {
 	return n, nil
 }
 
-// hasDuplicateNumbers determines if the board has duplicate numbers
-func (b Board) hasDuplicateNumbers() bool {
-	m := make(map[Number]struct{}, len(b))
-	for _, n := range b {
-		if _, ok := m[n]; ok {
-			return true
-		}
-		m[n] = struct{}{}
-	}
-	return false
+// isValid determines if the board has valid numbers, no duplicates, and the center is the zero value
+func (b Board) isValid() bool {
+	return validNumbers(b[:], true) && b[12] == 0
 }

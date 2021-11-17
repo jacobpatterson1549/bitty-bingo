@@ -86,8 +86,8 @@ func (g Game) ID() (string, error) {
 	if g.numbersDrawn <= 0 {
 		return "0", nil
 	}
-	if !g.validNumbers() {
-		return "", errors.New("game numbers not valid")
+	if !validNumbers(g.numbers[:], false) {
+		return "", errors.New("game has duplicate/invalid numbers")
 	}
 	data := make([]byte, len(g.numbers))
 	for i, n := range g.numbers {
@@ -123,21 +123,9 @@ func GameFromID(id string) (*Game, error) {
 	for i, n := range data {
 		g.numbers[i] = Number(n)
 	}
-	if !g.validNumbers() {
-		return nil, errors.New("game numbers not valid")
+	if !validNumbers(g.numbers[:], false) {
+		return nil, errors.New("game has duplicate/invalid numbers")
 	}
 	g.numbersDrawn = numbersDrawn
 	return &g, nil
-}
-
-// validNumbers determines if the all the valid numbers are in the game and there are no duplicates.
-func (g Game) validNumbers() bool {
-	m := make(map[Number]struct{}, len(g.numbers))
-	for _, n := range g.numbers {
-		if _, ok := m[n]; ok || !n.Valid() {
-			return false // duplicate or invalid
-		}
-		m[n] = struct{}{}
-	}
-	return true
 }
