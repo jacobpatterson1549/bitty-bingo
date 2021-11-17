@@ -11,32 +11,49 @@ import (
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
 
-// templatesFS is the embedded filesystem containing the template files.
-//go:embed templates
-var templatesFS embed.FS
+var (
+	// templatesFS is the embedded filesystem containing the template files.
+	//go:embed templates
+	templatesFS embed.FS
 
-// embeddedTemplate is the template containing the html and svg templates.
-var embeddedTemplate = template.Must(template.ParseFS(templatesFS, "templates/*"))
+	// embeddedTemplate is the template containing the html and svg templates.
+	embeddedTemplate = template.Must(template.ParseFS(templatesFS, "templates/*"))
+)
 
-// page contains all the data needed to render any html page.
-type page struct {
-	Name  string
-	List  []gameInfo
-	Game  *game
-	Board *board
-}
+type (
+	// page contains all the data needed to render any html page.
+	page struct {
+		Name  string
+		List  []gameInfo
+		Game  *game
+		Board *board
+	}
 
-// game contains the fields to render a game page.
-type game struct {
-	bingo.Game
-	BoardID  string
-	HasBingo bool
-}
+	// game contains the fields to render a game page.
+	game struct {
+		bingo.Game
+		BoardID  string
+		HasBingo bool
+	}
 
-// board contains the field to export a board
-type board struct {
-	bingo.Board
-	FreeSpace string
+	// board contains the field to export a board
+	board struct {
+		bingo.Board
+		FreeSpace string
+	}
+)
+
+// newTemplateBoard creates a board to render from the bingo board
+func newTemplateBoard(b bingo.Board) (*board, error) {
+	data, err := freeSpace(b)
+	if err != nil {
+		return nil, fmt.Errorf("getting center square free space for board, %v", err)
+	}
+	templateBoard := board{
+		Board:     b,
+		FreeSpace: data,
+	}
+	return &templateBoard, nil
 }
 
 // handleHelp renders the help html page.
@@ -115,17 +132,4 @@ func (p page) handleIndex(t *template.Template, w io.Writer) error {
 	}
 	_, err = buf.WriteTo(w)
 	return err
-}
-
-// newTemplateBoard creates a board to render from the bingo board
-func newTemplateBoard(b bingo.Board) (*board, error) {
-	data, err := freeSpace(b)
-	if err != nil {
-		return nil, fmt.Errorf("getting center square free space for board, %v", err)
-	}
-	templateBoard := board{
-		Board:     b,
-		FreeSpace: data,
-	}
-	return &templateBoard, nil
 }

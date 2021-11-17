@@ -43,6 +43,16 @@ func (g *Game) DrawNumber() {
 	}
 }
 
+// DrawnNumberColumns partitions the drawn numbers by columns in the order that they were drawn.
+func (g Game) DrawnNumberColumns() map[int][]Number {
+	cols := make(map[int][]Number, 5)
+	drawnNumbers := g.DrawnNumbers()
+	for _, n := range drawnNumbers {
+		cols[n.Column()] = append(cols[n.Column()], n)
+	}
+	return cols
+}
+
 // PreviousNumberDrawn is the last number drawn, or 0 of no numbers have been drawn.
 func (g Game) PreviousNumberDrawn() Number {
 	if 0 < g.numbersDrawn && g.numbersDrawn <= len(g.numbers) {
@@ -67,16 +77,6 @@ func (g *Game) Reset() {
 		g.numbers[i], g.numbers[j] = g.numbers[j], g.numbers[i]
 	})
 	g.numbersDrawn = 0
-}
-
-// DrawnNumberColumns partitions the drawn numbers by columns in the order that they were drawn.
-func (g Game) DrawnNumberColumns() map[int][]Number {
-	cols := make(map[int][]Number, 5)
-	drawnNumbers := g.DrawnNumbers()
-	for _, n := range drawnNumbers {
-		cols[n.Column()] = append(cols[n.Column()], n)
-	}
-	return cols
 }
 
 // ID encodes the game into an easy to transport string.

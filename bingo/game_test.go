@@ -37,10 +37,18 @@ func TestResetGame(t *testing.T) {
 	}
 }
 
-func TestColumns(t *testing.T) {
+func TestDrawnNumbers(t *testing.T) {
 	for i, test := range gameTests {
-		if want, got := test.wantColumns, test.game.DrawnNumberColumns(); !reflect.DeepEqual(want, got) {
-			t.Errorf("test %v (%v): columns not equal:\nwanted: %v\ngot:    %v", i, test.name, want, got)
+		if want, got := test.wantDrawnNumbers, test.game.DrawnNumbers(); !reflect.DeepEqual(want, got) {
+			t.Errorf("test %v (%v): drawn numbers not equal:\nwanted: %v\ngot:    %v", i, test.name, want, got)
+		}
+	}
+}
+
+func TestDrawnNumberColumns(t *testing.T) {
+	for i, test := range gameTests {
+		if want, got := test.wantDrawnNumberColumns, test.game.DrawnNumberColumns(); !reflect.DeepEqual(want, got) {
+			t.Errorf("test %v (%v): drawn number columns not equal:\nwanted: %v\ngot:    %v", i, test.name, want, got)
 		}
 	}
 }
@@ -150,7 +158,8 @@ var gameTests = []struct {
 	game                    Game
 	wantAvailableAfterDraw  Game
 	wantNumbersLeft         int
-	wantColumns             map[int][]Number
+	wantDrawnNumbers        []Number
+	wantDrawnNumberColumns  map[int][]Number
 	wantID                  string
 	wantPreviousNumberDrawn Number
 }{
@@ -162,7 +171,8 @@ var gameTests = []struct {
 			numbersDrawn: 1,
 		},
 		wantNumbersLeft:         75,
-		wantColumns:             map[int][]Number{},
+		wantDrawnNumbers:        []Number{},
+		wantDrawnNumberColumns:  map[int][]Number{},
 		wantID:                  "0",
 		wantPreviousNumberDrawn: 0,
 	},
@@ -176,8 +186,9 @@ var gameTests = []struct {
 			numbers:      [numbersLength]Number{65, 35, 44, 73, 18, 1, 37, 41, 69, 62, 72, 13, 9, 30, 14, 60, 2, 16, 64, 71, 24, 21, 6, 75, 55, 29, 61, 54, 12, 23, 53, 42, 48, 43, 28, 70, 15, 49, 46, 63, 68, 27, 31, 47, 67, 52, 56, 25, 11, 4, 39, 59, 66, 19, 26, 74, 22, 36, 45, 10, 50, 34, 3, 5, 57, 20, 32, 17, 40, 8, 58, 7, 51, 38, 33},
 			numbersDrawn: 4,
 		},
-		wantNumbersLeft: 72,
-		wantColumns: map[int][]Number{
+		wantNumbersLeft:  72,
+		wantDrawnNumbers: []Number{65, 35, 44},
+		wantDrawnNumberColumns: map[int][]Number{
 			2: {35, 44},
 			4: {65},
 		},
@@ -194,8 +205,9 @@ var gameTests = []struct {
 			numbers:      [numbersLength]Number{58, 29, 33, 59, 44, 61, 36, 60, 16, 12, 46, 50, 41, 47, 26, 67, 57, 55, 30, 34, 53, 24, 21, 38, 11, 56, 35, 48, 15, 52, 4, 27, 3, 42, 39, 8, 13, 2, 1, 45, 51, 49, 25, 32, 72, 31, 37, 40, 17, 69, 18, 43, 23, 65, 54, 7, 63, 28, 19, 5, 6, 9, 22, 62, 14, 20, 10, 66, 74, 68, 71, 73, 75, 70, 64},
 			numbersDrawn: 75,
 		},
-		wantNumbersLeft: 0,
-		wantColumns: map[int][]Number{
+		wantNumbersLeft:  0,
+		wantDrawnNumbers: []Number{58, 29, 33, 59, 44, 61, 36, 60, 16, 12, 46, 50, 41, 47, 26, 67, 57, 55, 30, 34, 53, 24, 21, 38, 11, 56, 35, 48, 15, 52, 4, 27, 3, 42, 39, 8, 13, 2, 1, 45, 51, 49, 25, 32, 72, 31, 37, 40, 17, 69, 18, 43, 23, 65, 54, 7, 63, 28, 19, 5, 6, 9, 22, 62, 14, 20, 10, 66, 74, 68, 71, 73, 75, 70, 64},
+		wantDrawnNumberColumns: map[int][]Number{
 			0: {12, 11, 15, 4, 3, 8, 13, 2, 1, 7, 5, 6, 9, 14, 10},
 			1: {29, 16, 26, 30, 24, 21, 27, 25, 17, 18, 23, 28, 19, 22, 20},
 			2: {33, 44, 36, 41, 34, 38, 35, 42, 39, 45, 32, 31, 37, 40, 43},
@@ -215,8 +227,9 @@ var gameTests = []struct {
 			numbers:      [numbersLength]Number{15, 8, 4, 12, 10, 19, 27, 16, 28, 25, 42, 41, 31, 40, 49, 52, 50, 46, 57, 64, 72, 67, 70, 74, 1, 2, 3, 5, 6, 7, 9, 11, 13, 14, 17, 18, 20, 21, 22, 23, 24, 26, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39, 43, 44, 45, 47, 48, 51, 53, 54, 55, 56, 58, 59, 60, 61, 62, 63, 65, 66, 68, 69, 71, 73, 75},
 			numbersDrawn: 6,
 		},
-		wantNumbersLeft: 70,
-		wantColumns: map[int][]Number{
+		wantNumbersLeft:  70,
+		wantDrawnNumbers: []Number{15, 8, 4, 12, 10},
+		wantDrawnNumberColumns: map[int][]Number{
 			0: {15, 8, 4, 12, 10},
 		},
 		wantID:                  "5-DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL",
@@ -232,8 +245,9 @@ var gameTests = []struct {
 			numbers:      [numbersLength]Number{15, 8, 4, 12, 10, 19, 27, 16, 28, 25, 42, 41, 31, 40, 49, 52, 50, 46, 57, 64, 72, 67, 70, 74, 1, 2, 3, 5, 6, 7, 9, 11, 13, 14, 17, 18, 20, 21, 22, 23, 24, 26, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39, 43, 44, 45, 47, 48, 51, 53, 54, 55, 56, 58, 59, 60, 61, 62, 63, 65, 66, 68, 69, 71, 73, 75},
 			numbersDrawn: 25,
 		},
-		wantNumbersLeft: 51,
-		wantColumns: map[int][]Number{
+		wantNumbersLeft:  51,
+		wantDrawnNumbers: []Number{15, 8, 4, 12, 10, 19, 27, 16, 28, 25, 42, 41, 31, 40, 49, 52, 50, 46, 57, 64, 72, 67, 70, 74},
+		wantDrawnNumberColumns: map[int][]Number{
 			0: {15, 8, 4, 12, 10},
 			1: {19, 27, 16, 28, 25},
 			2: {42, 41, 31, 40},
