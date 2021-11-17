@@ -97,8 +97,6 @@ func (h handler) serveGet(w http.ResponseWriter, r *http.Request) {
 // servePost handles various POST requests.
 func (h *handler) servePost(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
-	case "/game":
-		h.createGame(w, r)
 	case "/game/draw_number": // ?gameID=
 		h.drawNumber(w, r)
 	case "/game/boards": // ?n=
@@ -198,11 +196,6 @@ func (handler) checkBoard(w http.ResponseWriter, r *http.Request) {
 		url += "&bingo"
 	}
 	http.Redirect(w, r, url, http.StatusSeeOther)
-}
-
-// createGame redirects to a game that has not had any numbers drawn
-func (handler) createGame(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/game", http.StatusSeeOther)
 }
 
 // drawNumber draws a new number for the game specified by the request's 'gameID' form parameter.

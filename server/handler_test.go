@@ -363,11 +363,10 @@ var httpsHandlerServeHTTPTests = []struct {
 		name:           "create game",
 		gameInfos:      []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
 		wantGameInfos:  []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
-		r:              httptest.NewRequest(methodPost, urlPathGame, nil),
-		header:         http.Header{headerContentType: {contentTypeEncodedForm}},
-		wantStatusCode: 303,
+		r:              httptest.NewRequest(methodGet, urlPathGame, nil),
+		wantStatusCode: 200,
 		wantHeader: http.Header{
-			headerLocation: {urlPathGame},
+			headerContentType: {contentTypeTextHTML},
 		},
 	},
 	{
