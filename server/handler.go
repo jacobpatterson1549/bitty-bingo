@@ -3,12 +3,9 @@ package server
 import (
 	"archive/zip"
 	"bytes"
-	"compress/gzip"
 	"fmt"
-	"io"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
@@ -263,35 +260,6 @@ func (handler) createBoards(w http.ResponseWriter, r *http.Request) {
 	}
 	buf.WriteTo(w)
 	w.Header().Set("Content-Disposition", "attachment; filename=bingo-boards.zip")
-}
-
-// WithGzip wraps the handler with a handler that writes responses using gzip compression when accepted.
-func WithGzip(h http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-			h.ServeHTTP(w, r)
-			return
-		}
-		gzw := gzip.NewWriter(w)
-		defer gzw.Close()
-		wrw := wrappedResponseWriter{
-			Writer:         gzw,
-			ResponseWriter: w,
-		}
-		wrw.Header().Set("Content-Encoding", "gzip")
-		h.ServeHTTP(wrw, r)
-	}
-}
-
-// wrappedResponseWriter wraps response writing with another writer.
-type wrappedResponseWriter struct {
-	io.Writer
-	http.ResponseWriter
-}
-
-// Write delegates the write to the wrapped writer.
-func (wrw wrappedResponseWriter) Write(p []byte) (n int, err error) {
-	return wrw.Writer.Write(p)
 }
 
 // parseGame parses the game, writing parse errors to the response
