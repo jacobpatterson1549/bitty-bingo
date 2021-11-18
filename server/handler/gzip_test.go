@@ -16,7 +16,7 @@ func TestWithGzip(t *testing.T) {
 		r := httptest.NewRequest(methodGet, "/", nil)
 		r.Header.Add(headerAcceptEncoding, test.acceptEncoding)
 		WithGzip(h).ServeHTTP(w, r)
-		contentEncoding := w.Header().Get(headerContentEncoding)
+		contentEncoding := w.Header().Get("Content-Encoding")
 		gotGzip := contentEncoding == "gzip"
 		gotMessage := w.Body.String()
 		switch {
@@ -41,7 +41,7 @@ var withGzipTests = []struct {
 	},
 	{
 		name:           "with gzip accept encoding",
-		acceptEncoding: acceptEncodingsCommon,
+		acceptEncoding: "gzip, deflate, br",
 		wantGzip:       true,
 		wantBodyStart:  "\x1f\x8b\x08", // magic number (1f8b) and compression method for deflate (08)
 	},

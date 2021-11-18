@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -70,191 +69,68 @@ func TestServerShutdown(t *testing.T) {
 }
 
 func TestHTTPHandler(t *testing.T) {
+	cfg := Config{
+		HTTPSPort: "8000",
+	}
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "http://example.com:8001/", nil)
+	h := cfg.httpHandler()
+	r.Header = http.Header{
+		"Accept-Encoding": {"gzip, deflate, br"},
+	}
+	h.ServeHTTP(w, r)
+	gotStatusCode := w.Code
 	wantStatusCode := 301
-	for i, test := range httpHandlerTests {
-		w := httptest.NewRecorder()
-		h := test.cfg.httpHandler()
-		test.r.Header = test.header
-		h.ServeHTTP(w, test.r)
-		gotStatusCode := w.Code
-		gotHeader := w.Header()
-		switch {
-		case wantStatusCode != gotStatusCode:
-			t.Errorf("test %v (%v): HTTP response status codes not equal: wanted %v, got %v: %v", i, test.name, wantStatusCode, w.Code, w.Body.String())
-		case !reflect.DeepEqual(test.wantHeader, gotHeader):
-			t.Errorf("test %v (%v): HTTP response headers not equal:\nwanted: %v\ngot:    %v", i, test.name, test.wantHeader, gotHeader)
-		}
+	wantHeader := http.Header{
+		"Content-Encoding": {"gzip"},
+		"Content-Type":     {"text/html; charset=utf-8"},
+		"Location":         {"https://example.com:8000/"},
+	}
+	gotHeader := w.Header()
+	switch {
+	case wantStatusCode != gotStatusCode:
+		t.Errorf("HTTP response status codes not equal: wanted %v, got %v: %v", wantStatusCode, w.Code, w.Body.String())
+	case !reflect.DeepEqual(wantHeader, gotHeader):
+		t.Errorf("HTTP response headers not equal:\nwanted: %v\ngot:    %v", wantHeader, gotHeader)
 	}
 }
 
 func TestHTTPSHandler(t *testing.T) {
-	t.Run("valid configs", func(t *testing.T) {
-		for i, test := range httpsHandlerTests {
-			w := httptest.NewRecorder()
-			h, err := test.cfg.httpsHandler()
-			if err != nil {
-				t.Errorf("test %v (%v): creating handler: %v", i, test.name, err)
-				continue
-			}
-			test.r.Header = test.header
-			h.ServeHTTP(w, test.r)
-			gotStatusCode := w.Code
-			gotHeader := w.Header()
-			switch {
-			case test.wantStatusCode != gotStatusCode:
-				t.Errorf("test %v (%v): HTTPS response status codes not equal: wanted %v, got %v: %v", i, test.name, test.wantStatusCode, w.Code, w.Body.String())
-			case !reflect.DeepEqual(test.wantHeader, gotHeader):
-				t.Errorf("test %v (%v): HTTPS response headers not equal:\nwanted: %v\ngot:    %v", i, test.name, test.wantHeader, gotHeader)
-			}
+	t.Run("valid config", func(t *testing.T) {
+		cfg := Config{
+			GameCount: 10,
+			Time: func() string {
+				return "time"
+			},
+		}
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "https://example.com/", nil)
+		h, err := cfg.httpsHandler()
+		if err != nil {
+			t.Fatalf("creating handler: %v", err)
+		}
+		r.Header = http.Header{
+			"Accept-Encoding": {"gzip, deflate, br"},
+		}
+		h.ServeHTTP(w, r)
+		wantStatusCode := 200
+		gotStatusCode := w.Code
+		wantHeader := http.Header{
+			"Content-Encoding": {"gzip"},
+			"Content-Type":     {"application/x-gzip"},
+		}
+		gotHeader := w.Header()
+		switch {
+		case wantStatusCode != gotStatusCode:
+			t.Errorf("HTTPS response status codes not equal: wanted %v, got %v: %v", wantStatusCode, w.Code, w.Body.String())
+		case !reflect.DeepEqual(wantHeader, gotHeader):
+			t.Errorf("HTTPS response headers not equal:\nwanted: %v\ngot:    %v", wantHeader, gotHeader)
 		}
 	})
-	t.Run("bad configs", func(t *testing.T) {
-		tests := []struct {
-			cfg  Config
-			name string
-		}{
-			{
-				name: "zero values [zero game count]",
-			},
-			{
-				cfg: Config{
-					GameCount: -9,
-					Time: func() string {
-						return "anything"
-					},
-				},
-				name: "nonPositiveGameCount",
-			},
-			{
-				cfg: Config{
-					GameCount: 9,
-				},
-				name: "no time func",
-			},
-		}
-		for i, test := range tests {
-			if _, err := test.cfg.httpsHandler(); err == nil {
-				t.Errorf("test %v (%v): wanted error for bad config: %#v", i, test.name, test.cfg)
-			}
+	t.Run("bad config", func(t *testing.T) {
+		var cfg Config
+		if _, err := cfg.httpsHandler(); err == nil {
+			t.Errorf("wanted error for bad config")
 		}
 	})
 }
-
-const (
-	schemeHTTP               = "http"
-	schemeHTTPS              = "https"
-	host                     = "example.com"
-	methodGet                = "GET"
-	methodPost               = "POST"
-	headerContentType        = "Content-Type"
-	headerLocation           = "Location"
-	headerContentEncoding    = "Content-Encoding"
-	headerAcceptEncoding     = "Accept-Encoding"
-	contentTypeTextHTML      = "text/html; charset=utf-8"
-	contentTypeEncodedForm   = "application/x-www-form-urlencoded"
-	contentTypeGzip          = "application/x-gzip"
-	contentEncodingGzip      = "gzip"
-	acceptEncodingsCommon    = "gzip, deflate, br"
-	board1257894001IDNumbers = "DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"
-)
-
-var (
-	httpHandlerTests = []struct {
-		name       string
-		cfg        Config
-		r          *http.Request
-		header     http.Header
-		wantHeader http.Header
-	}{
-		{
-			name: "default http port to default HTTP port",
-			cfg: Config{
-				HTTPSPort: "443",
-			},
-			r: httptest.NewRequest(methodGet, schemeHTTP+"://"+host+"/", nil),
-			wantHeader: http.Header{
-				headerContentType: {contentTypeTextHTML},
-				headerLocation:    {schemeHTTPS + "://" + host + "/"},
-			},
-		},
-		{
-			name: "redirect to custom HTTPS port",
-			cfg: Config{
-				HTTPSPort: "8000",
-			},
-			r: httptest.NewRequest(methodGet, schemeHTTP+"://"+host+":8001/", nil),
-			wantHeader: http.Header{
-				headerContentType: {contentTypeTextHTML},
-				headerLocation:    {schemeHTTPS + "://" + host + ":8000/"},
-			},
-		},
-		{
-			name: "redirect with gzip",
-			cfg: Config{
-				HTTPSPort: "8000",
-			},
-			r: httptest.NewRequest(methodGet, schemeHTTP+"://"+host+":8001/", nil),
-			header: http.Header{
-				headerAcceptEncoding: {acceptEncodingsCommon},
-			},
-			wantHeader: http.Header{
-				headerContentEncoding: {contentEncodingGzip},
-				headerContentType:     {contentTypeTextHTML},
-				headerLocation:        {schemeHTTPS + "://" + host + ":8000/"},
-			},
-		},
-	}
-
-	httpsHandlerTests = []struct {
-		name           string
-		cfg            Config
-		r              *http.Request
-		header         http.Header
-		wantStatusCode int
-		wantHeader     http.Header
-	}{
-		{
-			name: "root with no accept encodings",
-			cfg: Config{
-				GameCount: 10,
-				Time:      func() string { return "time" },
-			},
-			r:              httptest.NewRequest(methodGet, schemeHTTPS+"://"+host+"/", nil),
-			wantStatusCode: 200,
-			wantHeader: http.Header{
-				headerContentType: {contentTypeTextHTML},
-			},
-		},
-		{
-			name: "root with gzip",
-			cfg: Config{
-				GameCount: 10,
-				Time:      func() string { return "time" },
-			},
-			r: httptest.NewRequest(methodGet, schemeHTTPS+"://"+host+"/", nil),
-			header: http.Header{
-				headerAcceptEncoding: {acceptEncodingsCommon},
-			},
-			wantStatusCode: 200,
-			wantHeader: http.Header{
-				headerContentEncoding: {contentEncodingGzip},
-				headerContentType:     {contentTypeGzip},
-			},
-		},
-		{
-			name: "draw number",
-			cfg: Config{
-				GameCount: 10,
-				Time:      func() string { return "then" },
-			},
-			r: httptest.NewRequest(methodPost, schemeHTTPS+"://"+host+""+"/game/draw_number", strings.NewReader("gameID=8-"+board1257894001IDNumbers)),
-			header: http.Header{
-				headerContentType: {contentTypeEncodedForm},
-			},
-			wantStatusCode: 303,
-			wantHeader: http.Header{
-				headerLocation: {"/game?gameID=9-" + board1257894001IDNumbers},
-			},
-		},
-	}
-)
