@@ -12,23 +12,31 @@ import (
 	"github.com/jacobpatterson1549/bitty-bingo/server/handler"
 )
 
-// Config is used to create a server.
-type Config struct {
-	// HTTPSRedirect causes the server to run a redirect from HTTPPORT to HTTPSPort when set
-	HTTPSRedirect bool
-	// HTTPPort is the HTTP port the server runs on.
-	HTTPPort string
-	// HTTPSPort is the HTTPS port the server runs on.
-	HTTPSPort string
-	// TLSCertFile is the public HTTPS TLS certificate file name.
-	TLSCertFile string
-	// TLSKeyFile is the private HTTPS TLS key file name.
-	TLSKeyFile string
-	// GameCount is the number of game states kept in the game list.
-	GameCount int
-	// Time is a function that can add a timestamp to parts of the site.
-	Time func() string
-}
+type (
+	// Server manages bingo games and creates boards.
+	Server struct {
+		Config
+		httpsServer *http.Server
+		httpServer  *http.Server
+	}
+	// Config is used to create a server.
+	Config struct {
+		// HTTPSRedirect causes the server to run a redirect from HTTPPORT to HTTPSPort when set
+		HTTPSRedirect bool
+		// HTTPPort is the HTTP port the server runs on.
+		HTTPPort string
+		// HTTPSPort is the HTTPS port the server runs on.
+		HTTPSPort string
+		// TLSCertFile is the public HTTPS TLS certificate file name.
+		TLSCertFile string
+		// TLSKeyFile is the private HTTPS TLS key file name.
+		TLSKeyFile string
+		// GameCount is the number of game states kept in the game list.
+		GameCount int
+		// Time is a function that can add a timestamp to parts of the site.
+		Time func() string
+	}
+)
 
 const (
 	// readDur is the maximum time taken to read a request before timing out.
@@ -38,13 +46,6 @@ const (
 	// stopDur is the maximum time allowed for the server to shut down.
 	stopDur = 5 * time.Second
 )
-
-// Server manages bingo games and creates boards.
-type Server struct {
-	Config
-	httpsServer *http.Server
-	httpServer  *http.Server
-}
 
 // NewServer initializes HTTP and HTTPS tcp servers from the Configs
 func (cfg Config) NewServer() (*Server, error) {

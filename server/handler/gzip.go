@@ -7,6 +7,17 @@ import (
 	"strings"
 )
 
+// wrappedResponseWriter wraps response writing with another writer.
+type wrappedResponseWriter struct {
+	io.Writer
+	http.ResponseWriter
+}
+
+// Write delegates the write to the wrapped writer.
+func (wrw wrappedResponseWriter) Write(p []byte) (n int, err error) {
+	return wrw.Writer.Write(p)
+}
+
 // WithGzip wraps the handler with a handler that writes responses using gzip compression when accepted.
 func WithGzip(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -23,15 +34,4 @@ func WithGzip(h http.Handler) http.HandlerFunc {
 		wrw.Header().Set("Content-Encoding", "gzip")
 		h.ServeHTTP(wrw, r)
 	}
-}
-
-// wrappedResponseWriter wraps response writing with another writer.
-type wrappedResponseWriter struct {
-	io.Writer
-	http.ResponseWriter
-}
-
-// Write delegates the write to the wrapped writer.
-func (wrw wrappedResponseWriter) Write(p []byte) (n int, err error) {
-	return wrw.Writer.Write(p)
 }

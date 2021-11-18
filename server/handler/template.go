@@ -15,7 +15,6 @@ var (
 	// templatesFS is the embedded filesystem containing the template files.
 	//go:embed templates
 	templatesFS embed.FS
-
 	// embeddedTemplate is the template containing the html and svg templates.
 	embeddedTemplate = template.Must(template.ParseFS(templatesFS, "templates/*"))
 )
@@ -28,14 +27,12 @@ type (
 		Game  *game
 		Board *board
 	}
-
 	// game contains the fields to render a game page.
 	game struct {
 		bingo.Game
 		BoardID  string
 		HasBingo bool
 	}
-
 	// board contains the field to export a board
 	board struct {
 		bingo.Board
