@@ -140,6 +140,24 @@ func TestHTTPSHandler(t *testing.T) {
 	})
 }
 
+const (
+	schemeHTTP               = "http"
+	schemeHTTPS              = "https"
+	host                     = "example.com"
+	methodGet                = "GET"
+	methodPost               = "POST"
+	headerContentType        = "Content-Type"
+	headerLocation           = "Location"
+	headerContentEncoding    = "Content-Encoding"
+	headerAcceptEncoding     = "Accept-Encoding"
+	contentTypeTextHTML      = "text/html; charset=utf-8"
+	contentTypeEncodedForm   = "application/x-www-form-urlencoded"
+	contentTypeGzip          = "application/x-gzip"
+	contentEncodingGzip      = "gzip"
+	acceptEncodingsCommon    = "gzip, deflate, br"
+	board1257894001IDNumbers = "DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"
+)
+
 var (
 	httpHandlerTests = []struct {
 		name       string
@@ -229,13 +247,13 @@ var (
 				GameCount: 10,
 				Time:      func() string { return "then" },
 			},
-			r: httptest.NewRequest(methodPost, schemeHTTPS+"://"+host+""+urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=8-"+board1257894001IDNumbers)),
+			r: httptest.NewRequest(methodPost, schemeHTTPS+"://"+host+""+"/game/draw_number", strings.NewReader("gameID=8-"+board1257894001IDNumbers)),
 			header: http.Header{
 				headerContentType: {contentTypeEncodedForm},
 			},
 			wantStatusCode: 303,
 			wantHeader: http.Header{
-				headerLocation: {urlPathGame + "?" + qpGameID + "=9-" + board1257894001IDNumbers},
+				headerLocation: {"/game?gameID=9-" + board1257894001IDNumbers},
 			},
 		},
 	}
