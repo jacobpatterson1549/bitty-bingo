@@ -17,7 +17,7 @@ type (
 	// handler tracks servers HTTP requests and stores recent game infos.
 	// The time function is used to create game infos
 	handler struct {
-		MuxHandler
+		Mux
 		gameInfos []gameInfo
 		time      func() string
 	}
@@ -65,8 +65,8 @@ func redirectHandler(httpsPort string) http.HandlerFunc {
 
 // ServeHTTP serves requests for GET and POST methods, not allowing others.
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if h.MuxHandler == nil {
-		h.MuxHandler = MuxHandler{
+	if h.Mux == nil {
+		h.Mux = Mux{
 			"GET": {
 				"/":                 h.getGames,
 				"/game":             h.getGame,
@@ -83,7 +83,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 	}
-	h.MuxHandler.ServeHTTP(w, r)
+	h.Mux.ServeHTTP(w, r)
 }
 
 // httpError writes the message with statusCode to the response.

@@ -2,11 +2,11 @@ package server
 
 import "net/http"
 
-// MuxHandler is http Handler that is a map of methods to path handler maps
-type MuxHandler map[string]map[string]http.HandlerFunc
+// Mux is http Handler that is a map of methods to path handler maps
+type Mux map[string]map[string]http.HandlerFunc
 
 // ServeHTTP serves to the path for the method of the request on the handler if such a Handler exists.
-func (m MuxHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (m Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	methodHandlers, ok := m[r.Method]
 	if !ok {
 		httpError(w, "", http.StatusMethodNotAllowed)

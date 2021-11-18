@@ -330,7 +330,7 @@ var httpsHandlerServeHTTPTests = []struct {
 		r:              httptest.NewRequest(methodPost, urlPathGameBoard, nil),
 		wantStatusCode: 303,
 		wantHeader: http.Header{
-			headerLocation:    {urlPathGameBoard + "?" + qpBoardID + "=" + board1257894001ID},
+			headerLocation: {urlPathGameBoard + "?" + qpBoardID + "=" + board1257894001ID},
 		},
 	},
 	{

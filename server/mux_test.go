@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func TestMuxHandlerServeHTTP(t *testing.T) {
-	for i, test := range muxHandlerTests {
+func TestMuxServeHTTP(t *testing.T) {
+	for i, test := range muxTests {
 		w := httptest.NewRecorder()
-		test.MuxHandler.ServeHTTP(w, test.Request)
+		test.Mux.ServeHTTP(w, test.Request)
 		if want, got := test.wantStatusCode, w.Code; want != got {
 			t.Errorf("test %v (%v): status codes not equal: wanted %v, got %v", i, test.name, want, got)
 		}
@@ -28,39 +28,39 @@ var (
 	okHandler = func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 	}
-	muxHandlerTests = []struct {
-		MuxHandler
+	muxTests = []struct {
+		Mux
 		*http.Request
 		name           string
 		wantStatusCode int
 	}{
 		{
 			name:           "empty mux",
-			MuxHandler:     MuxHandler{},
+			Mux:            Mux{},
 			Request:        httptest.NewRequest(methodGET, "/", nil),
 			wantStatusCode: 405,
 		},
 		{
 			name:           "page not found",
-			MuxHandler:     MuxHandler{methodGET: {"/b": okHandler}},
+			Mux:            Mux{methodGET: {"/b": okHandler}},
 			Request:        httptest.NewRequest(methodGET, "/a", nil),
 			wantStatusCode: 404,
 		},
 		{
 			name:           "get to post endpoint",
-			MuxHandler:     MuxHandler{methodGET: {"/": okHandler}},
+			Mux:            Mux{methodGET: {"/": okHandler}},
 			Request:        httptest.NewRequest(methodPOST, "/", nil),
 			wantStatusCode: 405,
 		},
 		{
 			name:           "ok: single endpoint",
-			MuxHandler:     MuxHandler{methodPOST: {"/": okHandler}},
+			Mux:            Mux{methodPOST: {"/": okHandler}},
 			Request:        httptest.NewRequest(methodPOST, "/", nil),
 			wantStatusCode: 200,
 		},
 		{
 			name: "ok: multiple handlers",
-			MuxHandler: MuxHandler{
+			Mux: Mux{
 				methodGET: {
 					"/":       nil,
 					"/help":   nil,
