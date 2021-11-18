@@ -1,3 +1,4 @@
+// Package handler evaluates site requests.
 package handler
 
 import (
