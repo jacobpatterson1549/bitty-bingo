@@ -17,6 +17,7 @@ type (
 	// handler tracks servers HTTP requests and stores recent game infos.
 	// The time function is used to create game infos
 	handler struct {
+		MuxHandler
 		gameInfos []gameInfo
 		time      func() string
 	}
@@ -64,16 +65,25 @@ func redirectHandler(httpsPort string) http.HandlerFunc {
 
 // ServeHTTP serves requests for GET and POST methods, not allowing others.
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	m := http.NewServeMux()
-	m.HandleFunc("/", h.getGames)
-	m.HandleFunc("/game", h.getGame)
-	m.HandleFunc("/game/board/check", h.checkBoard)
-	m.HandleFunc("/game/board", h.getBoard)
-	m.HandleFunc("/help", h.getHelp)
-	m.HandleFunc("/about", h.getAbout)
-	m.HandleFunc("/game/draw_number", h.drawNumber)
-	m.HandleFunc("/game/boards", h.createBoards)
-	m.ServeHTTP(w, r)
+	if h.MuxHandler == nil {
+		h.MuxHandler = MuxHandler{
+			"GET": {
+				"/":                 h.getGames,
+				"/game":             h.getGame,
+				"/game/board/check": h.checkBoard,
+				"/game/board":       h.getBoard,
+				"/help":             h.getHelp,
+				"/about":            h.getAbout,
+			},
+			"POST": {
+				"/game":             h.createGame,
+				"/game/draw_number": h.drawNumber,
+				"/game/board":       h.createBoard,
+				"/game/boards":      h.createBoards,
+			},
+		}
+	}
+	h.MuxHandler.ServeHTTP(w, r)
 }
 
 // httpError writes the message with statusCode to the response.
@@ -91,7 +101,7 @@ func (h handler) getGames(w http.ResponseWriter, r *http.Request) {
 
 // getGame renders the game page onto the response with the game of the 'gameID' query parameter.
 // The 'boardID' and 'bingo' query parameters are also used to forward the results of a BINGO check.
-func (h handler) getGame(w http.ResponseWriter, r *http.Request) {
+func (handler) getGame(w http.ResponseWriter, r *http.Request) {
 	gameID := r.URL.Query().Get("gameID")
 	boardID := r.URL.Query().Get("boardID")
 	hasBingo := r.URL.Query().Has("bingo")
@@ -109,21 +119,34 @@ func (h handler) getGame(w http.ResponseWriter, r *http.Request) {
 	handleGame(w, *g, boardID, hasBingo)
 }
 
+// createGame renders an empty game
+func (handler) createGame(w http.ResponseWriter, r *http.Request) {
+	var g bingo.Game
+	var boardID string
+	var hasBingo bool
+	handleGame(w, g, boardID, hasBingo)
+}
+
 // getBoard renders the board page onto the response or create a new board and redirects to it.
 func (handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	boardID := r.URL.Query().Get("boardID")
-	var b *bingo.Board
-	if len(boardID) == 0 {
-		b = bingo.NewBoard()
-		boardID, _ := b.ID()
-		http.Redirect(w, r, "/game/board?boardID="+boardID, http.StatusSeeOther)
-		return
-	}
 	b, ok := parseBoard(boardID, w)
 	if !ok {
 		return
 	}
 	handleBoard(w, *b)
+}
+
+// createBoard redirects to a new board.
+func (handler) createBoard(w http.ResponseWriter, r *http.Request) {
+	b := bingo.NewBoard()
+	boardID, err := b.ID()
+	if err != nil {
+		message := fmt.Sprintf("problem getting new board id: %v\nboard: %#v", err, b)
+		httpError(w, message, http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/game/board?boardID="+boardID, http.StatusSeeOther)
 }
 
 // getHelp renders the help page onto the response.
@@ -204,7 +227,7 @@ func (h *handler) drawNumber(w http.ResponseWriter, r *http.Request) {
 }
 
 // createBoards creates 'n' boards as specified by the request's form parameter, attaching the boards in a zip file.
-func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
+func (handler) createBoards(w http.ResponseWriter, r *http.Request) {
 	nQueryParam := r.FormValue("n")
 	n, err := strconv.Atoi(nQueryParam)
 	if err != nil {

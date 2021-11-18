@@ -153,7 +153,6 @@ const (
 	urlPathGame               = "/game"
 	urlPathGameCheckBoard     = "/game/board/check"
 	urlPathGameBoard          = "/game/board"
-	urlPathgameCreate         = "/game/create"
 	urlPathGameDrawNumber     = "/game/draw_number"
 	urlPathGameBoards         = "/game/boards"
 	urlPathHelp               = "/help"
@@ -327,11 +326,10 @@ var httpsHandlerServeHTTPTests = []struct {
 		},
 	},
 	{
-		name:           "get new board",
-		r:              httptest.NewRequest(methodGet, urlPathGameBoard, nil),
+		name:           "create board",
+		r:              httptest.NewRequest(methodPost, urlPathGameBoard, nil),
 		wantStatusCode: 303,
 		wantHeader: http.Header{
-			headerContentType: {contentTypeTextHTML},
 			headerLocation:    {urlPathGameBoard + "?" + qpBoardID + "=" + board1257894001ID},
 		},
 	},
@@ -363,7 +361,7 @@ var httpsHandlerServeHTTPTests = []struct {
 		name:           "create game",
 		gameInfos:      []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
 		wantGameInfos:  []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
-		r:              httptest.NewRequest(methodGet, urlPathGame, nil),
+		r:              httptest.NewRequest(methodPost, urlPathGame, nil),
 		wantStatusCode: 200,
 		wantHeader: http.Header{
 			headerContentType: {contentTypeTextHTML},
@@ -467,15 +465,15 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	// {
-	// 	name:           "get - not found",
-	// 	r:              httptest.NewRequest(methodGet, "/UNKNOWN", nil),
-	// 	wantStatusCode: 404,
-	// 	wantHeader: http.Header{
-	// 		headerContentType:         {contentTypeTextPlain},
-	// 		headerXContentTypeOptions: {xContentTypeNoSniff},
-	// 	},
-	// },
+	{
+		name:           "get - not found",
+		r:              httptest.NewRequest(methodGet, "/UNKNOWN", nil),
+		wantStatusCode: 404,
+		wantHeader: http.Header{
+			headerContentType:         {contentTypeTextPlain},
+			headerXContentTypeOptions: {xContentTypeNoSniff},
+		},
+	},
 	{
 		name:           "draw number - no form content type header (cannot parse game id)",
 		time:           func() string { return "" },
@@ -537,24 +535,24 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	// {
-	// 	name:           "post - not found",
-	// 	r:              httptest.NewRequest(methodPost, "/UNKNOWN", nil),
-	// 	wantStatusCode: 404,
-	// 	wantHeader: http.Header{
-	// 		headerContentType:         {contentTypeTextPlain},
-	// 		headerXContentTypeOptions: {xContentTypeNoSniff},
-	// 	},
-	// },
-	// {
-	// 	name:           "bad method",
-	// 	r:              httptest.NewRequest("DELETE", "/", nil),
-	// 	wantStatusCode: 405,
-	// 	wantHeader: http.Header{
-	// 		headerContentType:         {contentTypeTextPlain},
-	// 		headerXContentTypeOptions: {xContentTypeNoSniff},
-	// 	},
-	// },
+	{
+		name:           "post - not found",
+		r:              httptest.NewRequest(methodPost, "/UNKNOWN", nil),
+		wantStatusCode: 404,
+		wantHeader: http.Header{
+			headerContentType:         {contentTypeTextPlain},
+			headerXContentTypeOptions: {xContentTypeNoSniff},
+		},
+	},
+	{
+		name:           "bad method",
+		r:              httptest.NewRequest("DELETE", "/", nil),
+		wantStatusCode: 405,
+		wantHeader: http.Header{
+			headerContentType:         {contentTypeTextPlain},
+			headerXContentTypeOptions: {xContentTypeNoSniff},
+		},
+	},
 }
 
 var withGzipTests = []struct {
