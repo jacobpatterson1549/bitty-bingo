@@ -467,15 +467,15 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{
-		name:           "get - not found",
-		r:              httptest.NewRequest(methodGet, "/UNKNOWN", nil),
-		wantStatusCode: 404,
-		wantHeader: http.Header{
-			headerContentType:         {contentTypeTextPlain},
-			headerXContentTypeOptions: {xContentTypeNoSniff},
-		},
-	},
+	// {
+	// 	name:           "get - not found",
+	// 	r:              httptest.NewRequest(methodGet, "/UNKNOWN", nil),
+	// 	wantStatusCode: 404,
+	// 	wantHeader: http.Header{
+	// 		headerContentType:         {contentTypeTextPlain},
+	// 		headerXContentTypeOptions: {xContentTypeNoSniff},
+	// 	},
+	// },
 	{
 		name:           "draw number - no form content type header (cannot parse game id)",
 		time:           func() string { return "" },
@@ -537,24 +537,24 @@ var httpsHandlerServeHTTPTests = []struct {
 			headerXContentTypeOptions: {xContentTypeNoSniff},
 		},
 	},
-	{
-		name:           "post - not found",
-		r:              httptest.NewRequest(methodPost, "/UNKNOWN", nil),
-		wantStatusCode: 404,
-		wantHeader: http.Header{
-			headerContentType:         {contentTypeTextPlain},
-			headerXContentTypeOptions: {xContentTypeNoSniff},
-		},
-	},
-	{
-		name:           "bad method",
-		r:              httptest.NewRequest("DELETE", "/", nil),
-		wantStatusCode: 405,
-		wantHeader: http.Header{
-			headerContentType:         {contentTypeTextPlain},
-			headerXContentTypeOptions: {xContentTypeNoSniff},
-		},
-	},
+	// {
+	// 	name:           "post - not found",
+	// 	r:              httptest.NewRequest(methodPost, "/UNKNOWN", nil),
+	// 	wantStatusCode: 404,
+	// 	wantHeader: http.Header{
+	// 		headerContentType:         {contentTypeTextPlain},
+	// 		headerXContentTypeOptions: {xContentTypeNoSniff},
+	// 	},
+	// },
+	// {
+	// 	name:           "bad method",
+	// 	r:              httptest.NewRequest("DELETE", "/", nil),
+	// 	wantStatusCode: 405,
+	// 	wantHeader: http.Header{
+	// 		headerContentType:         {contentTypeTextPlain},
+	// 		headerXContentTypeOptions: {xContentTypeNoSniff},
+	// 	},
+	// },
 }
 
 var withGzipTests = []struct {

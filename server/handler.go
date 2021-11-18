@@ -64,46 +64,16 @@ func redirectHandler(httpsPort string) http.HandlerFunc {
 
 // ServeHTTP serves requests for GET and POST methods, not allowing others.
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		h.serveGet(w, r)
-	case http.MethodPost:
-		h.servePost(w, r)
-	default:
-		httpError(w, "", http.StatusMethodNotAllowed)
-	}
-}
-
-// serveGet handles various GET requests.
-func (h handler) serveGet(w http.ResponseWriter, r *http.Request) {
-	switch r.URL.Path {
-	case "/":
-		h.getGames(w, r)
-	case "/game": // ?gameID=&boardID=&bingo
-		h.getGame(w, r)
-	case "/game/board/check": // ?gameID=&boardID=&type=
-		h.checkBoard(w, r)
-	case "/game/board": // ?boardID
-		h.getBoard(w, r)
-	case "/help":
-		h.getHelp(w, r)
-	case "/about":
-		h.getAbout(w, r)
-	default:
-		http.NotFound(w, r)
-	}
-}
-
-// servePost handles various POST requests.
-func (h *handler) servePost(w http.ResponseWriter, r *http.Request) {
-	switch r.URL.Path {
-	case "/game/draw_number": // ?gameID=
-		h.drawNumber(w, r)
-	case "/game/boards": // ?n=
-		h.createBoards(w, r)
-	default:
-		http.NotFound(w, r)
-	}
+	m := http.NewServeMux()
+	m.HandleFunc("/", h.getGames)
+	m.HandleFunc("/game", h.getGame)
+	m.HandleFunc("/game/board/check", h.checkBoard)
+	m.HandleFunc("/game/board", h.getBoard)
+	m.HandleFunc("/help", h.getHelp)
+	m.HandleFunc("/about", h.getAbout)
+	m.HandleFunc("/game/draw_number", h.drawNumber)
+	m.HandleFunc("/game/boards", h.createBoards)
+	m.ServeHTTP(w, r)
 }
 
 // httpError writes the message with statusCode to the response.
