@@ -10,24 +10,6 @@ import (
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
 
-func TestRedirectHandler(t *testing.T) {
-	wantStatusCode := 301
-	for i, test := range redirectHandlerTests {
-		w := httptest.NewRecorder()
-		h := Redirect(test.httpsPort)
-		test.r.Header = test.header
-		h.ServeHTTP(w, test.r)
-		gotStatusCode := w.Code
-		gotHeader := w.Header()
-		switch {
-		case wantStatusCode != gotStatusCode:
-			t.Errorf("test %v (%v): HTTP response status codes not equal: wanted %v, got %v: %v", i, test.name, wantStatusCode, w.Code, w.Body.String())
-		case !reflect.DeepEqual(test.wantHeader, gotHeader):
-			t.Errorf("test %v (%v): HTTP response headers not equal:\nwanted: %v\ngot:    %v", i, test.name, test.wantHeader, gotHeader)
-		}
-	}
-}
-
 func TestHandler(t *testing.T) {
 	t.Run("valid configs", func(t *testing.T) {
 		for i, test := range handlerTests {
@@ -104,9 +86,6 @@ func TestHandlerServeHTTP(t *testing.T) {
 }
 
 const (
-	schemeHTTP               = "http"
-	schemeHTTPS              = "https"
-	host                     = "example.com"
 	methodGet                = "GET"
 	methodPost               = "POST"
 	headerContentType        = "Content-Type"
@@ -139,32 +118,6 @@ const (
 )
 
 var (
-	redirectHandlerTests = []struct {
-		name       string
-		httpsPort  string
-		r          *http.Request
-		header     http.Header
-		wantHeader http.Header
-	}{
-		{
-			name:      "default http port to default HTTP port",
-			httpsPort: "443",
-			r:         httptest.NewRequest(methodGet, schemeHTTP+"://"+host+"/", nil),
-			wantHeader: http.Header{
-				headerContentType: {contentTypeHTML},
-				headerLocation:    {schemeHTTPS + "://" + host + "/"},
-			},
-		},
-		{
-			name:      "redirect to custom HTTPS port",
-			httpsPort: "8000",
-			r:         httptest.NewRequest(methodGet, schemeHTTP+"://"+host+":8001/", nil),
-			wantHeader: http.Header{
-				headerContentType: {contentTypeHTML},
-				headerLocation:    {schemeHTTPS + "://" + host + ":8000/"},
-			},
-		},
-	}
 	handlerTests = []struct {
 		name           string
 		gameCount      int
@@ -178,7 +131,7 @@ var (
 			name:           "root with no accept encodings",
 			gameCount:      10,
 			time:           func() string { return "time" },
-			r:              httptest.NewRequest(methodGet, schemeHTTPS+"://"+host+"/", nil),
+			r:              httptest.NewRequest(methodGet, urlPathGames, nil),
 			wantStatusCode: 200,
 			wantHeader: http.Header{
 				headerContentType: {contentTypeHTML},
@@ -188,7 +141,7 @@ var (
 			name:      "draw number",
 			gameCount: 10,
 			time:      func() string { return "then" },
-			r:         httptest.NewRequest(methodPost, schemeHTTPS+"://"+host+""+"/game/draw_number", strings.NewReader("gameID=8-"+board1257894001IDNumbers)),
+			r:         httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader("gameID=8-"+board1257894001IDNumbers)),
 			header: http.Header{
 				headerContentType: {contentTypeEncodedForm},
 			},
