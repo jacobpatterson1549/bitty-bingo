@@ -129,8 +129,6 @@ func (p page) executeIndexTemplate(t *template.Template, w io.Writer) error {
 		}
 		return err
 	}
-	if _, err := buf.WriteTo(w); err != nil {
-		return err
-	}
-	return nil
+	_, err := buf.WriteTo(w)
+	return err
 }
