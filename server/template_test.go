@@ -13,7 +13,7 @@ import (
 
 func TestHandleHelp(t *testing.T) {
 	var w bytes.Buffer
-	err := handleHelp(&w)
+	err := executeHelpTemplate(&w)
 	switch {
 	case err != nil:
 		t.Error(err)
@@ -24,7 +24,7 @@ func TestHandleHelp(t *testing.T) {
 
 func TestHandleAbout(t *testing.T) {
 	var w bytes.Buffer
-	err := handleAbout(&w)
+	err := executeAboutTemplate(&w)
 	switch {
 	case err != nil:
 		t.Error(err)
@@ -68,7 +68,7 @@ func TestHandleGame(t *testing.T) {
 		}
 	for i, test := range tests {
 		var w bytes.Buffer
-		err := handleGame(&w, test.game, test.boardID, test.hasBingo)
+		err := executeGameTemplate(&w, test.game, test.boardID, test.hasBingo)
 		got := w.String()
 		switch {
 		case err != nil:
@@ -87,7 +87,7 @@ func TestHandleGames(t *testing.T) {
 		NumbersLeft: 36,
 	}
 	gameInfos := []gameInfo{gi}
-	err := handleGames(&w, gameInfos)
+	err := executeGamesTemplate(&w, gameInfos)
 	got := w.String()
 	switch {
 	case err != nil:
@@ -105,7 +105,7 @@ func TestHandleBoard(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		var w bytes.Buffer
 		b := board1257894001
-		err := handleBoard(&w, b)
+		err := executeBoardTemplate(&w, b)
 		got := w.String()
 		switch {
 		case err != nil:
@@ -117,7 +117,7 @@ func TestHandleBoard(t *testing.T) {
 	t.Run("bad", func(t *testing.T) {
 		var w bytes.Buffer
 		var b bingo.Board
-		if err := handleBoard(&w, b); err == nil {
+		if err := executeBoardTemplate(&w, b); err == nil {
 			t.Error("wanted export error rending board with bad id")
 		}
 	})
@@ -127,7 +127,7 @@ func TestHandleExportBoard(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		b := board1257894001
 		var w bytes.Buffer
-		if err := handleExportBoard(&w, b); err != nil {
+		if err := executeBoardExportTemplate(&w, b); err != nil {
 			t.Fatalf("unwanted export error: %v", err)
 		}
 		got := w.String()
@@ -141,7 +141,7 @@ func TestHandleExportBoard(t *testing.T) {
 	t.Run("bad", func(t *testing.T) {
 		var b bingo.Board
 		var w bytes.Buffer
-		if err := handleExportBoard(&w, b); err == nil {
+		if err := executeBoardExportTemplate(&w, b); err == nil {
 			t.Error("wanted export error exporting board with bad id")
 		}
 	})
@@ -170,7 +170,7 @@ func TestHandleIndexResponseWriter(t *testing.T) {
 	}
 	for i, test := range tests {
 		w := httptest.NewRecorder()
-		err := test.page.handleIndex(test.t, w)
+		err := test.page.executeIndexTemplate(test.t, w)
 		gotOk := err == nil
 		gotStatusCode := w.Code
 		switch {

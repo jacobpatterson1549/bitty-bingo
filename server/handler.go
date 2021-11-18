@@ -96,7 +96,7 @@ func httpError(w http.ResponseWriter, message string, statusCode int) {
 
 // getGames renders the games page onto the response with the game infos.
 func (h handler) getGames(w http.ResponseWriter, r *http.Request) {
-	handleGames(w, h.gameInfos)
+	executeGamesTemplate(w, h.gameInfos)
 }
 
 // getGame renders the game page onto the response with the game of the 'gameID' query parameter.
@@ -116,7 +116,7 @@ func (handler) getGame(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	handleGame(w, *g, boardID, hasBingo)
+	executeGameTemplate(w, *g, boardID, hasBingo)
 }
 
 // createGame renders an empty game
@@ -124,7 +124,7 @@ func (handler) createGame(w http.ResponseWriter, r *http.Request) {
 	var g bingo.Game
 	var boardID string
 	var hasBingo bool
-	handleGame(w, g, boardID, hasBingo)
+	executeGameTemplate(w, g, boardID, hasBingo)
 }
 
 // getBoard renders the board page onto the response or create a new board and redirects to it.
@@ -134,7 +134,7 @@ func (handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	handleBoard(w, *b)
+	executeBoardTemplate(w, *b)
 }
 
 // createBoard redirects to a new board.
@@ -151,12 +151,12 @@ func (handler) createBoard(w http.ResponseWriter, r *http.Request) {
 
 // getHelp renders the help page onto the response.
 func (handler) getHelp(w http.ResponseWriter, r *http.Request) {
-	handleHelp(w)
+	executeHelpTemplate(w)
 }
 
 // getAbout renders the about page onto the response.
 func (handler) getAbout(w http.ResponseWriter, r *http.Request) {
-	handleAbout(w)
+	executeAboutTemplate(w)
 }
 
 // checkBoard checks the board on the game with a checkType using the 'gameID', 'boardID', and 'type' query parameters.
@@ -250,7 +250,7 @@ func (handler) createBoards(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		board := bingo.NewBoard()
-		if err := handleExportBoard(f, *board); err != nil {
+		if err := executeBoardExportTemplate(f, *board); err != nil {
 			message := fmt.Sprintf("unexpected problem adding board #%v to zip file: %v", i, err)
 			httpError(w, message, http.StatusInternalServerError)
 			return

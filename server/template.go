@@ -56,24 +56,24 @@ func newTemplateBoard(b bingo.Board) (*board, error) {
 	return &templateBoard, nil
 }
 
-// handleHelp renders the help html page.
-func handleHelp(w io.Writer) error {
+// executeHelpTemplate renders the help html page.
+func executeHelpTemplate(w io.Writer) error {
 	p := page{
 		Name: "help",
 	}
-	return p.handleIndex(embeddedTemplate, w)
+	return p.executeIndexTemplate(embeddedTemplate, w)
 }
 
-// handleAbout renders the about html page.
-func handleAbout(w io.Writer) error {
+// executeAboutTemplate renders the about html page.
+func executeAboutTemplate(w io.Writer) error {
 	p := page{
 		Name: "about",
 	}
-	return p.handleIndex(embeddedTemplate, w)
+	return p.executeIndexTemplate(embeddedTemplate, w)
 }
 
-// handleGame renders the game html page.
-func handleGame(w io.Writer, g bingo.Game, boardID string, hasBingo bool) error {
+// executeGameTemplate renders the game html page.
+func executeGameTemplate(w io.Writer, g bingo.Game, boardID string, hasBingo bool) error {
 	templateGame := game{
 		Game:     g,
 		BoardID:  boardID,
@@ -83,20 +83,20 @@ func handleGame(w io.Writer, g bingo.Game, boardID string, hasBingo bool) error 
 		Name: "game",
 		Game: &templateGame,
 	}
-	return p.handleIndex(embeddedTemplate, w)
+	return p.executeIndexTemplate(embeddedTemplate, w)
 }
 
-// handleGames renders the games list html page.
-func handleGames(w io.Writer, gameInfos []gameInfo) error {
+// executeGamesTemplate renders the games list html page.
+func executeGamesTemplate(w io.Writer, gameInfos []gameInfo) error {
 	p := page{
 		Name: "list",
 		List: gameInfos,
 	}
-	return p.handleIndex(embeddedTemplate, w)
+	return p.executeIndexTemplate(embeddedTemplate, w)
 }
 
-// handleBoard renders the board on the html page.
-func handleBoard(w io.Writer, b bingo.Board) error {
+// executeBoardTemplate renders the board on the html page.
+func executeBoardTemplate(w io.Writer, b bingo.Board) error {
 	templateBoard, err := newTemplateBoard(b)
 	if err != nil {
 		return err
@@ -105,11 +105,11 @@ func handleBoard(w io.Writer, b bingo.Board) error {
 		Name:  "board",
 		Board: templateBoard,
 	}
-	return p.handleIndex(embeddedTemplate, w)
+	return p.executeIndexTemplate(embeddedTemplate, w)
 }
 
-// handleExportBoard renders the board onto an svg image.
-func handleExportBoard(w io.Writer, b bingo.Board) error {
+// executeBoardExportTemplate renders the board onto an svg image.
+func executeBoardExportTemplate(w io.Writer, b bingo.Board) error {
 	templateBoard, err := newTemplateBoard(b)
 	if err != nil {
 		return err
@@ -117,10 +117,10 @@ func handleExportBoard(w io.Writer, b bingo.Board) error {
 	return embeddedTemplate.ExecuteTemplate(w, "board.svg", templateBoard)
 }
 
-// handleIndex renders the page on the index HTML template.
+// executeIndexTemplate renders the page on the index HTML template.
 // HTTPErrors are handled if Writer is a ResponseWriter.
 // Templates are written a buffer to ensure they execute correctly before they are written to the response
-func (p page) handleIndex(t *template.Template, w io.Writer) error {
+func (p page) executeIndexTemplate(t *template.Template, w io.Writer) error {
 	var buf bytes.Buffer
 	if err := t.ExecuteTemplate(&buf, "index.html", p); err != nil {
 		if rw, ok := w.(http.ResponseWriter); ok {
