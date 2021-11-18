@@ -33,10 +33,10 @@ type (
 	}
 )
 
-// rootHandler creates a HTTP handler to serve the site.
+// Handler creates a HTTP handler to serve the site.
 // The gameCount and time function are validated used from the config in the handler
 // Responses are returned gzip compression when allowed.
-func rootHandler(gameCount int, time func() string) (http.Handler, error) {
+func Handler(gameCount int, time func() string) (http.Handler, error) {
 	if gameCount < 1 {
 		return nil, fmt.Errorf("positive GameCount required, got %v", gameCount)
 	}
@@ -50,9 +50,9 @@ func rootHandler(gameCount int, time func() string) (http.Handler, error) {
 	return &h, nil
 }
 
-// redirectHandler is a handler that redirects all requests to HTTPS uris.
+// Redirect is a handler that redirects all requests to HTTPS uris.
 // The httpsPort is used to redirect requests to non-standard HTTPS ports.
-func redirectHandler(httpsPort string) http.HandlerFunc {
+func Redirect(httpsPort string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		httpsURI := "https://" + r.URL.Hostname()
 		if len(r.URL.Port()) != 0 && httpsPort != "443" {
@@ -265,8 +265,8 @@ func (handler) createBoards(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", "attachment; filename=bingo-boards.zip")
 }
 
-// withGzipHandler wraps the handler with a handler that writes responses using gzip compression when accepted.
-func withGzipHandler(h http.Handler) http.HandlerFunc {
+// WithGzip wraps the handler with a handler that writes responses using gzip compression when accepted.
+func WithGzip(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 			h.ServeHTTP(w, r)

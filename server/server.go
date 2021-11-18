@@ -128,17 +128,17 @@ func (cfg Config) serveTCP(svr *http.Server, name string, errC chan<- error, htt
 // httpHandler creates a HTTP handler that redirects all requests to HTTPS.
 // Responses are returned gzip compression when allowed.
 func (cfg Config) httpHandler() http.Handler {
-	h := redirectHandler(cfg.HTTPSPort)
-	return withGzipHandler(h)
+	h := Redirect(cfg.HTTPSPort)
+	return WithGzip(h)
 }
 
 // httpsHandler creates a HTTP handler to serve the site.
 // The gameCount and time function are validated used from the config in the handler
 // Responses are returned gzip compression when allowed.
 func (cfg Config) httpsHandler() (http.Handler, error) {
-	h, err := rootHandler(cfg.GameCount, cfg.Time)
+	h, err := Handler(cfg.GameCount, cfg.Time)
 	if err != nil {
 		return nil, fmt.Errorf("creating root handler for server: %v", err)
 	}
-	return withGzipHandler(h), nil
+	return WithGzip(h), nil
 }
