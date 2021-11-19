@@ -115,6 +115,9 @@ const (
 )
 
 var (
+	htmlHeader = http.Header{
+		headerContentType: {contentTypeHTML},
+	}
 	formHeader = http.Header{
 		headerContentType: {contentTypeEncodedForm},
 	}
@@ -137,9 +140,7 @@ var (
 			time:           func() string { return "time" },
 			r:              httptest.NewRequest(methodGet, urlPathGames, nil),
 			wantStatusCode: 200,
-			wantHeader: http.Header{
-				headerContentType: {contentTypeHTML},
-			},
+			wantHeader:     htmlHeader,
 		},
 		{
 			name:           "draw number",
@@ -167,17 +168,13 @@ var (
 			name:           "get games list",
 			r:              httptest.NewRequest(methodGet, urlPathGames, nil),
 			wantStatusCode: 200,
-			wantHeader: http.Header{
-				headerContentType: {contentTypeHTML},
-			},
+			wantHeader:     htmlHeader,
 		},
 		{
 			name:           "get game",
 			r:              httptest.NewRequest(methodGet, urlPathGame+"?"+qpGameID+"=5-"+board1257894001IDNumbers, nil),
 			wantStatusCode: 200,
-			wantHeader: http.Header{
-				headerContentType: {contentTypeHTML},
-			},
+			wantHeader:     htmlHeader,
 		},
 		{
 			name:           "check board - HasLine",
@@ -218,25 +215,19 @@ var (
 			name:           "get board by id",
 			r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+board1257894001ID, nil),
 			wantStatusCode: 200,
-			wantHeader: http.Header{
-				headerContentType: {contentTypeHTML},
-			},
+			wantHeader:     htmlHeader,
 		},
 		{
 			name:           "help",
 			r:              httptest.NewRequest(methodGet, urlPathHelp, nil),
 			wantStatusCode: 200,
-			wantHeader: http.Header{
-				headerContentType: {contentTypeHTML},
-			},
+			wantHeader:     htmlHeader,
 		},
 		{
 			name:           "about",
 			r:              httptest.NewRequest(methodGet, urlPathAbout, nil),
 			wantStatusCode: 200,
-			wantHeader: http.Header{
-				headerContentType: {contentTypeHTML},
-			},
+			wantHeader:     htmlHeader,
 		},
 		{
 			name:           "create game",
