@@ -115,6 +115,9 @@ const (
 )
 
 var (
+	formHeader = http.Header{
+		headerContentType: {contentTypeEncodedForm},
+	}
 	errorHeader = http.Header{
 		headerContentType:        {"text/plain; charset=utf-8"},
 		"X-Content-Type-Options": {"nosniff"},
@@ -139,13 +142,11 @@ var (
 			},
 		},
 		{
-			name:      "draw number",
-			gameCount: 10,
-			time:      func() string { return "then" },
-			r:         httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader("gameID=8-"+board1257894001IDNumbers)),
-			header: http.Header{
-				headerContentType: {contentTypeEncodedForm},
-			},
+			name:           "draw number",
+			gameCount:      10,
+			time:           func() string { return "then" },
+			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader("gameID=8-"+board1257894001IDNumbers)),
+			header:         formHeader,
 			wantStatusCode: 303,
 			wantHeader: http.Header{
 				headerLocation: {urlPathGame + "?" + qpGameID + "=9-" + board1257894001IDNumbers},
@@ -257,7 +258,7 @@ var (
 				NumbersLeft: 66,
 			}, {ID: "1"}, {ID: "2"}, {ID: "3"}},
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=8-"+board1257894001IDNumbers)),
-			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
+			header:         formHeader,
 			wantStatusCode: 303,
 			wantHeader: http.Header{
 				headerLocation: {urlPathGame + "?" + qpGameID + "=9-" + board1257894001IDNumbers},
@@ -273,7 +274,7 @@ var (
 				NumbersLeft: 66,
 			}, {ID: "1"}, {ID: "2"}},
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=8-"+board1257894001IDNumbers)),
-			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
+			header:         formHeader,
 			wantStatusCode: 303,
 			wantHeader: http.Header{
 				headerLocation: {urlPathGame + "?" + qpGameID + "=9-" + board1257894001IDNumbers},
@@ -284,14 +285,14 @@ var (
 			gameInfos:      append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 			wantGameInfos:  append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=75-"+board1257894001IDNumbers)),
-			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
+			header:         formHeader,
 			wantStatusCode: 304,
 			wantHeader:     http.Header{},
 		},
 		{
 			name:           "create boards",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=5")),
-			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
+			header:         formHeader,
 			wantStatusCode: 200,
 			wantHeader: http.Header{
 				headerContentType:        {"application/zip"},
@@ -352,7 +353,7 @@ var (
 		{
 			name:           "draw number - bad game id",
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"="+badID)),
-			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
+			header:         formHeader,
 			wantStatusCode: 400,
 			wantHeader:     errorHeader,
 		},
@@ -365,21 +366,21 @@ var (
 		{
 			name:           "create boards - missing number",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, nil),
-			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
+			header:         formHeader,
 			wantStatusCode: 400,
 			wantHeader:     errorHeader,
 		},
 		{
 			name:           "create boards - number too small",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=0")),
-			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
+			header:         formHeader,
 			wantStatusCode: 400,
 			wantHeader:     errorHeader,
 		},
 		{
 			name:           "create boards - number too large",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=9999999")),
-			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
+			header:         formHeader,
 			wantStatusCode: 400,
 			wantHeader:     errorHeader,
 		},
