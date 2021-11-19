@@ -86,35 +86,35 @@ func TestHandlerServeHTTP(t *testing.T) {
 }
 
 const (
-	methodGet                = "GET"
-	methodPost               = "POST"
-	headerContentType        = "Content-Type"
-	headerLocation           = "Location"
-	headerContentTypeOptions = "X-Content-Type-Options"
-	headerAcceptEncoding     = "Accept-Encoding"
-	headerContentDisposition = "Content-Disposition"
-	contentTypeHTML          = "text/html; charset=utf-8"
-	contentTypeText         = "text/plain; charset=utf-8"
-	contentTypeEncodedForm   = "application/x-www-form-urlencoded"
-	ContentTypeOptionsNoSniff       = "nosniff"
-	board1257894001IDNumbers = "DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"
-	board1257894001ID        = "5zuTsMm6CTZAs7ad"
-	badID                    = "BAD-ID"
-	urlPathGames             = "/"
-	urlPathGame              = "/game"
-	urlPathGameCheckBoard    = "/game/board/check"
-	urlPathGameBoard         = "/game/board"
-	urlPathGameDrawNumber    = "/game/draw_number"
-	urlPathGameBoards        = "/game/boards"
-	urlPathHelp              = "/help"
-	urlPathAbout             = "/about"
-	urlPathUnknown           = "/UNKNOWN"
-	qpGameID                 = "gameID"
-	qpBoardID                = "boardID"
-	qpType                   = "type"
-	qpBingo                  = "bingo"
-	typeHasLine              = "HasLine"
-	typeIsFilled             = "IsFilled"
+	methodGet                 = "GET"
+	methodPost                = "POST"
+	headerContentType         = "Content-Type"
+	headerLocation            = "Location"
+	headerContentTypeOptions  = "X-Content-Type-Options"
+	headerAcceptEncoding      = "Accept-Encoding"
+	headerContentDisposition  = "Content-Disposition"
+	contentTypeHTML           = "text/html; charset=utf-8"
+	contentTypeText           = "text/plain; charset=utf-8"
+	contentTypeEncodedForm    = "application/x-www-form-urlencoded"
+	ContentTypeOptionsNoSniff = "nosniff"
+	board1257894001IDNumbers  = "DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"
+	board1257894001ID         = "5zuTsMm6CTZAs7ad"
+	badID                     = "BAD-ID"
+	urlPathGames              = "/"
+	urlPathGame               = "/game"
+	urlPathGameCheckBoard     = "/game/board/check"
+	urlPathGameBoard          = "/game/board"
+	urlPathGameDrawNumber     = "/game/draw_number"
+	urlPathGameBoards         = "/game/boards"
+	urlPathHelp               = "/help"
+	urlPathAbout              = "/about"
+	urlPathUnknown            = "/UNKNOWN"
+	qpGameID                  = "gameID"
+	qpBoardID                 = "boardID"
+	qpType                    = "type"
+	qpBingo                   = "bingo"
+	typeHasLine               = "HasLine"
+	typeIsFilled              = "IsFilled"
 )
 
 var (
@@ -285,9 +285,7 @@ var (
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=75-"+board1257894001IDNumbers)),
 			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 			wantStatusCode: 304,
-			wantHeader: http.Header{
-				headerLocation: {urlPathGame + "?" + qpGameID + "=75-" + board1257894001IDNumbers},
-			},
+			wantHeader:     http.Header{},
 		},
 		{
 			name:           "create boards",

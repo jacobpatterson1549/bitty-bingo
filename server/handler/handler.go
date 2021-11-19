@@ -185,7 +185,7 @@ func (h *handler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	g.DrawNumber()
 	afterNumsLeft := g.NumbersLeft()
 	if beforeNumsLeft == afterNumsLeft {
-		http.Redirect(w, r, "/game?gameID="+gameID, http.StatusNotModified)
+		w.WriteHeader(http.StatusNotModified)
 		return
 	}
 	afterID, err := g.ID()
