@@ -14,7 +14,7 @@ func TestWithGzip(t *testing.T) {
 		})
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest(methodGet, "/", nil)
-		r.Header.Add(headerAcceptEncoding, test.acceptEncoding)
+		r.Header.Add("Accept-Encoding", test.acceptEncoding)
 		WithGzip(h).ServeHTTP(w, r)
 		contentEncoding := w.Header().Get("Content-Encoding")
 		gotGzip := contentEncoding == "gzip"

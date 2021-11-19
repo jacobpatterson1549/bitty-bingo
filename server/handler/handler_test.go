@@ -90,10 +90,7 @@ const (
 	methodPost               = "POST"
 	headerContentType        = "Content-Type"
 	headerLocation           = "Location"
-	headerAcceptEncoding     = "Accept-Encoding"
-	headerContentDisposition = "Content-Disposition"
 	contentTypeHTML          = "text/html; charset=utf-8"
-	contentTypeEncodedForm   = "application/x-www-form-urlencoded"
 	board1257894001IDNumbers = "DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"
 	board1257894001ID        = "5zuTsMm6CTZAs7ad"
 	badID                    = "BAD-ID"
@@ -115,11 +112,11 @@ const (
 )
 
 var (
-	htmlHeader = http.Header{
+	htmlContentTypeHeader = http.Header{
 		headerContentType: {contentTypeHTML},
 	}
-	formHeader = http.Header{
-		headerContentType: {contentTypeEncodedForm},
+	formContentTypeHeader = http.Header{
+		headerContentType: {"application/x-www-form-urlencoded"},
 	}
 	errorHeader = http.Header{
 		headerContentType:        {"text/plain; charset=utf-8"},
@@ -140,14 +137,14 @@ var (
 			time:           func() string { return "time" },
 			r:              httptest.NewRequest(methodGet, urlPathGames, nil),
 			wantStatusCode: 200,
-			wantHeader:     htmlHeader,
+			wantHeader:     htmlContentTypeHeader,
 		},
 		{
 			name:           "draw number",
 			gameCount:      10,
 			time:           func() string { return "then" },
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader("gameID=8-"+board1257894001IDNumbers)),
-			header:         formHeader,
+			header:         formContentTypeHeader,
 			wantStatusCode: 303,
 			wantHeader: http.Header{
 				headerLocation: {urlPathGame + "?" + qpGameID + "=9-" + board1257894001IDNumbers},
@@ -168,13 +165,13 @@ var (
 			name:           "get games list",
 			r:              httptest.NewRequest(methodGet, urlPathGames, nil),
 			wantStatusCode: 200,
-			wantHeader:     htmlHeader,
+			wantHeader:     htmlContentTypeHeader,
 		},
 		{
 			name:           "get game",
 			r:              httptest.NewRequest(methodGet, urlPathGame+"?"+qpGameID+"=5-"+board1257894001IDNumbers, nil),
 			wantStatusCode: 200,
-			wantHeader:     htmlHeader,
+			wantHeader:     htmlContentTypeHeader,
 		},
 		{
 			name:           "check board - HasLine",
@@ -215,19 +212,19 @@ var (
 			name:           "get board by id",
 			r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+board1257894001ID, nil),
 			wantStatusCode: 200,
-			wantHeader:     htmlHeader,
+			wantHeader:     htmlContentTypeHeader,
 		},
 		{
 			name:           "help",
 			r:              httptest.NewRequest(methodGet, urlPathHelp, nil),
 			wantStatusCode: 200,
-			wantHeader:     htmlHeader,
+			wantHeader:     htmlContentTypeHeader,
 		},
 		{
 			name:           "about",
 			r:              httptest.NewRequest(methodGet, urlPathAbout, nil),
 			wantStatusCode: 200,
-			wantHeader:     htmlHeader,
+			wantHeader:     htmlContentTypeHeader,
 		},
 		{
 			name:           "create game",
@@ -249,7 +246,7 @@ var (
 				NumbersLeft: 66,
 			}, {ID: "1"}, {ID: "2"}, {ID: "3"}},
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=8-"+board1257894001IDNumbers)),
-			header:         formHeader,
+			header:         formContentTypeHeader,
 			wantStatusCode: 303,
 			wantHeader: http.Header{
 				headerLocation: {urlPathGame + "?" + qpGameID + "=9-" + board1257894001IDNumbers},
@@ -265,7 +262,7 @@ var (
 				NumbersLeft: 66,
 			}, {ID: "1"}, {ID: "2"}},
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=8-"+board1257894001IDNumbers)),
-			header:         formHeader,
+			header:         formContentTypeHeader,
 			wantStatusCode: 303,
 			wantHeader: http.Header{
 				headerLocation: {urlPathGame + "?" + qpGameID + "=9-" + board1257894001IDNumbers},
@@ -276,18 +273,18 @@ var (
 			gameInfos:      append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 			wantGameInfos:  append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=75-"+board1257894001IDNumbers)),
-			header:         formHeader,
+			header:         formContentTypeHeader,
 			wantStatusCode: 304,
 			wantHeader:     http.Header{},
 		},
 		{
 			name:           "create boards",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=5")),
-			header:         formHeader,
+			header:         formContentTypeHeader,
 			wantStatusCode: 200,
 			wantHeader: http.Header{
-				headerContentType:        {"application/zip"},
-				headerContentDisposition: {"attachment; filename=bingo-boards.zip"},
+				headerContentType:     {"application/zip"},
+				"Content-Disposition": {"attachment; filename=bingo-boards.zip"},
 			},
 		},
 		{
@@ -344,7 +341,7 @@ var (
 		{
 			name:           "draw number - bad game id",
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"="+badID)),
-			header:         formHeader,
+			header:         formContentTypeHeader,
 			wantStatusCode: 400,
 			wantHeader:     errorHeader,
 		},
@@ -357,21 +354,21 @@ var (
 		{
 			name:           "create boards - missing number",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, nil),
-			header:         formHeader,
+			header:         formContentTypeHeader,
 			wantStatusCode: 400,
 			wantHeader:     errorHeader,
 		},
 		{
 			name:           "create boards - number too small",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=0")),
-			header:         formHeader,
+			header:         formContentTypeHeader,
 			wantStatusCode: 400,
 			wantHeader:     errorHeader,
 		},
 		{
 			name:           "create boards - number too large",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=9999999")),
-			header:         formHeader,
+			header:         formContentTypeHeader,
 			wantStatusCode: 400,
 			wantHeader:     errorHeader,
 		},
