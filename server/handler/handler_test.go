@@ -197,7 +197,7 @@ var (
 			wantStatusCode: 303,
 			wantHeader: http.Header{
 				headerContentType: {contentTypeHTML},
-				headerLocation:    {urlPathGame + "?" + qpGameID + "=1-" + board1257894001IDNumbers + "&" + qpBoardID + "=" + board1257894001ID + ""},
+				headerLocation:    {urlPathGame + "?" + qpGameID + "=1-" + board1257894001IDNumbers + "&" + qpBoardID + "=" + board1257894001ID},
 			},
 		},
 		{
@@ -245,7 +245,7 @@ var (
 				ModTime:     "the_past_a",
 				NumbersLeft: 66,
 			}, {ID: "1"}, {ID: "2"}, {ID: "3"}},
-			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=8-"+board1257894001IDNumbers)),
+			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(qpGameID+"=8-"+board1257894001IDNumbers)),
 			header:         formContentTypeHeader,
 			wantStatusCode: 303,
 			wantHeader: http.Header{
@@ -261,7 +261,7 @@ var (
 				ModTime:     "the_past_b",
 				NumbersLeft: 66,
 			}, {ID: "1"}, {ID: "2"}},
-			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=8-"+board1257894001IDNumbers)),
+			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(qpGameID+"=8-"+board1257894001IDNumbers)),
 			header:         formContentTypeHeader,
 			wantStatusCode: 303,
 			wantHeader: http.Header{
@@ -272,7 +272,7 @@ var (
 			name:           "draw number - do not change game infos if all numbers are drawn",
 			gameInfos:      append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 			wantGameInfos:  append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
-			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=75-"+board1257894001IDNumbers)),
+			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(qpGameID+"=75-"+board1257894001IDNumbers)),
 			header:         formContentTypeHeader,
 			wantStatusCode: 304,
 			wantHeader:     http.Header{},
@@ -331,16 +331,16 @@ var (
 		},
 		{
 			name:           "draw number - no form content type header (cannot parse game id)",
-			time:           func() string { return "" },
+			time:           func() string { return "time" },
 			gameInfos:      []gameInfo{{}},
 			wantGameInfos:  []gameInfo{{}},
-			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=8-"+board1257894001IDNumbers)),
+			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(qpGameID+"=8-"+board1257894001IDNumbers)),
 			wantStatusCode: 400,
 			wantHeader:     errorHeader,
 		},
 		{
 			name:           "draw number - bad game id",
-			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"="+badID)),
+			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(qpGameID+"="+badID)),
 			header:         formContentTypeHeader,
 			wantStatusCode: 400,
 			wantHeader:     errorHeader,
