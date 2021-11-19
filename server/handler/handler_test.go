@@ -94,9 +94,9 @@ const (
 	headerAcceptEncoding     = "Accept-Encoding"
 	headerContentDisposition = "Content-Disposition"
 	contentTypeHTML          = "text/html; charset=utf-8"
-	contentTypePlain         = "text/plain; charset=utf-8"
+	contentTypeText         = "text/plain; charset=utf-8"
 	contentTypeEncodedForm   = "application/x-www-form-urlencoded"
-	ContentTypeNoSniff       = "nosniff"
+	ContentTypeOptionsNoSniff       = "nosniff"
 	board1257894001IDNumbers = "DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"
 	board1257894001ID        = "5zuTsMm6CTZAs7ad"
 	badID                    = "BAD-ID"
@@ -304,8 +304,8 @@ var (
 			r:              httptest.NewRequest(methodGet, urlPathGame+"?"+qpGameID+"="+badID, nil),
 			wantStatusCode: 400,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -313,8 +313,8 @@ var (
 			r:              httptest.NewRequest(methodGet, urlPathGame, nil),
 			wantStatusCode: 400,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -322,8 +322,8 @@ var (
 			r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+badID, nil),
 			wantStatusCode: 400,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -331,8 +331,8 @@ var (
 			r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"="+badID+"&"+qpBoardID+"="+board1257894001ID+"&"+qpType+"="+typeHasLine, nil),
 			wantStatusCode: 400,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -340,8 +340,8 @@ var (
 			r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"=5-"+board1257894001IDNumbers+"&"+qpBoardID+"="+badID+"&"+qpType+"="+typeHasLine, nil),
 			wantStatusCode: 400,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -349,8 +349,8 @@ var (
 			r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"=5-"+board1257894001IDNumbers+"&"+qpBoardID+"="+board1257894001ID+"&"+qpType+"="+badID, nil),
 			wantStatusCode: 400,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -358,8 +358,8 @@ var (
 			r:              httptest.NewRequest(methodGet, urlPathUnknown, nil),
 			wantStatusCode: 404,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -370,8 +370,8 @@ var (
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=8-"+board1257894001IDNumbers)),
 			wantStatusCode: 400,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -380,8 +380,8 @@ var (
 			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 			wantStatusCode: 400,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -389,8 +389,8 @@ var (
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=5")),
 			wantStatusCode: 400,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -399,8 +399,8 @@ var (
 			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 			wantStatusCode: 400,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -409,8 +409,8 @@ var (
 			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 			wantStatusCode: 400,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -419,8 +419,8 @@ var (
 			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 			wantStatusCode: 400,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -428,8 +428,8 @@ var (
 			r:              httptest.NewRequest(methodPost, urlPathUnknown, nil),
 			wantStatusCode: 404,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 		{
@@ -437,8 +437,8 @@ var (
 			r:              httptest.NewRequest("DELETE", "/", nil),
 			wantStatusCode: 405,
 			wantHeader: http.Header{
-				headerContentType:        {contentTypePlain},
-				headerContentTypeOptions: {ContentTypeNoSniff},
+				headerContentType:        {contentTypeText},
+				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
 			},
 		},
 	}
