@@ -156,16 +156,6 @@ func TestBoardIsValid(t *testing.T) {
 	}
 }
 
-var board1257894001 = Board{
-	15, 8, 4, 12, 10, // B
-	19, 27, 16, 28, 25, // I
-	42, 41, 0, 31, 40, // N
-	49, 52, 50, 46, 57, // G
-	64, 72, 67, 70, 74, // O
-}
-
-const board1257894001ID = "5zuTsMm6CTZAs7ad"
-
 func createTestGame(t *testing.T, nums []Number) Game {
 	t.Helper()
 	var g Game
@@ -174,77 +164,88 @@ func createTestGame(t *testing.T, nums []Number) Game {
 	return g
 }
 
-var hasLineTests = []struct {
-	name string
-	nums []Number
-	want bool
-}{
-	{
-		name: "B column",
-		nums: []Number{15, 8, 4, 12, 10},
-		want: true,
-	},
-	{
-		name: "I column",
-		nums: []Number{19, 27, 16, 28, 25},
-		want: true,
-	},
-	{
-		name: "N column",
-		nums: []Number{42, 41, 31, 40},
-		want: true,
-	},
-	{
-		name: "G column",
-		nums: []Number{49, 52, 50, 46, 57},
-		want: true,
-	},
-	{
-		name: "O column",
-		nums: []Number{64, 72, 67, 70, 74},
-		want: true,
-	},
-	{
-		name: "row 1",
-		nums: []Number{15, 19, 42, 49, 64},
-		want: true,
-	},
-	{
-		name: "row 2",
-		nums: []Number{8, 27, 41, 52, 72},
-		want: true,
-	},
-	{
-		name: "row 3",
-		nums: []Number{4, 16, 50, 67},
-		want: true,
-	},
-	{
-		name: "row 4",
-		nums: []Number{12, 28, 31, 46, 70},
-		want: true,
-	},
-	{
-		name: "row 5",
-		nums: []Number{10, 25, 40, 57, 74},
-		want: true,
-	},
-	{
-		name: "diagonal 1",
-		nums: []Number{15, 27, 46, 74},
-		want: true,
-	},
-	{
-		name: "diagonal 2",
-		nums: []Number{10, 28, 52, 64},
-		want: true,
-	},
-	{
-		name: "clover leaf, no corners",
-		nums: []Number{8, 19, 27, 12, 28, 25, 49, 52, 72, 46, 57, 70},
-		want: false,
-	},
-	{
-		name: "no numbers",
-	},
-}
+const board1257894001ID = "5zuTsMm6CTZAs7ad"
+
+var (
+	board1257894001 = Board{
+		15, 8, 4, 12, 10, // B
+		19, 27, 16, 28, 25, // I
+		42, 41, 0, 31, 40, // N
+		49, 52, 50, 46, 57, // G
+		64, 72, 67, 70, 74, // O
+	}
+	hasLineTests = []struct {
+		name string
+		nums []Number
+		want bool
+	}{
+		{
+			name: "B column",
+			nums: []Number{15, 8, 4, 12, 10},
+			want: true,
+		},
+		{
+			name: "I column",
+			nums: []Number{19, 27, 16, 28, 25},
+			want: true,
+		},
+		{
+			name: "N column",
+			nums: []Number{42, 41, 31, 40},
+			want: true,
+		},
+		{
+			name: "G column",
+			nums: []Number{49, 52, 50, 46, 57},
+			want: true,
+		},
+		{
+			name: "O column",
+			nums: []Number{64, 72, 67, 70, 74},
+			want: true,
+		},
+		{
+			name: "row 1",
+			nums: []Number{15, 19, 42, 49, 64},
+			want: true,
+		},
+		{
+			name: "row 2",
+			nums: []Number{8, 27, 41, 52, 72},
+			want: true,
+		},
+		{
+			name: "row 3",
+			nums: []Number{4, 16, 50, 67},
+			want: true,
+		},
+		{
+			name: "row 4",
+			nums: []Number{12, 28, 31, 46, 70},
+			want: true,
+		},
+		{
+			name: "row 5",
+			nums: []Number{10, 25, 40, 57, 74},
+			want: true,
+		},
+		{
+			name: "diagonal 1",
+			nums: []Number{15, 27, 46, 74},
+			want: true,
+		},
+		{
+			name: "diagonal 2",
+			nums: []Number{10, 28, 52, 64},
+			want: true,
+		},
+		{
+			name: "clover leaf, no corners",
+			nums: []Number{8, 19, 27, 12, 28, 25, 49, 52, 72, 46, 57, 70},
+			want: false,
+		},
+		{
+			name: "no numbers",
+		},
+	}
+)

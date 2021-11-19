@@ -49,54 +49,55 @@ func TestParseServerConfig(t *testing.T) {
 	}
 }
 
-var sampleProgramArgs = []string{
-	"--http-port=8001",
-	"--https-port=8000",
-	"--tls-cert-file=/home/jacobpatterson1549/tls-cert.pem",
-	"--tls-key-file=/home/jacobpatterson1549/tls-key.pem",
-	"--game-count=33",
-}
-
-var parseServerConfigTests = []struct {
-	name            string
-	programArgs     []string
-	wantConfig      server.Config
-	portOverride    string
-	hasPortOverride bool
-}{
-	{
-		name: "no args (use defaults)",
-		wantConfig: server.Config{
-			HTTPSRedirect: true,
-			HTTPPort:      "80",
-			HTTPSPort:     "443",
-			GameCount:     10,
+var (
+	sampleProgramArgs = []string{
+		"--http-port=8001",
+		"--https-port=8000",
+		"--tls-cert-file=/home/jacobpatterson1549/tls-cert.pem",
+		"--tls-key-file=/home/jacobpatterson1549/tls-key.pem",
+		"--game-count=33",
+	}
+	parseServerConfigTests = []struct {
+		name            string
+		programArgs     []string
+		wantConfig      server.Config
+		portOverride    string
+		hasPortOverride bool
+	}{
+		{
+			name: "no args (use defaults)",
+			wantConfig: server.Config{
+				HTTPSRedirect: true,
+				HTTPPort:      "80",
+				HTTPSPort:     "443",
+				GameCount:     10,
+			},
 		},
-	},
-	{
-		name:        "all flags",
-		programArgs: sampleProgramArgs,
-		wantConfig: server.Config{
-			GameCount:     33,
-			HTTPPort:      "8001",
-			HTTPSPort:     "8000",
-			TLSCertFile:   "/home/jacobpatterson1549/tls-cert.pem",
-			TLSKeyFile:    "/home/jacobpatterson1549/tls-key.pem",
-			HTTPSRedirect: true,
+		{
+			name:        "all flags",
+			programArgs: sampleProgramArgs,
+			wantConfig: server.Config{
+				GameCount:     33,
+				HTTPPort:      "8001",
+				HTTPSPort:     "8000",
+				TLSCertFile:   "/home/jacobpatterson1549/tls-cert.pem",
+				TLSKeyFile:    "/home/jacobpatterson1549/tls-key.pem",
+				HTTPSRedirect: true,
+			},
 		},
-	},
-	{
-		name:        "PORT should override HTTPS port and not redirect",
-		programArgs: sampleProgramArgs,
-		wantConfig: server.Config{
-			GameCount:     33,
-			HTTPPort:      "8001",
-			HTTPSPort:     "444",
-			TLSCertFile:   "/home/jacobpatterson1549/tls-cert.pem",
-			TLSKeyFile:    "/home/jacobpatterson1549/tls-key.pem",
-			HTTPSRedirect: false,
+		{
+			name:        "PORT should override HTTPS port and not redirect",
+			programArgs: sampleProgramArgs,
+			wantConfig: server.Config{
+				GameCount:     33,
+				HTTPPort:      "8001",
+				HTTPSPort:     "444",
+				TLSCertFile:   "/home/jacobpatterson1549/tls-cert.pem",
+				TLSKeyFile:    "/home/jacobpatterson1549/tls-key.pem",
+				HTTPSRedirect: false,
+			},
+			portOverride:    "444",
+			hasPortOverride: true,
 		},
-		portOverride:    "444",
-		hasPortOverride: true,
-	},
-}
+	}
+)
