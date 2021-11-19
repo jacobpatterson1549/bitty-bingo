@@ -86,38 +86,39 @@ func TestHandlerServeHTTP(t *testing.T) {
 }
 
 const (
-	methodGet                 = "GET"
-	methodPost                = "POST"
-	headerContentType         = "Content-Type"
-	headerLocation            = "Location"
-	headerContentTypeOptions  = "X-Content-Type-Options"
-	headerAcceptEncoding      = "Accept-Encoding"
-	headerContentDisposition  = "Content-Disposition"
-	contentTypeHTML           = "text/html; charset=utf-8"
-	contentTypeText           = "text/plain; charset=utf-8"
-	contentTypeEncodedForm    = "application/x-www-form-urlencoded"
-	ContentTypeOptionsNoSniff = "nosniff"
-	board1257894001IDNumbers  = "DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"
-	board1257894001ID         = "5zuTsMm6CTZAs7ad"
-	badID                     = "BAD-ID"
-	urlPathGames              = "/"
-	urlPathGame               = "/game"
-	urlPathGameCheckBoard     = "/game/board/check"
-	urlPathGameBoard          = "/game/board"
-	urlPathGameDrawNumber     = "/game/draw_number"
-	urlPathGameBoards         = "/game/boards"
-	urlPathHelp               = "/help"
-	urlPathAbout              = "/about"
-	urlPathUnknown            = "/UNKNOWN"
-	qpGameID                  = "gameID"
-	qpBoardID                 = "boardID"
-	qpType                    = "type"
-	qpBingo                   = "bingo"
-	typeHasLine               = "HasLine"
-	typeIsFilled              = "IsFilled"
+	methodGet                = "GET"
+	methodPost               = "POST"
+	headerContentType        = "Content-Type"
+	headerLocation           = "Location"
+	headerAcceptEncoding     = "Accept-Encoding"
+	headerContentDisposition = "Content-Disposition"
+	contentTypeHTML          = "text/html; charset=utf-8"
+	contentTypeEncodedForm   = "application/x-www-form-urlencoded"
+	board1257894001IDNumbers = "DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"
+	board1257894001ID        = "5zuTsMm6CTZAs7ad"
+	badID                    = "BAD-ID"
+	urlPathGames             = "/"
+	urlPathGame              = "/game"
+	urlPathGameCheckBoard    = "/game/board/check"
+	urlPathGameBoard         = "/game/board"
+	urlPathGameDrawNumber    = "/game/draw_number"
+	urlPathGameBoards        = "/game/boards"
+	urlPathHelp              = "/help"
+	urlPathAbout             = "/about"
+	urlPathUnknown           = "/UNKNOWN"
+	qpGameID                 = "gameID"
+	qpBoardID                = "boardID"
+	qpType                   = "type"
+	qpBingo                  = "bingo"
+	typeHasLine              = "HasLine"
+	typeIsFilled             = "IsFilled"
 )
 
 var (
+	errorHeader = http.Header{
+		headerContentType:        {"text/plain; charset=utf-8"},
+		"X-Content-Type-Options": {"nosniff"},
+	}
 	handlerTests = []struct {
 		name           string
 		gameCount      int
@@ -301,64 +302,43 @@ var (
 			name:           "get game - bad id",
 			r:              httptest.NewRequest(methodGet, urlPathGame+"?"+qpGameID+"="+badID, nil),
 			wantStatusCode: 400,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "get game - missing id",
 			r:              httptest.NewRequest(methodGet, urlPathGame, nil),
 			wantStatusCode: 400,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "get new board - bad id",
 			r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+badID, nil),
 			wantStatusCode: 400,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "check board - bad game id",
 			r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"="+badID+"&"+qpBoardID+"="+board1257894001ID+"&"+qpType+"="+typeHasLine, nil),
 			wantStatusCode: 400,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "check board - bad board id",
 			r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"=5-"+board1257894001IDNumbers+"&"+qpBoardID+"="+badID+"&"+qpType+"="+typeHasLine, nil),
 			wantStatusCode: 400,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "check board - bad check type",
 			r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"=5-"+board1257894001IDNumbers+"&"+qpBoardID+"="+board1257894001ID+"&"+qpType+"="+badID, nil),
 			wantStatusCode: 400,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "get - not found",
 			r:              httptest.NewRequest(methodGet, urlPathUnknown, nil),
 			wantStatusCode: 404,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "draw number - no form content type header (cannot parse game id)",
@@ -367,77 +347,53 @@ var (
 			wantGameInfos:  []gameInfo{{}},
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"=8-"+board1257894001IDNumbers)),
 			wantStatusCode: 400,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "draw number - bad game id",
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(""+qpGameID+"="+badID)),
 			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 			wantStatusCode: 400,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "create boards - no form content type header (missing number)",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=5")),
 			wantStatusCode: 400,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "create boards - missing number",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, nil),
 			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 			wantStatusCode: 400,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "create boards - number too small",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=0")),
 			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 			wantStatusCode: 400,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "create boards - number too large",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=9999999")),
 			header:         http.Header{headerContentType: {contentTypeEncodedForm}},
 			wantStatusCode: 400,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "post - not found",
 			r:              httptest.NewRequest(methodPost, urlPathUnknown, nil),
 			wantStatusCode: 404,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 		{
 			name:           "bad method",
 			r:              httptest.NewRequest("DELETE", "/", nil),
 			wantStatusCode: 405,
-			wantHeader: http.Header{
-				headerContentType:        {contentTypeText},
-				headerContentTypeOptions: {ContentTypeOptionsNoSniff},
-			},
+			wantHeader:     errorHeader,
 		},
 	}
 )
