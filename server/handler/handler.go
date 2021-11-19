@@ -15,7 +15,7 @@ type (
 	// handler tracks servers HTTP requests and stores recent game infos.
 	// The time function is used to create game infos
 	handler struct {
-		Mux
+		http.Handler
 		gameInfos []gameInfo
 		time      func() string
 	}
@@ -50,8 +50,8 @@ func Handler(gameCount int, time func() string) (http.Handler, error) {
 
 // ServeHTTP serves requests for GET and POST methods, not allowing others.
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if h.Mux == nil {
-		h.Mux = Mux{
+	if h.Handler == nil {
+		h.Handler = Mux{
 			"GET": {
 				"/":                 h.getGames,
 				"/game":             h.getGame,
@@ -68,7 +68,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 	}
-	h.Mux.ServeHTTP(w, r)
+	h.Handler.ServeHTTP(w, r)
 }
 
 // httpError writes the message with statusCode to the response.
