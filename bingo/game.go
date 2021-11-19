@@ -22,6 +22,8 @@ type (
 		// Seed sets the GameResetter to reset the next game from a starting point.
 		Seed(seed int64)
 	}
+	// shuffler is the internal implementation of GameResetter.
+	// It uses a random source to randomly swap numbers when shuffling.
 	shuffler struct {
 		*rand.Rand
 		swap func(numbers []Number) func(i, j int)
