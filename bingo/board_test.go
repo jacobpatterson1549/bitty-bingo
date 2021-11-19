@@ -112,6 +112,40 @@ func TestBoardFromID(t *testing.T) {
 	})
 }
 
+func TestBoardIsValid(t *testing.T) {
+	tests := []struct {
+		Board
+		name string
+		want bool
+	}{
+		{
+			Board: board1257894001,
+			name: "board1257894001 - used in many tests",
+			want: true,
+		},
+		{
+			Board: Board{1,2,3,4,5,16,17,18,19,20,31,32,0,34,35,46,47,48,49,50,61,62,63,64,65},
+			name: "first five numbers for each column",
+			want: true,
+		},
+		{
+			Board: Board{1,2,3,4,5,16,17,18,19,20,31,32,33,34,35,46,47,48,49,50,61,62,63,64,65},
+			name: "non-zero center square",
+			want: false,
+		},
+		{
+			Board: Board{1,1,3,4,5,16,17,18,19,20,31,32,33,34,35,46,47,48,49,50,61,62,63,64,65},
+			name: "duplicate values",
+			want: false,
+		},
+	}
+	for i, test := range tests {
+		if want, got := test.want, test.Board.isValid(); want != got {
+			t.Errorf("test %v (%v):\nisValid() Values not equal for %v: wanted %v, got %v", i, test.name, test.Board, want, got)
+		}
+	}
+}
+
 var board1257894001 = Board{
 	15, 8, 4, 12, 10, // B
 	19, 27, 16, 28, 25, // I
