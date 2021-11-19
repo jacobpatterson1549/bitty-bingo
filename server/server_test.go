@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -133,4 +134,47 @@ func TestHTTPSHandler(t *testing.T) {
 			t.Errorf("wanted error for bad config")
 		}
 	})
+}
+
+func TestGetBoardWithQR(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test that depends on external library")
+	}
+	cfg := Config{
+		GameCount: 10,
+		Time: func() string {
+			return "time"
+		},
+	}
+	h, err := cfg.httpsHandler()
+	if err != nil {
+		t.Fatalf("error creating handler: %v", err)
+	}
+	boardID := "5zuTsMm6CTZAs7ad"
+	r := httptest.NewRequest("GET", "/game/board?boardID="+boardID, nil)
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+	got := w.Body.String()
+	tests := []struct {
+		name string
+		want string
+	}{
+		{
+			name: "The SVG image should be in document.",
+			want: `<svg`,
+		},
+		{
+			name: "The board's ID should be part of image.",
+			want: boardID,
+		},
+		{
+			name: "The QR codes seem to all start with this, the first 11 chars are from the png header.  This also checks the image width/height.",
+			want: `width="80" height="80" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQEAAAAAD76nEyAAAB`,
+		},
+	}
+	for i, test := range tests {
+		if !strings.Contains(got, test.want) {
+			t.Errorf("test %v (%v): respons body did not contain %v:\n%v", i, test.name, test.want, got)
+		}
+	}
 }

@@ -3,12 +3,16 @@ package handler
 import (
 	"bytes"
 	"embed"
+	"encoding/base64"
 	"fmt"
 	"html/template"
+	"image"
+	"image/png"
 	"io"
 	"net/http"
 
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
+	"github.com/jacobpatterson1549/bitty-bingo/server/handler/qr"
 )
 
 var (
@@ -17,6 +21,8 @@ var (
 	templatesFS embed.FS
 	// embeddedTemplate is the template containing the html and svg templates.
 	embeddedTemplate = template.Must(template.ParseFS(templatesFS, "templates/*"))
+	// Image creates an QR codeimage from the text.  For testing use only.
+	qrCode qrEncoder = qr.Image
 )
 
 type (
@@ -38,6 +44,8 @@ type (
 		bingo.Board
 		FreeSpace string
 	}
+	// qrEncoder encodes text to a QR code with the specified size.
+	qrEncoder func(text string, width, height int) (image.Image, error)
 )
 
 // newTemplateBoard creates a board to render from the bingo board
@@ -128,4 +136,23 @@ func (p page) executeIndexTemplate(t *template.Template, w io.Writer) error {
 	}
 	_, err := buf.WriteTo(w)
 	return err
+}
+
+// freeSpace converts the id of the board to a qr code, to a png image, and then encodes it with standard base64 encoding.
+func freeSpace(b bingo.Board) (string, error) {
+	id, err := b.ID()
+	if err != nil {
+		return "", fmt.Errorf("getting board id %v", err)
+	}
+	img, err := qrCode(id, 80, 80)
+	if err != nil {
+		return "", fmt.Errorf("creating qr image: %v", err)
+	}
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, img); err != nil {
+		return "", fmt.Errorf("converting barcode to png image: %v", err)
+	}
+	bytes := buf.Bytes()
+	data := base64.StdEncoding.EncodeToString(bytes)
+	return data, nil
 }
