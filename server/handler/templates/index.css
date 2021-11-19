@@ -32,9 +32,9 @@ display: flex;
 flex-direction: column;
 justify-content: space-evenly;
 }
-@media (min-width:700px) {
+@media (min-width:725px) {
 .forms-and-table {
 flex-direction: row;
-max-width: 800px;
+max-width: 725px;
 }
 }
