@@ -35,27 +35,40 @@ type (
 	}
 	// game contains the fields to render a game page.
 	game struct {
-		bingo.Game
+		Game     bingo.Game
+		GameID   string
 		BoardID  string
 		HasBingo bool
 	}
 	// board contains the field to export a board
 	board struct {
-		bingo.Board
+		Board     bingo.Board
+		BoardID   string
 		FreeSpace string
 	}
 	// qrEncoder encodes text to a QR code with the specified size.
 	qrEncoder func(text string, width, height int) (image.Image, error)
 )
 
+func newTemplateGame(g bingo.Game, gameID, boardID string, hasBingo bool) *game {
+	templateGame := game{
+		Game:     g,
+		GameID:   gameID,
+		BoardID:  boardID,
+		HasBingo: hasBingo,
+	}
+	return &templateGame
+}
+
 // newTemplateBoard creates a board to render from the bingo board
-func newTemplateBoard(b bingo.Board) (*board, error) {
+func newTemplateBoard(b bingo.Board, id string) (*board, error) {
 	data, err := freeSpace(b)
 	if err != nil {
 		return nil, fmt.Errorf("getting center square free space for board: %v", err)
 	}
 	templateBoard := board{
 		Board:     b,
+		BoardID:   id,
 		FreeSpace: data,
 	}
 	return &templateBoard, nil
@@ -78,15 +91,11 @@ func executeAboutTemplate(w io.Writer) error {
 }
 
 // executeGameTemplate renders the game html page.
-func executeGameTemplate(w io.Writer, g bingo.Game, boardID string, hasBingo bool) error {
-	templateGame := game{
-		Game:     g,
-		BoardID:  boardID,
-		HasBingo: hasBingo,
-	}
+func executeGameTemplate(w io.Writer, g bingo.Game, gameID, boardID string, hasBingo bool) error {
+	templateGame := newTemplateGame(g, gameID, boardID, hasBingo)
 	p := page{
 		Name: "game",
-		Game: &templateGame,
+		Game: templateGame,
 	}
 	return p.executeIndexTemplate(embeddedTemplate, w)
 }
@@ -101,8 +110,8 @@ func executeGamesTemplate(w io.Writer, gameInfos []gameInfo) error {
 }
 
 // executeBoardTemplate renders the board on the html page.
-func executeBoardTemplate(w io.Writer, b bingo.Board) error {
-	templateBoard, err := newTemplateBoard(b)
+func executeBoardTemplate(w io.Writer, b bingo.Board, boardID string) error {
+	templateBoard, err := newTemplateBoard(b, boardID)
 	if err != nil {
 		return err
 	}
@@ -114,8 +123,8 @@ func executeBoardTemplate(w io.Writer, b bingo.Board) error {
 }
 
 // executeBoardExportTemplate renders the board onto an svg image.
-func executeBoardExportTemplate(w io.Writer, b bingo.Board) error {
-	templateBoard, err := newTemplateBoard(b)
+func executeBoardExportTemplate(w io.Writer, b bingo.Board, boardID string) error {
+	templateBoard, err := newTemplateBoard(b, boardID)
 	if err != nil {
 		return err
 	}

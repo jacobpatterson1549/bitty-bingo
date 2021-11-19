@@ -178,14 +178,6 @@ var (
 			},
 		},
 		{
-			name:           "get game (zero)",
-			r:              httptest.NewRequest(methodGet, urlPathGame, nil),
-			wantStatusCode: 200,
-			wantHeader: http.Header{
-				headerContentType: {contentTypeHTML},
-			},
-		},
-		{
 			name:           "check board - HasLine",
 			r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"=5-"+board1257894001IDNumbers+"&"+qpBoardID+"="+board1257894001ID+"&"+qpType+"="+typeHasLine, nil),
 			wantStatusCode: 303,
@@ -249,9 +241,9 @@ var (
 			gameInfos:      []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
 			wantGameInfos:  []gameInfo{{ID: "1"}, {ID: "2"}, {ID: "3"}},
 			r:              httptest.NewRequest(methodPost, urlPathGame, nil),
-			wantStatusCode: 200,
+			wantStatusCode: 303,
 			wantHeader: http.Header{
-				headerContentType: {contentTypeHTML},
+				headerLocation: {urlPathGame + "?" + qpGameID + "=0"},
 			},
 		},
 		{
@@ -310,6 +302,15 @@ var (
 		{
 			name:           "get game - bad id",
 			r:              httptest.NewRequest(methodGet, urlPathGame+"?"+qpGameID+"="+badID, nil),
+			wantStatusCode: 400,
+			wantHeader: http.Header{
+				headerContentType:        {contentTypePlain},
+				headerContentTypeOptions: {ContentTypeNoSniff},
+			},
+		},
+		{
+			name:           "get game - missing id",
+			r:              httptest.NewRequest(methodGet, urlPathGame, nil),
 			wantStatusCode: 400,
 			wantHeader: http.Header{
 				headerContentType:        {contentTypePlain},

@@ -5,16 +5,16 @@
 
 <form id="draw-number" method="POST" action="/game/draw_number">
     <fieldset>
-        <input type="text" name="gameID" value="{{.ID}}" hidden>
-        <input type="submit" {{if  le .NumbersLeft 0}}disabled{{end}}>
+        <input type="text" name="gameID" value="{{.GameID}}" hidden>
+        <input type="submit" {{if  le .Game.NumbersLeft 0}}disabled{{end}}>
         <legend>Draw Number</legend>
-        {{with $n := .PreviousNumberDrawn}}
+        {{with $n := .Game.PreviousNumberDrawn}}
         <div>
             <label>Previous number: <span class="previous-number">{{$n}}</span></label>
         </div>
         {{end}}
         <div>
-            <label>Numbers left: {{.NumbersLeft}}</label>
+            <label>Numbers left: {{.Game.NumbersLeft}}</label>
         </div>
     </fieldset>
 </form>
@@ -42,7 +42,7 @@
         <noscript>browser cannot run javascript to scan board</noscript>
         <span id="camera-log"></span>
         <legend>Check Board</legend>
-        <input type="text" hidden name="gameID" value="{{.ID}}">
+        <input type="text" hidden name="gameID" value="{{.GameID}}">
         <div>
             <label for="board-id">Board<label>
             <input id="board-id" type="string" name="boardID" value="{{.BoardID}}" required
@@ -86,7 +86,7 @@
     </thead>
     <tbody>
         <tr>
-            {{with $cols := .DrawnNumberColumns}}
+            {{with $cols := .Game.DrawnNumberColumns}}
             <td>{{range index $cols 0}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 1}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 2}}<p>{{.}}</p>{{end}}</td>

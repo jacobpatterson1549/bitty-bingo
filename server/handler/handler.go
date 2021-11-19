@@ -90,26 +90,23 @@ func (handler) getGame(w http.ResponseWriter, r *http.Request) {
 	gameID := r.URL.Query().Get("gameID")
 	boardID := r.URL.Query().Get("boardID")
 	hasBingo := r.URL.Query().Has("bingo")
-	var g *bingo.Game
-	switch len(gameID) {
-	case 0:
-		g = new(bingo.Game)
-	default:
-		var ok bool
-		g, ok = parseGame(gameID, w)
-		if !ok {
-			return
-		}
+	g, ok := parseGame(gameID, w)
+	if !ok {
+		return
 	}
-	executeGameTemplate(w, *g, boardID, hasBingo)
+	executeGameTemplate(w, *g, gameID, boardID, hasBingo)
 }
 
 // createGame renders an empty game
 func (handler) createGame(w http.ResponseWriter, r *http.Request) {
 	var g bingo.Game
-	var boardID string
-	var hasBingo bool
-	executeGameTemplate(w, g, boardID, hasBingo)
+	gameID, err := g.ID()
+	if err != nil {
+		message := fmt.Sprintf("unexpected problem getting new game id: %v=\ngame: %#v", err, g)
+		httpError(w, message, http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/game?gameID="+gameID, http.StatusSeeOther)
 }
 
 // getBoard renders the board page onto the response or create a new board and redirects to it.
@@ -119,7 +116,7 @@ func (handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	executeBoardTemplate(w, *b)
+	executeBoardTemplate(w, *b, boardID)
 }
 
 // createBoard redirects to a new board.
@@ -127,7 +124,7 @@ func (handler) createBoard(w http.ResponseWriter, r *http.Request) {
 	b := bingo.NewBoard()
 	boardID, err := b.ID()
 	if err != nil {
-		message := fmt.Sprintf("problem getting new board id: %v\nboard: %#v", err, b)
+		message := fmt.Sprintf("unexpected problem getting new board id: %v\nboard: %#v", err, b)
 		httpError(w, message, http.StatusInternalServerError)
 		return
 	}
@@ -234,8 +231,14 @@ func (handler) createBoards(w http.ResponseWriter, r *http.Request) {
 			httpError(w, message, http.StatusInternalServerError)
 			return
 		}
-		board := bingo.NewBoard()
-		if err := executeBoardExportTemplate(f, *board); err != nil {
+		b := bingo.NewBoard()
+		boardID, err := b.ID()
+		if err != nil {
+			message := fmt.Sprintf("unexpected problem getting new board id: %v\nboard: %#v", err, b)
+			httpError(w, message, http.StatusInternalServerError)
+			return
+		}
+		if err := executeBoardExportTemplate(f, *b, boardID); err != nil {
 			message := fmt.Sprintf("unexpected problem adding board #%v to zip file: %v", i, err)
 			httpError(w, message, http.StatusInternalServerError)
 			return

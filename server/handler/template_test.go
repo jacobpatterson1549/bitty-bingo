@@ -6,12 +6,53 @@ import (
 	"html/template"
 	"image"
 	"net/http/httptest"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
+
+func TestNewTemplateGame(t *testing.T) {
+	var g bingo.Game
+	g.DrawNumber()
+	g.DrawNumber()
+	gameID := "game-464"
+	boardID := "board-1797"
+	hasBingo := true
+	want := &game{
+		Game:     g,
+		GameID:   gameID,
+		BoardID:  boardID,
+		HasBingo: true,
+	}
+	got := newTemplateGame(g, gameID, boardID, hasBingo)
+	if !reflect.DeepEqual(want, got) {
+		t.Errorf("template games not equal:\nwanted: %#v\ngot:    %#v", want, got)
+	}
+}
+
+func TestNewTemplateBoard(t *testing.T) {
+	b := bingo.NewBoard()
+	boardID := "board-1341"
+	want := &board{
+		Board:   *b,
+		BoardID: boardID,
+	}
+	got, err := newTemplateBoard(*b, boardID)
+	switch {
+	case err != nil:
+		t.Errorf("creating template board: %v", err)
+	case len(got.FreeSpace) == 0:
+		t.Errorf("board free space not set: %#v", got)
+	default:
+		got.FreeSpace = ""
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("template games not equal:\nwanted: %#v\ngot:    %#v", want, got)
+		}
+	}
+}
 
 func TestHandleHelp(t *testing.T) {
 	var w bytes.Buffer
@@ -96,7 +137,7 @@ func TestHandleGame(t *testing.T) {
 		}
 	for i, test := range tests {
 		var w bytes.Buffer
-		err := executeGameTemplate(&w, test.game, test.boardID, test.hasBingo)
+		err := executeGameTemplate(&w, test.game, "game-id", test.boardID, test.hasBingo)
 		got := w.String()
 		switch {
 		case err != nil:
@@ -133,7 +174,7 @@ func TestHandleBoard(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		var w bytes.Buffer
 		b := board1257894001
-		err := executeBoardTemplate(&w, b)
+		err := executeBoardTemplate(&w, b, "any-board-id-1")
 		got := w.String()
 		switch {
 		case err != nil:
@@ -145,7 +186,7 @@ func TestHandleBoard(t *testing.T) {
 	t.Run("bad", func(t *testing.T) {
 		var w bytes.Buffer
 		var b bingo.Board
-		if err := executeBoardTemplate(&w, b); err == nil {
+		if err := executeBoardTemplate(&w, b, "board-id-2"); err == nil {
 			t.Error("wanted export error rending board with bad id")
 		}
 	})
@@ -155,7 +196,7 @@ func TestHandleExportBoard(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		b := board1257894001
 		var w bytes.Buffer
-		if err := executeBoardExportTemplate(&w, b); err != nil {
+		if err := executeBoardExportTemplate(&w, b, "board-id-3"); err != nil {
 			t.Fatalf("unwanted export error: %v", err)
 		}
 		got := w.String()
@@ -169,7 +210,7 @@ func TestHandleExportBoard(t *testing.T) {
 	t.Run("bad", func(t *testing.T) {
 		var b bingo.Board
 		var w bytes.Buffer
-		if err := executeBoardExportTemplate(&w, b); err == nil {
+		if err := executeBoardExportTemplate(&w, b, "board-id"); err == nil {
 			t.Error("wanted export error exporting board with bad id")
 		}
 	})
