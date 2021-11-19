@@ -120,23 +120,33 @@ func TestBoardIsValid(t *testing.T) {
 	}{
 		{
 			Board: board1257894001,
-			name: "board1257894001 - used in many tests",
-			want: true,
+			name:  "board1257894001 - used in many tests",
+			want:  true,
 		},
 		{
-			Board: Board{1,2,3,4,5,16,17,18,19,20,31,32,0,34,35,46,47,48,49,50,61,62,63,64,65},
-			name: "first five numbers for each column",
-			want: true,
+			Board: Board{1, 2, 3, 4, 5, 16, 17, 18, 19, 20, 31, 32, 0, 34, 35, 46, 47, 48, 49, 50, 61, 62, 63, 64, 65},
+			name:  "first five numbers for each column",
+			want:  true,
 		},
 		{
-			Board: Board{1,2,3,4,5,16,17,18,19,20,31,32,33,34,35,46,47,48,49,50,61,62,63,64,65},
-			name: "non-zero center square",
-			want: false,
+			Board: Board{1, 2, 3, 4, 5, 16, 17, 18, 19, 20, 31, 32, 33, 34, 35, 46, 47, 48, 49, 50, 61, 62, 63, 64, 65},
+			name:  "non-zero center square",
+			want:  false,
 		},
 		{
-			Board: Board{1,1,3,4,5,16,17,18,19,20,31,32,33,34,35,46,47,48,49,50,61,62,63,64,65},
-			name: "duplicate values",
-			want: false,
+			Board: Board{1, 1, 3, 4, 5, 16, 17, 18, 19, 20, 31, 32, 33, 34, 35, 46, 47, 48, 49, 50, 61, 62, 63, 64, 65},
+			name:  "duplicate values",
+			want:  false,
+		},
+		{
+			Board: Board{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 0, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25},
+			name:  "numbers in wrong columns",
+			want:  false,
+		},
+		{
+			Board: *NewBoard(),
+			name:  "random new board should be valid",
+			want:  true,
 		},
 	}
 	for i, test := range tests {

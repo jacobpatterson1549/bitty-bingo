@@ -128,11 +128,6 @@ func (b Board) ID() (string, error) {
 	if !b.isValid() {
 		return "", errors.New("board has duplicate/invalid numbers")
 	}
-	for i, n := range b {
-		if c, col := i/5, n.Column(); i != 12 && c != col {
-			return "", errors.New("board has number at incorrect column at index " + strconv.Itoa(i))
-		}
-	}
 	data := make([]byte, 0, 12)
 	for i := 0; i < len(b); i++ {
 		l := encodeNumber(b[i])
@@ -199,5 +194,15 @@ func decodeNumber(h byte, i int) (Number, error) {
 
 // isValid determines if the board has valid numbers, no duplicates, and the center is the zero value
 func (b Board) isValid() bool {
-	return validNumbers(b[:], true) && b[12] == 0
+	return validNumbers(b[:], true) && b[12] == 0 && b.numbersInCorrectColumns()
+}
+
+// numbersInCorrectColumns ensures numbers are in correct columns
+func (b Board) numbersInCorrectColumns() bool {
+	for i, n := range b {
+		if i != 12 && n.Column() != i/5 {
+			return false
+		}
+	}
+	return true
 }
