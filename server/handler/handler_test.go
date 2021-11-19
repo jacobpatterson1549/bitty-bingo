@@ -148,7 +148,7 @@ var (
 			},
 			wantStatusCode: 303,
 			wantHeader: http.Header{
-				headerLocation: {"/game?gameID=9-" + board1257894001IDNumbers},
+				headerLocation: {urlPathGame + "?" + qpGameID + "=9-" + board1257894001IDNumbers},
 			},
 		},
 	}
