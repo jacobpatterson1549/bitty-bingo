@@ -22,18 +22,20 @@ func NewBoard() *Board {
 		g.DrawNumber()
 		n := g.PreviousNumberDrawn()
 		c := n.Column()
-		r := (columnRowCounts >> (3 * c)) & 07
-		if r < 5 {
-			b[c*5+r] = n
-			clearRowCountMask := 07 << (3 * c)
-			columnRowCounts &^= clearRowCountMask
-			r++
-			if c == 2 && r == 2 {
-				r++ // skip center cell (leave free cell as zero)
-			}
-			setRowCountMask := r << (3 * c)
-			columnRowCounts |= setRowCountMask
+		offsetC := 3 * c
+		r := (columnRowCounts >> offsetC) & 07
+		if r >= 5 {
+			continue // column has enough values
 		}
+		b[c*5+r] = n
+		clearRowCountMask := 07 << offsetC
+		columnRowCounts &^= clearRowCountMask
+		r++
+		if c == 2 && r == 2 {
+			r++ // skip center cell (leave free cell as zero)
+		}
+		setRowCountMask := r << offsetC
+		columnRowCounts |= setRowCountMask
 	}
 	return &b
 }
@@ -61,7 +63,7 @@ func (b Board) IsFilled(g Game) bool {
 }
 
 // NumberSet creates a map of all the drawn numbers in the game.
-// It also includes the zero number to always accout for the middle free cell.
+// It also includes the zero number to always account for the middle free cell.
 func numberSet(g Game) map[Number]struct{} {
 	nums := make(map[Number]struct{}, g.numbersDrawn+1)
 	nums[0] = struct{}{} // free cell
