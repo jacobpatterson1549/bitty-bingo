@@ -10,7 +10,7 @@ func TestGameResetterSwap(t *testing.T) {
 	swap := GameResetter.(*shuffler).swap(nums)
 	swap(1, 3)
 	if want, got := []Number{1, 4, 3, 2, 5}, nums; !reflect.DeepEqual(want, got) {
-		t.Errorf("swap did not work as expected on GameSetter: nums not equal:\nwanted: %v\ngot:    %v", want, got)
+		t.Errorf("swap did not work as expected on GameResetter: nums not equal:\nwanted: %v\ngot:    %v", want, got)
 	}
 }
 

@@ -47,7 +47,7 @@ const (
 	stopDur = 5 * time.Second
 )
 
-// NewServer initializes HTTP and HTTPS tcp servers from the Configs
+// NewServer initializes HTTP and HTTPS TCP servers from the Configs
 func (cfg Config) NewServer() (*Server, error) {
 	httpsHandler, err := cfg.httpsHandler()
 	if err != nil {
