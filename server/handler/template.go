@@ -5,12 +5,10 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
-	"image"
 	"io"
 	"net/http"
 
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
-	"github.com/jacobpatterson1549/bitty-bingo/server/handler/qr"
 )
 
 var (
@@ -19,8 +17,6 @@ var (
 	templatesFS embed.FS
 	// embeddedTemplate is the template containing the html and svg templates.
 	embeddedTemplate = template.Must(template.ParseFS(templatesFS, "templates/*"))
-	// Image creates an QR codeimage from the text.  For testing use only.
-	qrCode qrEncoder = qr.Image
 )
 
 type (
@@ -44,8 +40,6 @@ type (
 		BoardID   string
 		FreeSpace string
 	}
-	// qrEncoder encodes text to a QR code with the specified size.
-	qrEncoder func(text string, width, height int) (image.Image, error)
 )
 
 func newTemplateGame(g bingo.Game, gameID, boardID string, hasBingo bool) *game {

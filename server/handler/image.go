@@ -9,12 +9,20 @@ import (
 	"image/png"
 
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
+	"github.com/jacobpatterson1549/bitty-bingo/server/handler/qr"
 )
 
-// transparentImage wraps a gray16 image to make all points that are not black transparent.
-type transparentImage struct {
-	image.Image
-}
+// qrCode creates an QR codeimage from the text.
+var qrCode qrEncoder = qr.Image
+
+type (
+	// transparentImage wraps a gray16 image to make all points that are not black transparent.
+	transparentImage struct {
+		image.Image
+	}
+	// qrEncoder encodes text to a QR code with the specified size.
+	qrEncoder func(text string, width, height int) (image.Image, error)
+)
 
 // newTransparentImage creates a transparentImage from the source image which must have gray 16 color model.
 func newTransparentImage(m image.Image) (*transparentImage, error) {
