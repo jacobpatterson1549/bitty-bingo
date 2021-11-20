@@ -169,12 +169,12 @@ func TestGetBoardWithQR(t *testing.T) {
 		},
 		{
 			name: "The QR codes seem to all start with this, the first 11 chars are from the png header.  This also checks the image width/height.",
-			want: `width="80" height="80" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQEAAAAAD76nEyAAAB`,
+			want: `width="80" height="80" href="data:image/png;base64,iVBORw0KGgo`,
 		},
 	}
 	for i, test := range tests {
 		if !strings.Contains(got, test.want) {
-			t.Errorf("test %v (%v): respons body did not contain %v:\n%v", i, test.name, test.want, got)
+			t.Errorf("test %v (%v): response body did not contain %q:\n%v", i, test.name, test.want, got)
 		}
 	}
 }

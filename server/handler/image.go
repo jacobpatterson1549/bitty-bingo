@@ -4,10 +4,38 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"image"
+	"image/color"
 	"image/png"
 
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
+
+// transparentImage wraps a gray16 image to make all points that are not black transparent.
+type transparentImage struct {
+	image.Image
+}
+
+// newTransparentImage creates a transparentImage from the source image which must have gray 16 color model.
+func newTransparentImage(m image.Image) (*transparentImage, error) {
+	if cm := m.ColorModel(); cm != color.Gray16Model {
+		return nil, fmt.Errorf("color model not gray16: %v", cm)
+	}
+	return &transparentImage{m}, nil
+}
+
+// At returns the color at a point on the image, Black is preserved from the source, everything else is transparent
+func (m transparentImage) At(x, y int) color.Color {
+	if c := m.Image.At(x, y); c == color.Black {
+		return c
+	}
+	return color.Transparent
+}
+
+// ColorModel returns NRGBAModel.  This allows the transparentImage to encode transparent colors correctly to png.
+func (transparentImage) ColorModel() color.Model {
+	return color.NRGBAModel
+}
 
 // freeSpace converts the id of the board to a qr code, to a png image, and then encodes it with standard base64 encoding.
 func freeSpace(b bingo.Board) (string, error) {
@@ -20,6 +48,7 @@ func freeSpace(b bingo.Board) (string, error) {
 		return "", fmt.Errorf("creating qr image: %v", err)
 	}
 	var buf bytes.Buffer
+	img = transparentImage{img}
 	if err := png.Encode(&buf, img); err != nil {
 		return "", fmt.Errorf("converting barcode to png image: %v", err)
 	}
