@@ -60,13 +60,14 @@
             </div>
         </fieldset>
         <input type="submit">
-        {{if .BoardID}}
+        {{if .BoardID}}<div>
+            <span>Previous check:</span>
             {{if .HasBingo}}
                 <a href="/game/board?boardID={{.BoardID}}" class="has-bingo">BINGO !!!</a>
             {{else}}
                 <a href="/game/board?boardID={{.BoardID}}" class="no-bingo">No Bingo :(</a>
             {{end}}
-        {{end}}
+        </div>{{end}}
     </fieldset>
 </form>
 
