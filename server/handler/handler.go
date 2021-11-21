@@ -16,9 +16,9 @@ type (
 	// The time function is used to create game infos
 	handler struct {
 		http.Handler
-		gameInfos  []gameInfo
-		time       func() string
-		freeSpacer FreeSpacer
+		FreeSpacer
+		gameInfos []gameInfo
+		time      func() string
 	}
 
 	// gameInfo is the display value of the sate of a game at a specific time.
@@ -47,7 +47,7 @@ func Handler(gameCount int, time func() string, f FreeSpacer) (http.Handler, err
 	h := handler{
 		gameInfos:  make([]gameInfo, 0, gameCount),
 		time:       time,
-		freeSpacer: f,
+		FreeSpacer: f,
 	}
 	return &h, nil
 }
@@ -120,7 +120,7 @@ func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	executeBoardTemplate(w, *b, boardID, h.freeSpacer)
+	executeBoardTemplate(w, *b, boardID, h.FreeSpacer)
 }
 
 // createBoard redirects to a new board.
@@ -242,7 +242,7 @@ func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 			httpError(w, message, http.StatusInternalServerError)
 			return
 		}
-		if err := executeBoardExportTemplate(f, *b, boardID, h.freeSpacer); err != nil {
+		if err := executeBoardExportTemplate(f, *b, boardID, h.FreeSpacer); err != nil {
 			message := fmt.Sprintf("unexpected problem adding board #%v to zip file: %v", i, err)
 			httpError(w, message, http.StatusInternalServerError)
 			return

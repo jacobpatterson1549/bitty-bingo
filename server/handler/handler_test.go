@@ -79,7 +79,7 @@ func TestHandlerServeHTTP(t *testing.T) {
 		h := handler{
 			time:      test.time,
 			gameInfos: gameInfos,
-			freeSpacer: okMockFreeSpacer,
+			FreeSpacer: okMockFreeSpacer,
 		}
 		test.r.Header = test.header
 		bingo.GameResetter.Seed(1257894001) // make board new board creation deterministic
