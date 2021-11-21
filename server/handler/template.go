@@ -20,7 +20,6 @@ var (
 	templatesFS embed.FS
 	// embeddedTemplate is the template containing the html and svg templates.
 	embeddedTemplate = template.Must(template.ParseFS(templatesFS, "templates/*"))
-	// Image creates an QR codeimage from the text.  For testing use only.
 )
 
 type (

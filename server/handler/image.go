@@ -12,7 +12,7 @@ var (
 	transparentColor = pngColorModel.Convert(color.Transparent)
 )
 
-// transparentImage wraps a gray16 image to make all points that are not black transparent.
+// transparentImage wraps an image to make non-black pixels transparent.
 type transparentImage struct {
 	image.Image
 	blackColor color.Color
@@ -26,7 +26,7 @@ func newTransparentImage(m image.Image) *transparentImage {
 	}
 }
 
-// At returns the color at a point on the image, Black is preserved from the source, everything else is transparent
+// At returns the color at a point on the image, Black is preserved from the source, everything else is transparent.
 func (m transparentImage) At(x, y int) color.Color {
 	if c := m.Image.At(x, y); c == m.blackColor {
 		return c
