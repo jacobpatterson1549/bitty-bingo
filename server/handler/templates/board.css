@@ -17,3 +17,6 @@ font-size: 75px;
 .id {
 font-size: 8px;
 }
+image {
+image-rendering: pixelated;
+}
