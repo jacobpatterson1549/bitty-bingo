@@ -2,12 +2,12 @@ package qr
 
 import "testing"
 
-func TestImage(t *testing.T) {
+func TestQRCode(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test that depends on external library")
 	}
 	for i, test := range imageTests {
-		got, err := Image(test.text, test.width, test.height)
+		got, err := QRCode(test.text, test.width, test.height)
 		switch {
 		case !test.wantOk:
 			if err == nil {

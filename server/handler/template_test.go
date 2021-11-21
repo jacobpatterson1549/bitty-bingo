@@ -2,7 +2,9 @@ package handler
 
 import (
 	"bytes"
+	"errors"
 	"html/template"
+	"image"
 	"net/http/httptest"
 	"reflect"
 	"strconv"
@@ -10,6 +12,15 @@ import (
 	"testing"
 
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
+)
+
+var (
+	okMockFreeSpacer = &mockFreeSpacer{
+		Image: image.NewGray16(image.Rect(0, 0, 1, 1)),
+	}
+	errMockFreeSpacer = &mockFreeSpacer{
+		err: errors.New("mock FreeSpacer error"),
+	}
 )
 
 func TestNewTemplateGame(t *testing.T) {
@@ -38,7 +49,7 @@ func TestNewTemplateBoard(t *testing.T) {
 		Board:   *b,
 		BoardID: boardID,
 	}
-	got, err := newTemplateBoard(*b, boardID)
+	got, err := newTemplateBoard(*b, boardID, okMockFreeSpacer)
 	switch {
 	case err != nil:
 		t.Errorf("creating template board: %v", err)
@@ -169,49 +180,87 @@ func TestHandleGames(t *testing.T) {
 }
 
 func TestHandleBoard(t *testing.T) {
-	t.Run("ok", func(t *testing.T) {
+	tests := []struct {
+		FreeSpacer
+		name   string
+		wantOk bool
+	}{
+		{
+			name:       "ok",
+			wantOk:     true,
+			FreeSpacer: okMockFreeSpacer,
+		},
+		{
+			name:       "freeSpacer error",
+			wantOk:     false,
+			FreeSpacer: errMockFreeSpacer,
+		},
+		{
+			name:   "png encode error - image with zero size",
+			wantOk: false,
+			FreeSpacer: &mockFreeSpacer{
+				Image: image.NewGray16(image.Rect(0, 0, 0, 0)),
+			},
+		},
+	}
+	for i, test := range tests {
 		var w bytes.Buffer
 		b := board1257894001
-		err := executeBoardTemplate(&w, b, "any-board-id-1")
+		boardID := board1257894001ID
+		err := executeBoardTemplate(&w, b, boardID, test.FreeSpacer)
 		got := w.String()
 		switch {
+		case !test.wantOk:
+			if err == nil {
+				t.Errorf("test %v (%v): wanted error", i, test.name)
+			}
 		case err != nil:
-			t.Error(err)
-		case !strings.Contains(got, board1257894001ID):
-			t.Errorf("board ID missing: %v", got)
+			t.Errorf("test %v (%v): unwanted error: %v", i, test.name, err)
+		case !strings.Contains(got, boardID):
+			t.Errorf("test %v (%v): board ID missing: %v", i, test.name, got)
 		}
-	})
-	t.Run("bad", func(t *testing.T) {
-		var w bytes.Buffer
-		var b bingo.Board
-		if err := executeBoardTemplate(&w, b, "board-id-2"); err == nil {
-			t.Error("wanted export error rending board with bad id")
-		}
-	})
+	}
 }
 
 func TestHandleExportBoard(t *testing.T) {
-	t.Run("ok", func(t *testing.T) {
-		b := board1257894001
+	tests := []struct {
+		FreeSpacer
+		name   string
+		wantOk bool
+	}{
+		{
+			name:       "ok",
+			FreeSpacer: okMockFreeSpacer,
+			wantOk:     true,
+		},
+		{
+			name:       "bad",
+			FreeSpacer: errMockFreeSpacer,
+			wantOk:     false,
+		},
+	}
+	for i, test := range tests {
 		var w bytes.Buffer
-		if err := executeBoardExportTemplate(&w, b, "board-id-3"); err != nil {
-			t.Fatalf("unwanted export error: %v", err)
-		}
-		got := w.String()
-		for i, n := range b {
-			if want := ">" + strconv.Itoa(int(n)) + "<"; i != 12 && !strings.Contains(got, want) {
-				t.Errorf("wanted board export to contain %q:\n%v", want, got)
-				break
+		b := board1257894001
+		boardID := board1257894001ID
+		err := executeBoardExportTemplate(&w, b, boardID, test.FreeSpacer)
+		switch {
+		case !test.wantOk:
+			if err == nil {
+				t.Errorf("test %v (%v): wanted error", i, test.name)
+			}
+		case err != nil:
+			t.Errorf("test %v (%v): unwanted error: %v", i, test.name, err)
+		default:
+			got := w.String()
+			for i, n := range b {
+				if want := ">" + strconv.Itoa(int(n)) + "<"; i != 12 && !strings.Contains(got, want) {
+					t.Errorf("wanted board export to contain %q:\n%v", want, got)
+					break
+				}
 			}
 		}
-	})
-	t.Run("bad", func(t *testing.T) {
-		var b bingo.Board
-		var w bytes.Buffer
-		if err := executeBoardExportTemplate(&w, b, "board-id"); err == nil {
-			t.Error("wanted export error exporting board with bad id")
-		}
-	})
+	}
 }
 
 func TestHandleIndexResponseWriter(t *testing.T) {

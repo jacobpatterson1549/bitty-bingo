@@ -14,7 +14,7 @@ func TestHandler(t *testing.T) {
 	t.Run("valid configs", func(t *testing.T) {
 		for i, test := range handlerTests {
 			w := httptest.NewRecorder()
-			h, err := Handler(test.gameCount, test.time)
+			h, err := Handler(test.gameCount, test.time, okMockFreeSpacer)
 			if err != nil {
 				t.Errorf("test %v (%v): creating handler: %v", i, test.name, err)
 				continue
@@ -33,6 +33,7 @@ func TestHandler(t *testing.T) {
 	})
 	t.Run("bad parameters", func(t *testing.T) {
 		tests := []struct {
+			FreeSpacer
 			gameCount int
 			time      func() string
 			name      string
@@ -48,12 +49,20 @@ func TestHandler(t *testing.T) {
 				name: "nonPositiveGameCount",
 			},
 			{
+				gameCount:  9,
+				FreeSpacer: okMockFreeSpacer,
+				name:       "no time func",
+			},
+			{
 				gameCount: 9,
-				name:      "no time func",
+				time: func() string {
+					return "anything"
+				},
+				name: "no FreeSpacer",
 			},
 		}
 		for i, test := range tests {
-			if _, err := Handler(test.gameCount, test.time); err == nil {
+			if _, err := Handler(test.gameCount, test.time, test.FreeSpacer); err == nil {
 				t.Errorf("test %v (%v): wanted error for bad parameters", i, test.name)
 			}
 		}
@@ -70,6 +79,7 @@ func TestHandlerServeHTTP(t *testing.T) {
 		h := handler{
 			time:      test.time,
 			gameInfos: gameInfos,
+			freeSpacer: okMockFreeSpacer,
 		}
 		test.r.Header = test.header
 		bingo.GameResetter.Seed(1257894001) // make board new board creation deterministic

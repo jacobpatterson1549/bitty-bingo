@@ -3,14 +3,15 @@ package handler
 import (
 	"bytes"
 	"embed"
+	"encoding/base64"
 	"fmt"
 	"html/template"
 	"image"
+	"image/png"
 	"io"
 	"net/http"
 
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
-	"github.com/jacobpatterson1549/bitty-bingo/server/handler/qr"
 )
 
 var (
@@ -20,10 +21,14 @@ var (
 	// embeddedTemplate is the template containing the html and svg templates.
 	embeddedTemplate = template.Must(template.ParseFS(templatesFS, "templates/*"))
 	// Image creates an QR codeimage from the text.  For testing use only.
-	qrCode qrEncoder = qr.Image
 )
 
 type (
+	// FreeSpacer generates the free space image for a board.
+	FreeSpacer interface {
+		// QRCode encodes the board id to a QR code with a width and height.
+		QRCode(boardID string, width, height int) (image.Image, error)
+	}
 	// page contains all the data needed to render any html page.
 	page struct {
 		Name  string
@@ -44,8 +49,6 @@ type (
 		BoardID   string
 		FreeSpace string
 	}
-	// qrEncoder encodes text to a QR code with the specified size.
-	qrEncoder func(text string, width, height int) (image.Image, error)
 )
 
 func newTemplateGame(g bingo.Game, gameID, boardID string, hasBingo bool) *game {
@@ -59,14 +62,21 @@ func newTemplateGame(g bingo.Game, gameID, boardID string, hasBingo bool) *game 
 }
 
 // newTemplateBoard creates a board to render from the bingo board
-func newTemplateBoard(b bingo.Board, id string) (*board, error) {
-	data, err := freeSpace(b)
+func newTemplateBoard(b bingo.Board, boardID string, freeSpacer FreeSpacer) (*board, error) {
+	qrCode, err := freeSpacer.QRCode(boardID, 80, 80)
 	if err != nil {
-		return nil, fmt.Errorf("getting center square free space for board: %v", err)
+		return nil, fmt.Errorf("creating qr code for free space: %v", err)
 	}
+	var buf bytes.Buffer
+	img := newTransparentImage(qrCode)
+	if err := png.Encode(&buf, img); err != nil {
+		return nil, fmt.Errorf("converting free space qr code to png image: %v", err)
+	}
+	bytes := buf.Bytes()
+	data := base64.StdEncoding.EncodeToString(bytes)
 	templateBoard := board{
 		Board:     b,
-		BoardID:   id,
+		BoardID:   boardID,
 		FreeSpace: data,
 	}
 	return &templateBoard, nil
@@ -108,8 +118,8 @@ func executeGamesTemplate(w io.Writer, gameInfos []gameInfo) error {
 }
 
 // executeBoardTemplate renders the board on the html page.
-func executeBoardTemplate(w io.Writer, b bingo.Board, boardID string) error {
-	templateBoard, err := newTemplateBoard(b, boardID)
+func executeBoardTemplate(w io.Writer, b bingo.Board, boardID string, freeSpacer FreeSpacer) error {
+	templateBoard, err := newTemplateBoard(b, boardID, freeSpacer)
 	if err != nil {
 		return err
 	}
@@ -121,8 +131,8 @@ func executeBoardTemplate(w io.Writer, b bingo.Board, boardID string) error {
 }
 
 // executeBoardExportTemplate renders the board onto an svg image.
-func executeBoardExportTemplate(w io.Writer, b bingo.Board, boardID string) error {
-	templateBoard, err := newTemplateBoard(b, boardID)
+func executeBoardExportTemplate(w io.Writer, b bingo.Board, boardID string, freeSpacer FreeSpacer) error {
+	templateBoard, err := newTemplateBoard(b, boardID, freeSpacer)
 	if err != nil {
 		return err
 	}

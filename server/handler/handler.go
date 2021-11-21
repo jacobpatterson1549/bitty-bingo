@@ -16,8 +16,9 @@ type (
 	// The time function is used to create game infos
 	handler struct {
 		http.Handler
-		gameInfos []gameInfo
-		time      func() string
+		gameInfos  []gameInfo
+		time       func() string
+		freeSpacer FreeSpacer
 	}
 
 	// gameInfo is the display value of the sate of a game at a specific time.
@@ -34,16 +35,19 @@ type (
 // Handler creates a HTTP handler to serve the site.
 // The gameCount and time function are validated used from the config in the handler
 // Responses are returned gzip compression when allowed.
-func Handler(gameCount int, time func() string) (http.Handler, error) {
-	if gameCount < 1 {
+func Handler(gameCount int, time func() string, f FreeSpacer) (http.Handler, error) {
+	switch {
+	case gameCount < 1:
 		return nil, fmt.Errorf("positive GameCount required, got %v", gameCount)
-	}
-	if time == nil {
+	case time == nil:
 		return nil, fmt.Errorf("time function required")
+	case f == nil:
+		return nil, fmt.Errorf("FreeSpacer required")
 	}
 	h := handler{
-		gameInfos: make([]gameInfo, 0, gameCount),
-		time:      time,
+		gameInfos:  make([]gameInfo, 0, gameCount),
+		time:       time,
+		freeSpacer: f,
 	}
 	return &h, nil
 }
@@ -110,13 +114,13 @@ func (handler) createGame(w http.ResponseWriter, r *http.Request) {
 }
 
 // getBoard renders the board page onto the response or create a new board and redirects to it.
-func (handler) getBoard(w http.ResponseWriter, r *http.Request) {
+func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	boardID := r.URL.Query().Get("boardID")
 	b, ok := parseBoard(boardID, w)
 	if !ok {
 		return
 	}
-	executeBoardTemplate(w, *b, boardID)
+	executeBoardTemplate(w, *b, boardID, h.freeSpacer)
 }
 
 // createBoard redirects to a new board.
@@ -209,7 +213,7 @@ func (h *handler) drawNumber(w http.ResponseWriter, r *http.Request) {
 }
 
 // createBoards creates 'n' boards as specified by the request's form parameter, attaching the boards in a zip file.
-func (handler) createBoards(w http.ResponseWriter, r *http.Request) {
+func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 	nQueryParam := r.FormValue("n")
 	n, err := strconv.Atoi(nQueryParam)
 	if err != nil {
@@ -238,7 +242,7 @@ func (handler) createBoards(w http.ResponseWriter, r *http.Request) {
 			httpError(w, message, http.StatusInternalServerError)
 			return
 		}
-		if err := executeBoardExportTemplate(f, *b, boardID); err != nil {
+		if err := executeBoardExportTemplate(f, *b, boardID, h.freeSpacer); err != nil {
 			message := fmt.Sprintf("unexpected problem adding board #%v to zip file: %v", i, err)
 			httpError(w, message, http.StatusInternalServerError)
 			return
