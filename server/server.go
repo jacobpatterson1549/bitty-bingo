@@ -141,8 +141,7 @@ func (cfg Config) httpHandler() http.Handler {
 // The gameCount and time function are validated used from the config in the handler
 // Responses are returned gzip compression when allowed.
 func (cfg Config) httpsHandler() (http.Handler, error) {
-	var f handler.FreeSpacer = cfg
-	h, err := handler.Handler(cfg.GameCount, cfg.Time, f)
+	h, err := handler.Handler(cfg.GameCount, cfg.Time, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("creating root handler for server: %v", err)
 	}
@@ -150,5 +149,5 @@ func (cfg Config) httpsHandler() (http.Handler, error) {
 }
 
 func (Config) QRCode(text string, width, height int) (image.Image, error) {
-	return qr.QRCode(text, width, height)
+	return qr.Image(text, width, height)
 }

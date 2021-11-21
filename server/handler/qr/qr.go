@@ -9,8 +9,8 @@ import (
 	"github.com/boombuler/barcode/qr"
 )
 
-// QRCode creates an QR-code image of the text that has the specified dimensions.
-func QRCode(text string, width, height int) (image.Image, error) {
+// Image creates an QR-code image of the text that has the specified dimensions.
+func Image(text string, width, height int) (image.Image, error) {
 	qrcode, err := qr.Encode(text, qr.L, qr.Unicode)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected problem ecoding QR code image: %v", err)

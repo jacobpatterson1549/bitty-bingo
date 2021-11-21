@@ -7,7 +7,7 @@ func TestQRCode(t *testing.T) {
 		t.Skip("skipping test that depends on external library")
 	}
 	for i, test := range imageTests {
-		got, err := QRCode(test.text, test.width, test.height)
+		got, err := Image(test.text, test.width, test.height)
 		switch {
 		case !test.wantOk:
 			if err == nil {
