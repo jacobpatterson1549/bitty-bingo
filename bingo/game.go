@@ -91,9 +91,7 @@ func (s *shuffler) Reset(g *Game) {
 	for i := range g.numbers {
 		g.numbers[i] = Number(i + 1)
 	}
-	s.Rand.Shuffle(len(g.numbers), func(i, j int) {
-		g.numbers[i], g.numbers[j] = g.numbers[j], g.numbers[i]
-	})
+	s.Rand.Shuffle(len(g.numbers), s.swap(g.numbers[:]))
 	g.numbersDrawn = 0
 }
 
