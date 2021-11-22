@@ -31,7 +31,7 @@
     const scanQR = () => {
         imageCapture.grabFrame()
             .then(imageBitmap => {
-                barcodeDetector.detect(imageBitmap)
+                barcodeDetector?.detect(imageBitmap)
                     .then(barCodes => {
                         if (barCodes.length == 1) {
                             const qrCode = barCodes[0].rawValue;
