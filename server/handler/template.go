@@ -40,6 +40,7 @@ type (
 	}
 )
 
+// newTemplateGame creates a game to render from the bingo game.
 func newTemplateGame(g bingo.Game, gameID, boardID string, hasBingo bool) *game {
 	templateGame := game{
 		Game:     g,
@@ -50,7 +51,7 @@ func newTemplateGame(g bingo.Game, gameID, boardID string, hasBingo bool) *game 
 	return &templateGame
 }
 
-// newTemplateBoard creates a board to render from the bingo board
+// newTemplateBoard creates a board to render from the bingo board.
 func newTemplateBoard(b bingo.Board, boardID, freeSpace string) *board {
 	templateBoard := board{
 		Board:     b,

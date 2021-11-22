@@ -148,6 +148,7 @@ func (cfg Config) httpsHandler() (http.Handler, error) {
 	return handler.WithGzip(h), nil
 }
 
+// QRCode uses a real qr code encoder to create an image of the desired size.
 func (Config) QRCode(text string, width, height int) (image.Image, error) {
 	return qr.Image(text, width, height)
 }

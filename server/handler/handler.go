@@ -291,6 +291,7 @@ func (h handler) parseBoard(id string, w http.ResponseWriter) (b *bingo.Board, o
 	return b, true
 }
 
+// boardFreeSpace uses the FreeSpacer to encode the freeSpace image as a base64-encode png image with transparency.
 func (h handler) boardFreeSpace(boardID string) (string, error) {
 	qrCode, err := h.FreeSpacer.QRCode(boardID, 80, 80)
 	if err != nil {
