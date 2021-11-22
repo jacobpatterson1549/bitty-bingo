@@ -90,11 +90,11 @@ func (h *handler) getGames(w http.ResponseWriter, r *http.Request) {
 
 // getGame renders the game page onto the response with the game of the 'gameID' query parameter.
 // The 'boardID' and 'bingo' query parameters are also used to forward the results of a BINGO check.
-func (handler) getGame(w http.ResponseWriter, r *http.Request) {
+func (h handler) getGame(w http.ResponseWriter, r *http.Request) {
 	gameID := r.URL.Query().Get("gameID")
 	boardID := r.URL.Query().Get("boardID")
 	hasBingo := r.URL.Query().Has("bingo")
-	g, ok := parseGame(gameID, w)
+	g, ok := h.parseGame(gameID, w)
 	if !ok {
 		return
 	}
@@ -102,7 +102,7 @@ func (handler) getGame(w http.ResponseWriter, r *http.Request) {
 }
 
 // createGame renders an empty game
-func (handler) createGame(w http.ResponseWriter, r *http.Request) {
+func (h handler) createGame(w http.ResponseWriter, r *http.Request) {
 	var g bingo.Game
 	gameID, err := g.ID()
 	if err != nil {
@@ -116,7 +116,7 @@ func (handler) createGame(w http.ResponseWriter, r *http.Request) {
 // getBoard renders the board page onto the response or create a new board and redirects to it.
 func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	boardID := r.URL.Query().Get("boardID")
-	b, ok := parseBoard(boardID, w)
+	b, ok := h.parseBoard(boardID, w)
 	if !ok {
 		return
 	}
@@ -153,14 +153,14 @@ func (handler) getAbout(w http.ResponseWriter, r *http.Request) {
 
 // checkBoard checks the board on the game with a checkType using the 'gameID', 'boardID', and 'type' query parameters.
 // The results of the check are included as query parameters onto a redirect to the game page.'
-func (handler) checkBoard(w http.ResponseWriter, r *http.Request) {
+func (h handler) checkBoard(w http.ResponseWriter, r *http.Request) {
 	gameID := r.URL.Query().Get("gameID")
-	g, ok := parseGame(gameID, w)
+	g, ok := h.parseGame(gameID, w)
 	if !ok {
 		return
 	}
 	boardID := r.URL.Query().Get("boardID")
-	b, ok := parseBoard(boardID, w)
+	b, ok := h.parseBoard(boardID, w)
 	if !ok {
 		return
 	}
@@ -187,7 +187,7 @@ func (handler) checkBoard(w http.ResponseWriter, r *http.Request) {
 // The response is redirected to the updated game.  It's updated state is stored in the game infos slice.
 func (h *handler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	gameID := r.FormValue("gameID")
-	g, ok := parseGame(gameID, w)
+	g, ok := h.parseGame(gameID, w)
 	if !ok {
 		return
 	}
@@ -270,7 +270,7 @@ func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 }
 
 // parseGame parses the game, writing parse errors to the response
-func parseGame(id string, w http.ResponseWriter) (g *bingo.Game, ok bool) {
+func (h handler) parseGame(id string, w http.ResponseWriter) (g *bingo.Game, ok bool) {
 	g, err := bingo.GameFromID(id)
 	if err != nil {
 		message := fmt.Sprintf("getting game from query parameter: %v", err)
@@ -281,7 +281,7 @@ func parseGame(id string, w http.ResponseWriter) (g *bingo.Game, ok bool) {
 }
 
 // parseBoard parses the board, writing parse errors to the response
-func parseBoard(id string, w http.ResponseWriter) (b *bingo.Board, ok bool) {
+func (h handler) parseBoard(id string, w http.ResponseWriter) (b *bingo.Board, ok bool) {
 	b, err := bingo.BoardFromID(id)
 	if err != nil {
 		message := fmt.Sprintf("getting board from query parameter: %v", err)
