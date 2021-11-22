@@ -44,8 +44,9 @@ type (
 	}
 	// board contains the field to export a board
 	board struct {
-		Board     bingo.Board
-		BoardID   string
+		Board   bingo.Board
+		BoardID string
+		// FreeSpace is the base64-encoding png image that should be placed in the free space in the middl/e of the board
 		FreeSpace string
 	}
 )
