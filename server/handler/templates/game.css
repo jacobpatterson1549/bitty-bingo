@@ -1,7 +1,7 @@
 #camera-video {
     border: 1px solid;
-    height: 100px;
-    width: 100px;
+    height: 10em;
+    width: 10em;
 }
 #check-board input[hidden] + label,
 #allow-camera-checkbox:not(:checked) + * {

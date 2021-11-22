@@ -29,9 +29,9 @@ table caption {
     flex-direction: column;
     justify-content: space-evenly;
 }
-@media (min-width:725px) {
+@media (min-width:44em) {
     .forms-and-table {
         flex-direction: row;
-        max-width: 725px;
+        max-width: 44em;
     }
 }
