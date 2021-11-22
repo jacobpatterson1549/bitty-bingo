@@ -9,7 +9,6 @@ import (
 	"image"
 	"image/png"
 	"io"
-	"net/http"
 
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
@@ -140,17 +139,6 @@ func executeBoardExportTemplate(w io.Writer, b bingo.Board, boardID string, free
 }
 
 // executeIndexTemplate renders the page on the index HTML template.
-// HTTPErrors are handled if Writer is a ResponseWriter.
-// Templates are written a buffer to ensure they execute correctly before they are written to the response
 func (p page) executeIndexTemplate(t *template.Template, w io.Writer) error {
-	var buf bytes.Buffer
-	if err := t.ExecuteTemplate(&buf, "index.html", p); err != nil {
-		if rw, ok := w.(http.ResponseWriter); ok {
-			message := fmt.Sprintf("unexpected problem rendering %v template: %v", p.Name, err)
-			httpError(rw, message, http.StatusInternalServerError)
-		}
-		return err
-	}
-	_, err := buf.WriteTo(w)
-	return err
+	return t.ExecuteTemplate(w, "index.html", p)
 }

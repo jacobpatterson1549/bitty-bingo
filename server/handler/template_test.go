@@ -267,33 +267,26 @@ func TestHandleIndexResponseWriter(t *testing.T) {
 	tests := []struct {
 		name string
 		page
-		t              *template.Template
-		wantStatusCode int
-		wantOk         bool
+		t      *template.Template
+		wantOk bool
 	}{
 		{
-			name:           "unknown template",
-			t:              template.Must(template.New("unknown template").Parse("<p>template for {{.UNKNOWN}}</p>")),
-			wantStatusCode: 500,
+			name:   "unknown template",
+			t:      template.Must(template.New("unknown template").Parse("<p>template for {{.UNKNOWN}}</p>")),
+			wantOk: false,
 		},
 		{
-			name:           "empty game",
-			page:           page{Name: "about"},
-			t:              embeddedTemplate,
-			wantStatusCode: 200,
-			wantOk:         true,
+			name:   "empty game",
+			page:   page{Name: "about"},
+			t:      embeddedTemplate,
+			wantOk: true,
 		},
 	}
 	for i, test := range tests {
 		w := httptest.NewRecorder()
 		err := test.page.executeIndexTemplate(test.t, w)
-		gotOk := err == nil
-		gotStatusCode := w.Code
-		switch {
-		case test.wantOk != gotOk:
-			t.Errorf("test %v (%v): ok values not equal: wanted %v, got %v (error: %v) ", i, test.name, test.wantOk, gotOk, err)
-		case test.wantStatusCode != gotStatusCode:
-			t.Errorf("test %v (%v): status codes not equal: wanted %v, got %v", i, test.name, test.wantStatusCode, gotStatusCode)
+		if want, got := test.wantOk, err == nil; want != got {
+			t.Errorf("test %v (%v): ok values not equal: wanted %v, got %v (error: %v) ", i, test.name, want, got, err)
 		}
 	}
 }
