@@ -4,7 +4,10 @@ package handler
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/base64"
 	"fmt"
+	"image"
+	"image/png"
 	"net/http"
 	"strconv"
 
@@ -12,6 +15,11 @@ import (
 )
 
 type (
+	// FreeSpacer generates the free space image for a board.
+	FreeSpacer interface {
+		// QRCode encodes the board id to a QR code with a width and height.
+		QRCode(boardID string, width, height int) (image.Image, error)
+	}
 	// handler tracks servers HTTP requests and stores recent game infos.
 	// The time function is used to create game infos
 	handler struct {
@@ -120,7 +128,13 @@ func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	executeBoardTemplate(w, *b, boardID, h.FreeSpacer)
+	freeSpace, err := h.boardFreeSpace(boardID)
+	if err != nil {
+		message := fmt.Sprintf("unexpected problem creating board free space: %v", err)
+		httpError(w, message, http.StatusInternalServerError)
+		return
+	}
+	executeBoardTemplate(w, *b, boardID, freeSpace)
 }
 
 // createBoard redirects to a new board.
@@ -242,7 +256,13 @@ func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 			httpError(w, message, http.StatusInternalServerError)
 			return
 		}
-		if err := executeBoardExportTemplate(f, *b, boardID, h.FreeSpacer); err != nil {
+		freeSpace, err := h.boardFreeSpace(boardID)
+		if err != nil {
+			message := fmt.Sprintf("unexpected problem creating board #%v free space: %v", i, err)
+			httpError(w, message, http.StatusInternalServerError)
+			return
+		}
+		if err := executeBoardExportTemplate(f, *b, boardID, freeSpace); err != nil {
 			message := fmt.Sprintf("unexpected problem adding board #%v to zip file: %v", i, err)
 			httpError(w, message, http.StatusInternalServerError)
 			return
@@ -277,4 +297,19 @@ func parseBoard(id string, w http.ResponseWriter) (b *bingo.Board, ok bool) {
 		return nil, false
 	}
 	return b, true
+}
+
+func (h handler) boardFreeSpace(boardID string) (string, error) {
+	qrCode, err := h.FreeSpacer.QRCode(boardID, 80, 80)
+	if err != nil {
+		return "", fmt.Errorf("creating qr code for free space: %v", err)
+	}
+	var buf bytes.Buffer
+	img := newTransparentImage(qrCode)
+	if err := png.Encode(&buf, img); err != nil {
+		return "", fmt.Errorf("converting free space qr code to png image: %v", err)
+	}
+	bytes := buf.Bytes()
+	data := base64.StdEncoding.EncodeToString(bytes)
+	return data, nil
 }
