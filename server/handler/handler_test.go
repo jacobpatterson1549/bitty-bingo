@@ -97,6 +97,28 @@ func TestHandlerServeHTTP(t *testing.T) {
 	}
 }
 
+func TestDrawNumberModifiesGames(t *testing.T) {
+	w1 := httptest.NewRecorder()
+	r1 := httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(qpGameID+"=8-"+board1257894001IDNumbers))
+	r1.Header = formContentTypeHeader
+	h := handler{
+		gameInfos: make([]gameInfo, 0, 1),
+		time: func() string {
+			return "time"
+		},
+	}
+	h.ServeHTTP(w1, r1)
+	if want, got := 303, w1.Result().StatusCode; want != got {
+		t.Fatalf("draw number status codes not equal: wanted %v, got %v", want, got)
+	}
+	w2 := httptest.NewRecorder()
+	r2 := httptest.NewRequest(methodGet, urlPathGames, nil)
+	h.ServeHTTP(w2, r2)
+	if want, got := "9-"+board1257894001IDNumbers, w2.Body.String(); !strings.Contains(got, want) {
+		t.Errorf("wanted modified game history to be displayed on the games page (%v):\n%+v", want, w2)
+	}
+}
+
 const (
 	methodGet                = "GET"
 	methodPost               = "POST"

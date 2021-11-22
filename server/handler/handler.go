@@ -84,7 +84,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // getGames renders the games page onto the response with the game infos.
-func (h handler) getGames(w http.ResponseWriter, r *http.Request) {
+func (h *handler) getGames(w http.ResponseWriter, r *http.Request) {
 	executeGamesTemplate(w, h.gameInfos)
 }
 
