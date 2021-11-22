@@ -1,8 +1,8 @@
 #help-page p {
-width: clamp(45ch, 50%, 75ch);
+    width: clamp(45ch, 50%, 75ch);
 }
 @media (max-width:45ch){
-#help-page p {
-width: auto;
-}
+    #help-page p {
+        width: auto;
+    }
 }

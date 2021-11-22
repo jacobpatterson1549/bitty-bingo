@@ -1,28 +1,28 @@
 #camera-video {
-border: 1px solid;
-height: 100px;
-width: 100px;
+    border: 1px solid;
+    height: 100px;
+    width: 100px;
 }
 #check-board input[hidden] + label,
 #allow-camera-checkbox:not(:checked) + * {
-display: none;
+    display: none;
 }
 #check-board noscript,
 #camera-log {
-color: gray;
+    color: gray;
 }
 .has-bingo {
-text-shadow: 1px 1px blue;
+    text-shadow: 1px 1px blue;
 }
 .no-bingo {
-text-shadow: 1px 1px red;
+    text-shadow: 1px 1px red;
 }
 .previous-number {
-font-size: clamp(5em, 25vw, 6em);
+    font-size: clamp(5em, 25vw, 6em);
 }
 #game-drawn-numbers th {
-font-size: 4em;
+    font-size: 4em;
 }
 #game-drawn-numbers td {
-width: 4em;
+    width: 4em;
 }

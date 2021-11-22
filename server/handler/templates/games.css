@@ -1,7 +1,7 @@
 #games-list td:nth-child(1) {
-overflow-wrap: anywhere;
-max-width: 50vw;
+    overflow-wrap: anywhere;
+    max-width: 50vw;
 }
 #games-list td:nth-child(2) {
-max-width: 40vw;
+    max-width: 40vw;
 }

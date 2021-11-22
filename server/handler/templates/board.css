@@ -1,22 +1,22 @@
 line {
-stroke: black;
-stroke-width: 3;
+    stroke: black;
+    stroke-width: 3;
 }
 text {
-font-weight: bold;
-font-family: sans-serif;
-text-anchor: middle;
-dominant-baseline: central;
+    font-weight: bold;
+    font-family: sans-serif;
+    text-anchor: middle;
+    dominant-baseline: central;
 }
 .header {
-font-size: 80px;
+    font-size: 80px;
 }
 .number {
-font-size: 75px;
+    font-size: 75px;
 }
 .id {
-font-size: 8px;
+    font-size: 8px;
 }
 image {
-image-rendering: pixelated;
+    image-rendering: pixelated;
 }
