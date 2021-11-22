@@ -83,14 +83,6 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.Handler.ServeHTTP(w, r)
 }
 
-// httpError writes the message with statusCode to the response.
-func httpError(w http.ResponseWriter, message string, statusCode int) {
-	if len(message) == 0 {
-		message = http.StatusText(statusCode)
-	}
-	http.Error(w, message, statusCode)
-}
-
 // getGames renders the games page onto the response with the game infos.
 func (h handler) getGames(w http.ResponseWriter, r *http.Request) {
 	executeGamesTemplate(w, h.gameInfos)
@@ -115,7 +107,7 @@ func (handler) createGame(w http.ResponseWriter, r *http.Request) {
 	gameID, err := g.ID()
 	if err != nil {
 		message := fmt.Sprintf("unexpected problem getting new game id: %v=\ngame: %#v", err, g)
-		httpError(w, message, http.StatusInternalServerError)
+		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, "/game?gameID="+gameID, http.StatusSeeOther)
@@ -131,7 +123,7 @@ func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	freeSpace, err := h.boardFreeSpace(boardID)
 	if err != nil {
 		message := fmt.Sprintf("unexpected problem creating board free space: %v", err)
-		httpError(w, message, http.StatusInternalServerError)
+		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
 	executeBoardTemplate(w, *b, boardID, freeSpace)
@@ -143,7 +135,7 @@ func (handler) createBoard(w http.ResponseWriter, r *http.Request) {
 	boardID, err := b.ID()
 	if err != nil {
 		message := fmt.Sprintf("unexpected problem getting new board id: %v\nboard: %#v", err, b)
-		httpError(w, message, http.StatusInternalServerError)
+		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, "/game/board?boardID="+boardID, http.StatusSeeOther)
@@ -181,7 +173,7 @@ func (handler) checkBoard(w http.ResponseWriter, r *http.Request) {
 		result = b.IsFilled(*g)
 	default:
 		message := fmt.Sprintf("unknown checkType %q", checkType)
-		httpError(w, message, http.StatusBadRequest)
+		http.Error(w, message, http.StatusBadRequest)
 		return
 	}
 	url := fmt.Sprintf("/game?gameID=%v&boardID=%v", gameID, boardID)
@@ -209,7 +201,7 @@ func (h *handler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	afterID, err := g.ID()
 	if err != nil {
 		message := fmt.Sprintf("unexpected problem getting id after drawing number from game with a VALID id %q: %v", gameID, err)
-		httpError(w, message, http.StatusInternalServerError)
+		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
 	if len(h.gameInfos) < cap(h.gameInfos) {
@@ -232,11 +224,11 @@ func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 	n, err := strconv.Atoi(nQueryParam)
 	if err != nil {
 		message := fmt.Sprintf("%v: example: /game/boards?n=5 creates 5 unique boards", err)
-		httpError(w, message, http.StatusBadRequest)
+		http.Error(w, message, http.StatusBadRequest)
 		return
 	}
 	if n < 1 || n > 1000 {
-		httpError(w, "n must be be between 1 and 1000", http.StatusBadRequest)
+		http.Error(w, "n must be be between 1 and 1000", http.StatusBadRequest)
 		return
 	}
 	var buf bytes.Buffer
@@ -246,31 +238,31 @@ func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 		f, err := z.Create(fileName)
 		if err != nil {
 			message := fmt.Sprintf("unexpected problem creating file #%v in zip: %v", i, fileName)
-			httpError(w, message, http.StatusInternalServerError)
+			http.Error(w, message, http.StatusInternalServerError)
 			return
 		}
 		b := bingo.NewBoard()
 		boardID, err := b.ID()
 		if err != nil {
 			message := fmt.Sprintf("unexpected problem getting new board id: %v\nboard: %#v", err, b)
-			httpError(w, message, http.StatusInternalServerError)
+			http.Error(w, message, http.StatusInternalServerError)
 			return
 		}
 		freeSpace, err := h.boardFreeSpace(boardID)
 		if err != nil {
 			message := fmt.Sprintf("unexpected problem creating board #%v free space: %v", i, err)
-			httpError(w, message, http.StatusInternalServerError)
+			http.Error(w, message, http.StatusInternalServerError)
 			return
 		}
 		if err := executeBoardExportTemplate(f, *b, boardID, freeSpace); err != nil {
 			message := fmt.Sprintf("unexpected problem adding board #%v to zip file: %v", i, err)
-			httpError(w, message, http.StatusInternalServerError)
+			http.Error(w, message, http.StatusInternalServerError)
 			return
 		}
 	}
 	if err := z.Close(); err != nil {
 		message := fmt.Sprintf("unexpected problem closing zip file: %v", err)
-		httpError(w, message, http.StatusInternalServerError)
+		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
 	buf.WriteTo(w)
@@ -282,7 +274,7 @@ func parseGame(id string, w http.ResponseWriter) (g *bingo.Game, ok bool) {
 	g, err := bingo.GameFromID(id)
 	if err != nil {
 		message := fmt.Sprintf("getting game from query parameter: %v", err)
-		httpError(w, message, http.StatusBadRequest)
+		http.Error(w, message, http.StatusBadRequest)
 		return nil, false
 	}
 	return g, true
@@ -293,7 +285,7 @@ func parseBoard(id string, w http.ResponseWriter) (b *bingo.Board, ok bool) {
 	b, err := bingo.BoardFromID(id)
 	if err != nil {
 		message := fmt.Sprintf("getting board from query parameter: %v", err)
-		httpError(w, message, http.StatusBadRequest)
+		http.Error(w, message, http.StatusBadRequest)
 		return nil, false
 	}
 	return b, true
