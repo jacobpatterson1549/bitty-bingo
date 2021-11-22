@@ -1,20 +1,22 @@
 <svg width="500" height="600" viewBox="0 0 500 600" xmlns="http://www.w3.org/2000/svg">
 <style>{{template "board.css"}}</style>
-<!-- rows -->
-<line x1="000" y1="000" x2="500" y2="000" />
-<line x1="000" y1="100" x2="500" y2="100" />
-<line x1="000" y1="200" x2="500" y2="200" />
-<line x1="000" y1="300" x2="500" y2="300" />
-<line x1="000" y1="400" x2="500" y2="400" />
-<line x1="000" y1="500" x2="500" y2="500" />
-<line x1="000" y1="600" x2="500" y2="600" />
-<!-- columns -->
-<line x1="000" y1="000" x2="000" y2="600" />
-<line x1="100" y1="000" x2="100" y2="600" />
-<line x1="200" y1="000" x2="200" y2="600" />
-<line x1="300" y1="000" x2="300" y2="600" />
-<line x1="400" y1="000" x2="400" y2="600" />
-<line x1="500" y1="000" x2="500" y2="600" />
+<g class="rows">
+  <line x1="000" y1="000" x2="500" y2="000" />
+  <line x1="000" y1="100" x2="500" y2="100" />
+  <line x1="000" y1="200" x2="500" y2="200" />
+  <line x1="000" y1="300" x2="500" y2="300" />
+  <line x1="000" y1="400" x2="500" y2="400" />
+  <line x1="000" y1="500" x2="500" y2="500" />
+  <line x1="000" y1="600" x2="500" y2="600" />
+</g>
+<g class="columns">
+  <line x1="000" y1="000" x2="000" y2="600" />
+  <line x1="100" y1="000" x2="100" y2="600" />
+  <line x1="200" y1="000" x2="200" y2="600" />
+  <line x1="300" y1="000" x2="300" y2="600" />
+  <line x1="400" y1="000" x2="400" y2="600" />
+  <line x1="500" y1="000" x2="500" y2="600" />
+</g>
 <g class="column-b">
   <text x="050" y="050" class="header">B</text>
   <text x="050" y="150" class="number">{{(index .Board 0).Value}}</text>
@@ -35,8 +37,10 @@
   <text x="250" y="050" class="header">N</text>
   <text x="250" y="150" class="number">{{(index .Board 10).Value}}</text>
   <text x="250" y="250" class="number">{{(index .Board 11).Value}}</text>
-  <image x="210" y="310" width="80" height="80" href="data:image/png;base64,{{.FreeSpace}}"/>
-  <text x="250" y="390" class="id">{{.BoardID}}</text>
+  <g class="free-space">
+    <image x="210" y="310" width="80" height="80" href="data:image/png;base64,{{.FreeSpace}}"/>
+    <text x="250" y="390" class="id">{{.BoardID}}</text>
+  </g>
   <text x="250" y="450" class="number">{{(index .Board 13).Value}}</text>
   <text x="250" y="550" class="number">{{(index .Board 14).Value}}</text>
 </g>

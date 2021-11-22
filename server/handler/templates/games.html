@@ -41,11 +41,13 @@
         </tr>
     </thead>
     <tbody>
-        {{range .}}<tr>
+        {{- range .}}
+        <tr>
             <td><a href="/game?gameID={{.ID}}">{{.ID}}</td>
             <td>{{.ModTime}}</td>
             <td>{{.NumbersLeft}}</td>
-        </tr>{{end}}
+        </tr>
+        {{- end}}
     </tbody>
 </table>
 

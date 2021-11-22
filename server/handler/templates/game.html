@@ -8,11 +8,11 @@
         <input type="text" name="gameID" value="{{.GameID}}" hidden>
         <input type="submit" {{if  le .Game.NumbersLeft 0}}disabled{{end}}>
         <legend>Draw Number</legend>
-        {{with $n := .Game.PreviousNumberDrawn}}
+        {{- with $n := .Game.PreviousNumberDrawn}}
         <div>
             <label>Previous number: <span class="previous-number">{{$n}}</span></label>
         </div>
-        {{end}}
+        {{- end}}
         <div>
             <label>Numbers left: {{.Game.NumbersLeft}}</label>
         </div>
@@ -60,14 +60,16 @@
             </div>
         </fieldset>
         <input type="submit">
-        {{if .BoardID}}<div>
+        {{- if .BoardID}}
+        <div>
             <span>Previous check:</span>
-            {{if .HasBingo}}
+            {{- if .HasBingo}}
                 <a href="/game/board?boardID={{.BoardID}}" class="has-bingo">BINGO !!!</a>
-            {{else}}
+            {{- else}}
                 <a href="/game/board?boardID={{.BoardID}}" class="no-bingo">No Bingo :(</a>
-            {{end}}
-        </div>{{end}}
+            {{- end}}
+        </div>
+        {{- end}}
     </fieldset>
 </form>
 
@@ -87,13 +89,13 @@
     </thead>
     <tbody>
         <tr>
-            {{with $cols := .Game.DrawnNumberColumns}}
+            {{- with $cols := .Game.DrawnNumberColumns}}
             <td>{{range index $cols 0}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 1}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 2}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 3}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 4}}<p>{{.}}</p>{{end}}</td>
-            {{end}}
+            {{- end}}
         <tr>
     </tbody>
 </table>
