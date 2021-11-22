@@ -11,9 +11,8 @@ func TestRedirectHandler(t *testing.T) {
 	wantStatusCode := 301
 	for i, test := range redirectHandlerTests {
 		w := httptest.NewRecorder()
-		h := Redirect(test.httpsPort)
 		test.r.Header = test.header
-		h.ServeHTTP(w, test.r)
+		test.HTTPSRedirectPort.ServeHTTP(w, test.r)
 		gotStatusCode := w.Code
 		gotHeader := w.Header()
 		switch {
@@ -32,25 +31,25 @@ const (
 )
 
 var redirectHandlerTests = []struct {
+	HTTPSRedirectPort
 	name       string
-	httpsPort  string
 	r          *http.Request
 	header     http.Header
 	wantHeader http.Header
 }{
 	{
-		name:      "default http port to default HTTP port",
-		httpsPort: "443",
-		r:         httptest.NewRequest(methodGet, schemeHTTP+"://"+host+"/", nil),
+		name:              "default http port to default HTTP port",
+		HTTPSRedirectPort: "443",
+		r:                 httptest.NewRequest(methodGet, schemeHTTP+"://"+host+"/", nil),
 		wantHeader: http.Header{
 			headerContentType: {contentTypeHTML},
 			headerLocation:    {schemeHTTPS + "://" + host + "/"},
 		},
 	},
 	{
-		name:      "redirect to custom HTTPS port",
-		httpsPort: "8000",
-		r:         httptest.NewRequest(methodGet, schemeHTTP+"://"+host+":8001/", nil),
+		name:              "redirect to custom HTTPS port",
+		HTTPSRedirectPort: "8000",
+		r:                 httptest.NewRequest(methodGet, schemeHTTP+"://"+host+":8001/", nil),
 		wantHeader: http.Header{
 			headerContentType: {contentTypeHTML},
 			headerLocation:    {schemeHTTPS + "://" + host + ":8000/"},

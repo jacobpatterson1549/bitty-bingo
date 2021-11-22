@@ -133,7 +133,7 @@ func (cfg Config) serveTCP(svr *http.Server, name string, errC chan<- error, htt
 // httpHandler creates a HTTP handler that redirects all requests to HTTPS.
 // Responses are returned gzip compression when allowed.
 func (cfg Config) httpHandler() http.Handler {
-	h := handler.Redirect(cfg.HTTPSPort)
+	h := handler.HTTPSRedirectPort(cfg.HTTPSPort)
 	return handler.WithGzip(h)
 }
 
