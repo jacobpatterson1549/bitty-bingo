@@ -161,8 +161,8 @@ func TestHandleGames(t *testing.T) {
 
 func TestHandleBoard(t *testing.T) {
 	var w bytes.Buffer
-	b := board1257894001
-	boardID := board1257894001ID
+	var b bingo.Board
+	boardID := "board-313"
 	freeSpace := "free-space-png-base64-data"
 	err := executeBoardTemplate(&w, b, boardID, freeSpace)
 	got := w.String()
@@ -172,12 +172,4 @@ func TestHandleBoard(t *testing.T) {
 	case !strings.Contains(got, boardID):
 		t.Errorf("board ID missing: %v", got)
 	}
-}
-
-var board1257894001 = bingo.Board{
-	15, 8, 4, 12, 10, // B
-	19, 27, 16, 28, 25, // I
-	42, 41, 0, 31, 40, // N
-	49, 52, 50, 46, 57, // G
-	64, 72, 67, 70, 74, // O
 }
