@@ -1,8 +1,6 @@
 package bingo
 
-import (
-	"strconv"
-)
+import "strconv"
 
 // Number represents a value that can be drawn in the game.
 // Boards are made of numbers.
