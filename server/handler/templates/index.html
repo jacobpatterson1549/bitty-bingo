@@ -5,24 +5,26 @@
         <title>bitty-bingo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="Description" content="a small bingo application">
-        <style>{{template "index.css"}}</style>
+        <style>
+{{template "index.css"}}
+</style>
     </head>
     <body>
         <header>
             <h1>bitty-bingo</h1>
-            {{template "nav.html"}}
+{{template "nav.html"}}
         </header>
         <main>
             {{if eq .Name "list"}}
-            {{template "games.html" .List}}
+{{template "games.html" .List}}
             {{- else if eq .Name "game"}}
-            {{template "game.html" .Game}}
+{{template "game.html" .Game}}
             {{- else if eq .Name "board"}}
-            {{template "board.svg" .Board}}
+{{template "board.svg" .Board}}
             {{- else if eq .Name "help"}}
-            {{template "help.html"}}
+{{template "help.html"}}
             {{- else if eq .Name "about"}}
-            {{template "about.html"}}
+{{template "about.html"}}
             {{- end}}
         </main>
     </body>

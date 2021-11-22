@@ -1,5 +1,7 @@
 <svg width="500" height="600" viewBox="0 0 500 600" xmlns="http://www.w3.org/2000/svg">
-<style>{{template "board.css"}}</style>
+<style>
+{{template "board.css"}}
+</style>
 <g class="rows">
   <line x1="000" y1="000" x2="500" y2="000" />
   <line x1="000" y1="100" x2="500" y2="100" />
