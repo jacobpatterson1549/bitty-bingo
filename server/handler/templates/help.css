@@ -3,6 +3,6 @@
 }
 @media (max-width:45ch){
     #help-page p {
-        width: auto;
+        width: inherit;
     }
 }
