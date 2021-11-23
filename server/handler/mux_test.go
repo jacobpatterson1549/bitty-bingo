@@ -16,14 +16,6 @@ func TestMuxServeHTTP(t *testing.T) {
 	}
 }
 
-const (
-	methodGET                  = "GET"
-	methodPOST                 = "POST"
-	statusCodeOK               = 200
-	statusCodeNotFound         = 404
-	statusCodeMethodNotAllowed = 405
-)
-
 var (
 	okHandler = func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
@@ -37,42 +29,42 @@ var (
 		{
 			name:           "empty mux",
 			Mux:            Mux{},
-			Request:        httptest.NewRequest(methodGET, "/", nil),
+			Request:        httptest.NewRequest(methodGet, "/", nil),
 			wantStatusCode: 405,
 		},
 		{
 			name:           "page not found",
-			Mux:            Mux{methodGET: {"/b": okHandler}},
-			Request:        httptest.NewRequest(methodGET, "/a", nil),
+			Mux:            Mux{methodGet: {"/b": okHandler}},
+			Request:        httptest.NewRequest(methodGet, "/a", nil),
 			wantStatusCode: 404,
 		},
 		{
 			name:           "get to post endpoint",
-			Mux:            Mux{methodGET: {"/": okHandler}},
-			Request:        httptest.NewRequest(methodPOST, "/", nil),
+			Mux:            Mux{methodGet: {"/": okHandler}},
+			Request:        httptest.NewRequest(methodPost, "/", nil),
 			wantStatusCode: 405,
 		},
 		{
 			name:           "ok: single endpoint",
-			Mux:            Mux{methodPOST: {"/": okHandler}},
-			Request:        httptest.NewRequest(methodPOST, "/", nil),
+			Mux:            Mux{methodPost: {"/": okHandler}},
+			Request:        httptest.NewRequest(methodPost, "/", nil),
 			wantStatusCode: 200,
 		},
 		{
 			name: "ok: multiple handlers",
 			Mux: Mux{
-				methodGET: {
+				methodGet: {
 					"/":       nil,
 					"/help":   nil,
 					"/page/a": nil,
 					"/page/b": okHandler,
 					"/page/c": nil,
 				},
-				methodPOST: {
+				methodPost: {
 					"/create": nil,
 				},
 			},
-			Request:        httptest.NewRequest(methodGET, "/page/b", nil),
+			Request:        httptest.NewRequest(methodGet, "/page/b", nil),
 			wantStatusCode: 200,
 		},
 	}
