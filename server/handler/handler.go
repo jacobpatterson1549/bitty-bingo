@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"image/png"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -28,7 +29,6 @@ type (
 		gameInfos []gameInfo
 		time      func() string
 	}
-
 	// gameInfo is the display value of the sate of a game at a specific time.
 	gameInfo struct {
 		// ID is the identifier of the game.
@@ -204,18 +204,23 @@ func (h *handler) drawNumber(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
+	h.addGame(afterID, afterNumsLeft)
+	http.Redirect(w, r, "/game?gameID="+afterID, http.StatusSeeOther)
+}
+
+// addGame creates a new gameInfo and adds it to the gameInfos stack.  If the stack is full, the last item is discarded.
+func (h *handler) addGame(gameID string, numbersLeft int) {
 	if len(h.gameInfos) < cap(h.gameInfos) {
 		h.gameInfos = append(h.gameInfos, gameInfo{}) // increase length
 	}
 	copy(h.gameInfos[1:], h.gameInfos) // shift right, overwriting last
 	modTime := h.time()
 	gi := gameInfo{
-		ID:          afterID,
+		ID:          gameID,
 		ModTime:     modTime,
-		NumbersLeft: afterNumsLeft,
+		NumbersLeft: numbersLeft,
 	}
 	h.gameInfos[0] = gi // set first
-	http.Redirect(w, r, "/game?gameID="+gi.ID, http.StatusSeeOther)
 }
 
 // createBoards creates 'n' boards as specified by the request's form parameter, attaching the boards in a zip file.
@@ -232,41 +237,41 @@ func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var buf bytes.Buffer
-	z := zip.NewWriter(&buf)
-	for i := 1; i <= n; i++ {
-		fileName := fmt.Sprintf("bingo_%v.svg", i)
-		f, err := z.Create(fileName)
-		if err != nil {
-			message := fmt.Sprintf("unexpected problem creating file #%v in zip: %v", i, fileName)
-			http.Error(w, message, http.StatusInternalServerError)
-			return
-		}
-		b := bingo.NewBoard()
-		boardID, err := b.ID()
-		if err != nil {
-			message := fmt.Sprintf("unexpected problem getting new board id: %v\nboard: %#v", err, b)
-			http.Error(w, message, http.StatusInternalServerError)
-			return
-		}
-		freeSpace, err := h.boardFreeSpace(boardID)
-		if err != nil {
-			message := fmt.Sprintf("unexpected problem creating board #%v free space: %v", i, err)
-			http.Error(w, message, http.StatusInternalServerError)
-			return
-		}
-		if err := executeBoardExportTemplate(f, *b, boardID, freeSpace); err != nil {
-			message := fmt.Sprintf("unexpected problem adding board #%v to zip file: %v", i, err)
-			http.Error(w, message, http.StatusInternalServerError)
-			return
-		}
-	}
-	if err := z.Close(); err != nil {
-		message := fmt.Sprintf("unexpected problem closing zip file: %v", err)
+	if err := h.zipNewBoards(&buf, n); err != nil {
+		message := fmt.Sprintf("unexpected problem creating zip file: %v", err)
 		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
 	buf.WriteTo(w)
 	w.Header().Set("Content-Disposition", "attachment; filename=bingo-boards.zip")
+}
+
+// zipNewBoards writes n new boards to a zip file
+func (h handler) zipNewBoards(w io.Writer, n int) error {
+	z := zip.NewWriter(w)
+	for i := 1; i <= n; i++ {
+		fileName := fmt.Sprintf("bingo_%v.svg", i)
+		f, err := z.Create(fileName)
+		if err != nil {
+			return fmt.Errorf("creating file #%v: %v", i, fileName)
+		}
+		b := bingo.NewBoard()
+		boardID, err := b.ID()
+		if err != nil {
+			return fmt.Errorf("getting id of board #%v: %v\nboard: %#v", i, err, b)
+		}
+		freeSpace, err := h.boardFreeSpace(boardID)
+		if err != nil {
+			return fmt.Errorf("creating board #%v free space: %v", i, err)
+		}
+		if err := executeBoardExportTemplate(f, *b, boardID, freeSpace); err != nil {
+			return fmt.Errorf("adding board #%v to zip file: %v", i, err)
+		}
+	}
+	if err := z.Close(); err != nil {
+		return fmt.Errorf("writing/closing zip file: %v", err)
+	}
+	return nil
 }
 
 // parseGame parses the game, writing parse errors to the response
