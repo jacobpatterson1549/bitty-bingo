@@ -17,7 +17,7 @@ import (
 type (
 	// Server manages bingo games and creates boards.
 	Server struct {
-		Config
+		config      Config
 		httpsServer *http.Server
 		httpServer  *http.Server
 	}
@@ -57,7 +57,7 @@ func (cfg Config) NewServer() (*Server, error) {
 	}
 	httpHandler := cfg.httpHandler()
 	s := Server{
-		Config:      cfg,
+		config:      cfg,
 		httpsServer: httpServer(cfg.HTTPSPort, httpsHandler),
 		httpServer:  httpServer(cfg.HTTPPort, httpHandler),
 	}
@@ -68,7 +68,7 @@ func (cfg Config) NewServer() (*Server, error) {
 func (s *Server) Run() <-chan error {
 	errC := make(chan error, 2)
 	go s.serveTCP(s.httpsServer, "https", errC, true)
-	if s.HTTPSRedirect {
+	if s.config.HTTPSRedirect {
 		go s.serveTCP(s.httpServer, "http", errC, false)
 	}
 	return errC
@@ -107,17 +107,17 @@ func httpServer(port string, h http.Handler) *http.Server {
 
 // serveTCP servers the server on TCP for the address.
 // TLS certificates are loaded if the server is HTTPS and has a separarte server that redirects HTTP requests to HTTPS.
-func (cfg Config) serveTCP(svr *http.Server, name string, errC chan<- error, https bool) {
+func (s Server) serveTCP(svr *http.Server, name string, errC chan<- error, https bool) {
 	l, err := net.Listen("tcp", svr.Addr)
 	if err != nil {
 		errC <- fmt.Errorf("listening to tcp at address %q: %v", svr.Addr, err)
 		return
 	}
 	defer l.Close()
-	if https && cfg.HTTPSRedirect {
-		certificate, err := tls.LoadX509KeyPair(cfg.TLSCertFile, cfg.TLSKeyFile)
+	if https && s.config.HTTPSRedirect {
+		certificate, err := tls.LoadX509KeyPair(s.config.TLSCertFile, s.config.TLSKeyFile)
 		if err != nil {
-			errC <- fmt.Errorf("loading TLS certificates (%q and %q): %v", cfg.TLSCertFile, cfg.TLSKeyFile, err)
+			errC <- fmt.Errorf("loading TLS certificates (%q and %q): %v", s.config.TLSCertFile, s.config.TLSKeyFile, err)
 			return
 		}
 		cfg := tls.Config{

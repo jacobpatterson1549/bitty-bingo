@@ -63,24 +63,29 @@ func Handler(gameCount int, time func() string, f FreeSpacer) (http.Handler, err
 // ServeHTTP serves requests for GET and POST methods, not allowing others.
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.Handler == nil {
-		h.Handler = Mux{
-			"GET": {
-				"/":                 h.getGames,
-				"/game":             h.getGame,
-				"/game/board/check": h.checkBoard,
-				"/game/board":       h.getBoard,
-				"/help":             h.getHelp,
-				"/about":            h.getAbout,
-			},
-			"POST": {
-				"/game":             h.createGame,
-				"/game/draw_number": h.drawNumber,
-				"/game/board":       h.createBoard,
-				"/game/boards":      h.createBoards,
-			},
-		}
+		h.Handler = newMux(h)
 	}
 	h.Handler.ServeHTTP(w, r)
+}
+
+// newMux creates a new multiplexer to handle endpoints
+func newMux(h *handler) *Mux {
+	return &Mux{
+		"GET": {
+			"/":                 h.getGames,
+			"/game":             h.getGame,
+			"/game/board/check": h.checkBoard,
+			"/game/board":       h.getBoard,
+			"/help":             h.getHelp,
+			"/about":            h.getAbout,
+		},
+		"POST": {
+			"/game":             h.createGame,
+			"/game/draw_number": h.drawNumber,
+			"/game/board":       h.createBoard,
+			"/game/boards":      h.createBoards,
+		},
+	}
 }
 
 // getGames renders the games page onto the response with the game infos.

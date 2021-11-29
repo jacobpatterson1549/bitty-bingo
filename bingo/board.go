@@ -43,12 +43,15 @@ func NewBoard() *Board {
 // HasLine determines if the board has a five-in-a row line, creating a BINGO for the game.
 func (b Board) HasLine(g Game) bool {
 	nums := numberSet(g)
+	if b.hasDiagonal1(nums) || b.hasDiagonal2(nums) {
+		return true
+	}
 	for i := 0; i < 5; i++ {
 		if b.hasColumn(i, nums) || b.hasRow(i, nums) {
 			return true
 		}
 	}
-	return b.hasDiagonal1(nums) || b.hasDiagonal2(nums)
+	return false
 }
 
 // IsFilled determines if all the numbers in the board have been called in the game.
@@ -196,7 +199,11 @@ func decodeNumber(h byte, i int) (Number, error) {
 
 // isValid determines if the board has valid numbers, no duplicates, and the center is the zero value
 func (b Board) isValid() bool {
-	return validNumbers(b[:], true) && b[12] == 0 && b.numbersInCorrectColumns()
+	switch {
+	case b[12] != 0, !validNumbers(b[:], true), !b.numbersInCorrectColumns():
+		return false
+	}
+	return true
 }
 
 // numbersInCorrectColumns ensures numbers are in correct columns

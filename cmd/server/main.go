@@ -1,4 +1,4 @@
-// Package main runs a bingo server on the command line..
+// Package main runs a bingo server on the command line.
 package main
 
 import (

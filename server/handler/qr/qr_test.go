@@ -15,8 +15,8 @@ func TestQRCode(t *testing.T) {
 			}
 		case err != nil:
 			t.Errorf("test %v (%v): %v", i, test.name, err)
-		case got == nil:
-			t.Errorf("test %v (%v): wanted image", i, test.name)
+		case got == nil, got.Bounds().Dx() != test.width, got.Bounds().Dy() != test.height:
+			t.Errorf("test %v (%v): wanted [%vx%v] image, got %v", i, test.name, test.width, test.height, got)
 		}
 	}
 }

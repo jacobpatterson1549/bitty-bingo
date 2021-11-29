@@ -45,7 +45,9 @@ func (n Number) Valid() bool {
 func validNumbers(numbers []Number, allowZeroValue bool) bool {
 	m := make(map[Number]struct{}, len(numbers))
 	for _, n := range numbers {
-		if _, duplicate := m[n]; duplicate || ((n == 0 && allowZeroValue) != !n.Valid()) {
+		_, duplicate := m[n];
+		switch {
+		case duplicate, !n.Valid() && (n != 0 || !allowZeroValue):
 			return false // duplicate or invalid
 		}
 		m[n] = struct{}{}
