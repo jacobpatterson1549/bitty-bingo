@@ -1,5 +1,5 @@
 #camera-video {
-    border: 1px solid;
+    border: 0.0625em solid;
     width: 85vw;
     height: 60vh;
 }
@@ -12,10 +12,10 @@
     color: gray;
 }
 .has-bingo {
-    text-shadow: 1px 1px blue;
+    text-shadow: 0.0625em 0.0625em blue;
 }
 .no-bingo {
-    text-shadow: 1px 1px red;
+    text-shadow: 0.0625em 0.0625em red;
 }
 .previous-number {
     font-size: clamp(5em, 25vw, 6em);

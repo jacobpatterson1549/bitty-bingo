@@ -1,6 +1,6 @@
 line {
     stroke: black;
-    stroke-width: 3;
+    stroke-width: 0.1875em;
 }
 image {
     image-rendering: pixelated;
