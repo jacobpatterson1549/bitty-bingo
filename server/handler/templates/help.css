@@ -1,8 +1,5 @@
-#help-page p {
-    width: clamp(45ch, 50%, 75ch);
-}
-@media (max-width:45ch){
+@media (min-width:50ch){
     #help-page p {
-        width: inherit;
+        width: clamp(50ch, 50%, 75ch);
     }
 }
