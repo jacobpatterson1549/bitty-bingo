@@ -21,7 +21,12 @@ func main() {
 	var cfg server.Config
 	fs := flagSet(&cfg, programName)
 	parseServerConfig(&cfg, fs, programArgs, portOverride, hasPortOverride)
-	runServer(cfg) // BLOCKING
+	logFlags := log.LUTC | log.Ldate | log.Ltime | log.Lmsgprefix
+	log := log.New(os.Stdout, "UTC: ", logFlags)
+	if err := runServer(cfg, log); err != nil { // BLOCKING
+		log.Fatalf("running server: %v", err)
+	}
+	log.Printf("server stopped successfully")
 }
 
 // flagSet creates a flag set that sets the config
@@ -53,23 +58,21 @@ func parseServerConfig(cfg *server.Config, fs *flag.FlagSet, programArgs []strin
 }
 
 // runServer creates and runs a bingo server from the config
-func runServer(cfg server.Config) {
+func runServer(cfg server.Config, log *log.Logger) (err error) {
 	s, err := cfg.NewServer()
 	if err != nil {
-		log.Fatalf("creating server: %v", err)
-		return
+		return fmt.Errorf("problem creating server: %v", err)
 	}
 	done := make(chan os.Signal, 2)
 	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
 	errC := s.Run()
-	switch {
-	case cfg.HTTPSRedirect:
-		log.Printf("started server at https://127.0.0.1:%v", cfg.HTTPSPort)
-	default:
-		log.Printf("started server at http://127.0.0.1:%v", cfg.HTTPSPort)
+	scheme := "http"
+	if cfg.HTTPSRedirect {
+		scheme += "s"
 	}
+	log.Printf("started server at " + scheme + "://127.0.0.1:" + cfg.HTTPSPort)
 	select { // BLOCKING
-	case err := <-errC:
+	case err = <-errC:
 		if err != nil {
 			log.Printf("running server: %v", err)
 		}
@@ -78,8 +81,7 @@ func runServer(cfg server.Config) {
 	}
 	ctx := context.Background()
 	if err := s.Shutdown(ctx); err != nil {
-		log.Fatalf("stopping server: %v", err)
-		return
+		return fmt.Errorf("stopping server: %v", err)
 	}
-	log.Printf("server stopped successfully")
+	return // an error might have been set from the running server
 }
