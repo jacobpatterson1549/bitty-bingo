@@ -1,6 +1,6 @@
 body {
-    background-color: beige;
-    color: darkslateblue;
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
 }
 form {
     margin-bottom: 1em;

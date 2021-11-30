@@ -2,11 +2,8 @@ line {
     stroke: black;
     stroke-width: 3;
 }
-text {
-    font-weight: bold;
-    font-family: sans-serif;
-    text-anchor: middle;
-    dominant-baseline: central;
+image {
+    image-rendering: pixelated;
 }
 .header {
     font-size: 5em;
@@ -16,7 +13,4 @@ text {
 }
 .id {
     font-size: 0.5em;
-}
-image {
-    image-rendering: pixelated;
 }
