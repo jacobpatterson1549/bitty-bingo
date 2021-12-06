@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -10,7 +11,7 @@ import (
 func TestWithGzip(t *testing.T) {
 	for i, test := range withGzipTests {
 		h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("abc123")) // same as wantBodyStart for non-gzip accepting
+			fmt.Fprint(w, gzipTestWriteBody)
 		})
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest(methodGet, "/", nil)
@@ -28,6 +29,8 @@ func TestWithGzip(t *testing.T) {
 	}
 }
 
+const gzipTestWriteBody = "abc123"
+
 var withGzipTests = []struct {
 	name           string
 	acceptEncoding string
@@ -37,7 +40,7 @@ var withGzipTests = []struct {
 }{
 	{
 		name:          "no accept encoding",
-		wantBodyStart: "abc123",
+		wantBodyStart: gzipTestWriteBody,
 	},
 	{
 		name:           "with gzip accept encoding",
