@@ -49,7 +49,7 @@ func TestNewServer(t *testing.T) {
 			t.Errorf("test %v (%v): HTTP server not set", i, test.name)
 		default:
 			s.config.Time = nil // functions are not comparable
-			test.cfg.Time = nil // "
+			test.cfg.Time = nil // functions are not comparable
 			if want, got := test.cfg, s.config; !reflect.DeepEqual(want, got) {
 				t.Errorf("test %v (%v): config not copied to server:\nwanted: %v\ngot:    %v", i, test.name, want, got)
 			}

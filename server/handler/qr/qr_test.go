@@ -40,8 +40,7 @@ var imageTests = []struct {
 		wantOk: false,
 	},
 	{
-		// see https://www.qrcode.com/en/about/version.html
-		name:   "too much text, one larger than Version 40, 177x177 modules, ECC Level L, Binary",
+		name:   "too much text, one larger than Version 40, 177x177 modules, ECC Level L, Binary (see https://www.qrcode.com/en/about/version.html)",
 		text:   string(make([]byte, 2953+1)),
 		width:  1000,
 		height: 1000,

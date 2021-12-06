@@ -27,7 +27,7 @@ func TestFlagSet(t *testing.T) {
 		var buf bytes.Buffer
 		fs := flagSet(&cfg, "name1")
 		fs.SetOutput(&buf)
-		fs.Init("name2", flag.ContinueOnError) // don't actually exit
+		fs.Init("name2", flag.ContinueOnError)
 		err := fs.Parse([]string{"-h"})
 		switch {
 		case err != flag.ErrHelp:
@@ -46,7 +46,7 @@ func TestParseServerConfig(t *testing.T) {
 		if cfg.Time == nil || len(cfg.Time()) == 0 {
 			t.Errorf("test %v (%v): time func not set or returns nothing", i, test.name)
 		}
-		cfg.Time = nil // funcs are not comparable
+		cfg.Time = nil // functions are not comparable
 		if want, got := test.wantConfig, cfg; !reflect.DeepEqual(want, got) {
 			t.Errorf("test %v (%v): configs are not equal:\nwanted: %#v\ngot:    %#v", i, test.name, want, got)
 		}

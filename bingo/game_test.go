@@ -7,8 +7,8 @@ import (
 
 func TestGameResetterSwap(t *testing.T) {
 	nums := []Number{1, 2, 3, 4, 5}
-	swap := GameResetter.(*shuffler).swap(nums)
-	swap(1, 3)
+	swapIndexes := GameResetter.(*shuffler).swap(nums)
+	swapIndexes(1, 3)
 	if want, got := []Number{1, 4, 3, 2, 5}, nums; !reflect.DeepEqual(want, got) {
 		t.Errorf("swap did not work as expected on GameResetter: nums not equal:\nwanted: %v\ngot:    %v", want, got)
 	}
@@ -32,7 +32,7 @@ func TestDrawnNumbers(t *testing.T) {
 
 func TestGameDrawNumber(t *testing.T) {
 	for i, test := range gameTests {
-		GameResetter.Seed(1257894000) // seed the available when a game is reset
+		GameResetter.Seed(1257894000) // if necessary, reset the game using a specific board when drawing a number
 		test.game.DrawNumber()
 		if want, got := test.wantAvailableAfterDraw, test.game; !reflect.DeepEqual(want, got) {
 			t.Errorf("test %v (%v): games not equal after number drawn:\nwanted: %v\ngot:    %v", i, test.name, want, got)
@@ -257,15 +257,14 @@ var gameTests = []struct {
 		wantPreviousNumberDrawn: 74,
 	},
 	{
-		name: "negative numbers drawn for '5zuTsMm6CTZAs7ad'",
+		name: "negative numbers drawn for '5zuTsMm6CTZAs7ad' (want reset on draw)",
 		game: Game{
 			numbers:      [numbersLength]Number{15, 8, 4, 12, 10, 19, 27, 16, 28, 25, 42, 41, 31, 40, 49, 52, 50, 46, 57, 64, 72, 67, 70, 74, 1, 2, 3, 5, 6, 7, 9, 11, 13, 14, 17, 18, 20, 21, 22, 23, 24, 26, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39, 43, 44, 45, 47, 48, 51, 53, 54, 55, 56, 58, 59, 60, 61, 62, 63, 65, 66, 68, 69, 71, 73, 75},
 			numbersDrawn: -1,
 		},
 		wantAvailableAfterDraw: Game{
-			// numbers are reset:
-			numbers:      [numbersLength]Number{24, 20, 64, 54, 6, 62, 25, 43, 22, 57, 10, 40, 28, 29, 30, 73, 75, 69, 68, 23, 2, 37, 36, 15, 38, 26, 8, 18, 51, 49, 53, 42, 1, 32, 52, 71, 16, 65, 5, 35, 31, 9, 12, 59, 34, 4, 33, 39, 17, 41, 27, 67, 70, 11, 55, 56, 13, 72, 46, 19, 58, 3, 47, 14, 74, 45, 66, 48, 44, 63, 21, 50, 61, 60, 7},
 			numbersDrawn: 1,
+			numbers:      [numbersLength]Number{24, 20, 64, 54, 6, 62, 25, 43, 22, 57, 10, 40, 28, 29, 30, 73, 75, 69, 68, 23, 2, 37, 36, 15, 38, 26, 8, 18, 51, 49, 53, 42, 1, 32, 52, 71, 16, 65, 5, 35, 31, 9, 12, 59, 34, 4, 33, 39, 17, 41, 27, 67, 70, 11, 55, 56, 13, 72, 46, 19, 58, 3, 47, 14, 74, 45, 66, 48, 44, 63, 21, 50, 61, 60, 7},
 		},
 		wantNumbersLeft:         75,
 		wantDrawnNumbers:        []Number{},
@@ -275,14 +274,13 @@ var gameTests = []struct {
 		wantPreviousNumberDrawn: 0,
 	},
 	{
-		name: "huge numbers drawn for '5zuTsMm6CTZAs7ad'",
+		name: "huge numbers drawn for '5zuTsMm6CTZAs7ad' (want clamped value on draw)",
 		game: Game{
 			numbers:      [numbersLength]Number{15, 8, 4, 12, 10, 19, 27, 16, 28, 25, 42, 41, 31, 40, 49, 52, 50, 46, 57, 64, 72, 67, 70, 74, 1, 2, 3, 5, 6, 7, 9, 11, 13, 14, 17, 18, 20, 21, 22, 23, 24, 26, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39, 43, 44, 45, 47, 48, 51, 53, 54, 55, 56, 58, 59, 60, 61, 62, 63, 65, 66, 68, 69, 71, 73, 75},
 			numbersDrawn: 99999,
 		},
 		wantAvailableAfterDraw: Game{
-			numbers: [numbersLength]Number{15, 8, 4, 12, 10, 19, 27, 16, 28, 25, 42, 41, 31, 40, 49, 52, 50, 46, 57, 64, 72, 67, 70, 74, 1, 2, 3, 5, 6, 7, 9, 11, 13, 14, 17, 18, 20, 21, 22, 23, 24, 26, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39, 43, 44, 45, 47, 48, 51, 53, 54, 55, 56, 58, 59, 60, 61, 62, 63, 65, 66, 68, 69, 71, 73, 75},
-			// value is clamped
+			numbers:      [numbersLength]Number{15, 8, 4, 12, 10, 19, 27, 16, 28, 25, 42, 41, 31, 40, 49, 52, 50, 46, 57, 64, 72, 67, 70, 74, 1, 2, 3, 5, 6, 7, 9, 11, 13, 14, 17, 18, 20, 21, 22, 23, 24, 26, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39, 43, 44, 45, 47, 48, 51, 53, 54, 55, 56, 58, 59, 60, 61, 62, 63, 65, 66, 68, 69, 71, 73, 75},
 			numbersDrawn: 75,
 		},
 		wantNumbersLeft:  0,

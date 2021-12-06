@@ -6,9 +6,8 @@ import (
 )
 
 func TestNewBoard(t *testing.T) {
-	GameResetter.Seed(1257894001) // seed the available numbers for the first test
-	b := board1257894001
-	if want, got := &b, NewBoard(); !reflect.DeepEqual(want, got) {
+	GameResetter.Seed(1257894001) // create the board from a specific game
+	if want, got := &board1257894001, NewBoard(); !reflect.DeepEqual(want, got) {
 		t.Errorf("boards not equal:\nwanted: %v\ngot:    %v", want, got)
 	}
 }
@@ -74,7 +73,7 @@ func TestBoardID(t *testing.T) {
 		var b Board
 		copy(b[:], board1257894001[:])
 		b[1] = b[0]
-		if id, err := b.ID(); err == nil { // 7juTsMm6CTZAs7ad
+		if id, err := b.ID(); err == nil {
 			t.Errorf("wanted when first number repeated, got %q", id)
 		}
 	})
@@ -168,11 +167,11 @@ const board1257894001ID = "5zuTsMm6CTZAs7ad"
 
 var (
 	board1257894001 = Board{
-		15, 8, 4, 12, 10, // B
-		19, 27, 16, 28, 25, // I
-		42, 41, 0, 31, 40, // N
-		49, 52, 50, 46, 57, // G
-		64, 72, 67, 70, 74, // O
+		15, 8, 4, 12, 10,
+		19, 27, 16, 28, 25,
+		42, 41, 0, 31, 40,
+		49, 52, 50, 46, 57,
+		64, 72, 67, 70, 74,
 	}
 	hasLineTests = []struct {
 		name string

@@ -75,7 +75,7 @@ func TestHandlerServeHTTP(t *testing.T) {
 	for i, test := range handlerServeHTTPTests {
 		w := httptest.NewRecorder()
 		gameInfos := make([]gameInfo, len(test.gameInfos), cap(test.gameInfos))
-		copy(gameInfos, test.gameInfos) // do not modify the test value
+		copy(gameInfos, test.gameInfos) // do not modify the test data, it is used in multiple tests
 		wantGameInfos := make([]gameInfo, len(test.wantGameInfos))
 		copy(wantGameInfos, test.wantGameInfos)
 		h := handler{
@@ -84,7 +84,7 @@ func TestHandlerServeHTTP(t *testing.T) {
 			FreeSpacer: test.FreeSpacer,
 		}
 		test.r.Header = test.header
-		bingo.GameResetter.Seed(1257894001) // make board new board creation deterministic
+		bingo.GameResetter.Seed(1257894001) // make board creation deterministic
 		h.ServeHTTP(w, test.r)
 		switch {
 		case w.Code != test.wantStatusCode:
@@ -227,6 +227,15 @@ var (
 			},
 		},
 		{
+			name:           "check board - HasLine (false)",
+			r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"=3-"+board1257894001IDNumbers+"&"+qpBoardID+"="+board1257894001ID+"&"+qpType+"="+typeHasLine, nil),
+			wantStatusCode: 303,
+			wantHeader: http.Header{
+				headerContentType: {contentTypeHTML},
+				headerLocation:    {urlPathGame + "?" + qpGameID + "=3-" + board1257894001IDNumbers + "&" + qpBoardID + "=" + board1257894001ID},
+			},
+		},
+		{
 			name:           "check board - IsFilled",
 			r:              httptest.NewRequest(methodGet, urlPathGameCheckBoard+"?"+qpGameID+"=24-"+board1257894001IDNumbers+"&"+qpBoardID+"="+board1257894001ID+"&"+qpType+"="+typeIsFilled, nil),
 			wantStatusCode: 303,
@@ -284,7 +293,7 @@ var (
 		{
 			name:      "draw number",
 			time:      func() string { return "the_past_a" },
-			gameInfos: append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}), // use append on empty slice with capacity
+			gameInfos: append(make([]gameInfo, 0, 10), gameInfo{ID: "1"}, gameInfo{ID: "2"}, gameInfo{ID: "3"}),
 			wantGameInfos: []gameInfo{{
 				ID:          "9-" + board1257894001IDNumbers,
 				ModTime:     "the_past_a",
