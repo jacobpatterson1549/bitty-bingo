@@ -178,3 +178,16 @@ func TestHandleBoard(t *testing.T) {
 		t.Errorf("board ID missing: %v", got)
 	}
 }
+
+func TestHandleFavicon(t *testing.T) {
+	got, err := executeFaviconTemplate()
+	const wantPrefix = "PHN2Z"
+	switch {
+	case err != nil:
+		t.Errorf("unwanted error: %v", err)
+	case !strings.HasPrefix(got, "PHN2Z"):
+		t.Errorf("wanted favicon to be base64 encoded and start with %q [btoa('<svg')]:\n%v", wantPrefix, got)
+	case strings.Contains(got, "\n"):
+		t.Errorf("unwanted line break now in favicon string\nit will be injected into the data href of the link\ngot: %v", got)
+	}
+}

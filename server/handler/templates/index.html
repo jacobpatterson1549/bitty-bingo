@@ -3,9 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>bitty-bingo</title>
-        <link rel="icon" href='data:image/svg+xml,
-{{template "favicon.svg"}}
-        '>
+        <link rel="icon" href="data:image/svg+xml;base64,{{.Favicon}}">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="Description" content="a small bingo application">
         <style>
@@ -39,17 +37,17 @@
             </nav>
         </header>
         <main>
-            {{- if eq .Name "list"}}
+{{- if eq .Name "list"}}
 {{template "games.html" .List}}
-            {{- else if eq .Name "game"}}
+{{- else if eq .Name "game"}}
 {{template "game.html" .Game}}
-            {{- else if eq .Name "board"}}
+{{- else if eq .Name "board"}}
 {{template "board.svg" .Board}}
-            {{- else if eq .Name "help"}}
+{{- else if eq .Name "help"}}
 {{template "help.html"}}
-            {{- else if eq .Name "about"}}
+{{- else if eq .Name "about"}}
 {{template "about.html"}}
-            {{- end}}
+{{- end}}
         </main>
     </body>
 </html>

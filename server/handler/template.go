@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"bytes"
 	"embed"
+	"encoding/base64"
 	"html/template"
 	"io"
 
@@ -19,10 +21,11 @@ var (
 type (
 	// page contains all the data needed to render any html page.
 	page struct {
-		Name  string
-		List  []gameInfo
-		Game  *game
-		Board *board
+		Name    string
+		Favicon string
+		List    []gameInfo
+		Game    *game
+		Board   *board
 	}
 	// game contains the fields to render a game page.
 	game struct {
@@ -112,7 +115,23 @@ func executeBoardExportTemplate(w io.Writer, b bingo.Board, boardID, freeSpace s
 	return embeddedTemplate.ExecuteTemplate(w, "board.svg", templateBoard)
 }
 
+// exectueFaviconTemplate renders the favicon without line breaks.
+func executeFaviconTemplate() (string, error) {
+	var w bytes.Buffer
+	if err := embeddedTemplate.ExecuteTemplate(&w, "favicon.svg", nil); err != nil {
+		return "", err
+	}
+	b := w.Bytes()
+	s := base64.StdEncoding.EncodeToString(b)
+	return s, nil
+}
+
 // executeIndexTemplate renders the page on the index HTML template.
 func (p page) executeIndexTemplate(t *template.Template, w io.Writer) error {
+	favicon, err := executeFaviconTemplate()
+	if err != nil {
+		return err
+	}
+	p.Favicon = favicon
 	return t.ExecuteTemplate(w, "index.html", p)
 }
