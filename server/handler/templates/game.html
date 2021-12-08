@@ -8,9 +8,9 @@
 
 <form id="draw-number" method="post" action="/game/draw_number">
     <fieldset>
+        <legend>Draw Number</legend>
         <input type="text" name="gameID" value="{{.GameID}}" hidden>
         <input type="submit" {{if  le .Game.NumbersLeft 0}}disabled{{end}}>
-        <legend>Draw Number</legend>
         {{- with $n := .Game.PreviousNumberDrawn}}
         <div>
             <label>Previous number: <span class="previous-number">{{$n}}</span></label>
@@ -25,6 +25,7 @@
 {{- if .Game.PreviousNumberDrawn}}
 <form id="check-board" method="get" action="/game/board/check">
     <fieldset>
+        <legend>Check Board</legend>
         <input id="allow-camera-checkbox" type="checkbox" hidden>
         <div>
             <div>
@@ -45,11 +46,10 @@
         </div>
         <noscript>browser cannot run javascript to scan board</noscript>
         <span id="camera-log"></span>
-        <legend>Check Board</legend>
         <input type="text" hidden name="gameID" value="{{.GameID}}">
         <div>
-            <label for="board-id">Board<label>
-            <input id="board-id" type="string" name="boardID" value="{{.BoardID}}" required
+            <label for="board-id">Board</label>
+            <input id="board-id" type="text" name="boardID" value="{{.BoardID}}" required
                 minLength="16" maxLength="16" pattern="[A-za-z0-9-]{16}"/>
         </div>
         <fieldset>
@@ -104,9 +104,10 @@
             <td>{{range index $cols 2}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 3}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 4}}<p>{{.}}</p>{{end}}</td>
-        <tr>
+        </tr>
     </tbody>
 </table>
 {{- end}}
 
+</div>
 </div>
