@@ -1,0 +1,27 @@
+form {
+    margin-bottom: 1em;
+}
+fieldset {
+    width: fit-content;
+}
+input {
+    margin: .5em;
+}
+th {
+    border-bottom: 0.05em dashed;
+}
+td {
+    vertical-align: top;
+    text-align: center
+}
+table {
+    border: .2em groove;
+}
+table caption {
+    text-align: left;
+}
+.forms-and-table {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
