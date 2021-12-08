@@ -21,6 +21,13 @@
 {{template "help.css"}}
 {{- end}}
         </style>
+{{- if eq .Name "game"}}
+{{- if .Game.Game.PreviousNumberDrawn}}
+        <script>
+{{template "game.js" }}
+        </script>
+{{- end}}
+{{- end}}
     </head>
     <body>
         <header>

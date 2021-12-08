@@ -1,4 +1,4 @@
-(() => {
+window.onload = () => {
     const allowCameraCheckbox = document.querySelector('#allow-camera-checkbox');
     const enableCameraCheckbox = document.querySelector('#enable-camera-checkbox');
     const frontCameraCheckbox = document.querySelector('#front-camera-checkbox');
@@ -92,4 +92,4 @@
         }
     };
     init();
-})();
+};
