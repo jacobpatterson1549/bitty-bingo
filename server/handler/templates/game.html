@@ -5,7 +5,7 @@
 <div class="forms-and-table">
 <div>
 
-<form id="draw-number" method="POST" action="/game/draw_number">
+<form id="draw-number" method="post" action="/game/draw_number">
     <fieldset>
         <input type="text" name="gameID" value="{{.GameID}}" hidden>
         <input type="submit" {{if  le .Game.NumbersLeft 0}}disabled{{end}}>
@@ -21,7 +21,7 @@
     </fieldset>
 </form>
 
-<form id="check-board" method="GET" action="/game/board/check">
+<form id="check-board" method="get" action="/game/board/check">
     <fieldset>
         <input id="allow-camera-checkbox" type="checkbox" hidden>
         <div>
