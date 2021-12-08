@@ -11,6 +11,16 @@
         <style>
 {{template "vars.css"}}
 {{template "index.css"}}
+{{template "nav.css"}}
+{{- if eq .Name "list"}}
+{{template "forms_and_table.css"}}
+{{template "games.css"}}
+{{- else if eq .Name "game"}}
+{{template "forms_and_table.css"}}
+{{template "game.css"}}
+{{- else if eq .Name "help"}}
+{{template "help.css"}}
+{{- end}}
         </style>
     </head>
     <body>
@@ -19,7 +29,7 @@
 {{template "nav.html"}}
         </header>
         <main>
-            {{if eq .Name "list"}}
+            {{- if eq .Name "list"}}
 {{template "games.html" .List}}
             {{- else if eq .Name "game"}}
 {{template "game.html" .Game}}
