@@ -11,7 +11,6 @@
         <style>
 {{template "vars.css"}}
 {{template "index.css"}}
-{{template "nav.css"}}
 {{- if eq .Name "list"}}
 {{template "forms_and_table.css"}}
 {{template "games.css"}}
@@ -26,7 +25,11 @@
     <body>
         <header>
             <h1>bitty-bingo</h1>
-{{template "nav.html"}}
+            <nav>
+                <a href="/">Games List</a>
+                <a href="/help">Help</a>
+                <a href="/about">About</a>
+            </nav>
         </header>
         <main>
             {{- if eq .Name "list"}}

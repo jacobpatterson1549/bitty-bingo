@@ -2,3 +2,12 @@ body {
     color: var(--primary-color);
     background-color: var(--secondary-color);
 }
+nav {
+    width: fit-content;
+    padding: 1em;
+    border: .2em groove;
+    margin-bottom: 1em;
+}
+nav * {
+    margin: 1em;
+}
