@@ -21,6 +21,7 @@
     </fieldset>
 </form>
 
+{{- if .Game.PreviousNumberDrawn}}
 <form id="check-board" method="get" action="/game/board/check">
     <fieldset>
         <input id="allow-camera-checkbox" type="checkbox" hidden>
@@ -75,9 +76,15 @@
     </fieldset>
 </form>
 
+<script>
+{{template "game.js"}}
+</script>
+{{- end}}
+
 </div>
 <div>
 
+{{- with $cols := .Game.DrawnNumberColumns}}
 <table id="game-drawn-numbers">
     <caption>Game Drawn Numbers</caption>
     <thead>
@@ -91,19 +98,14 @@
     </thead>
     <tbody>
         <tr>
-            {{- with $cols := .Game.DrawnNumberColumns}}
             <td>{{range index $cols 0}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 1}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 2}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 3}}<p>{{.}}</p>{{end}}</td>
             <td>{{range index $cols 4}}<p>{{.}}</p>{{end}}</td>
-            {{- end}}
         <tr>
     </tbody>
 </table>
+{{- end}}
 
 </div>
-
-<script>
-{{template "game.js"}}
-</script>

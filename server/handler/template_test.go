@@ -66,6 +66,12 @@ func TestHandleAbout(t *testing.T) {
 }
 
 func TestHandleGame(t *testing.T) {
+	var allNumbersDrawnGame bingo.Game
+	for allNumbersDrawnGame.NumbersLeft() != 0 {
+		allNumbersDrawnGame.DrawNumber()
+	}
+	var oneNumberDrawnGame bingo.Game
+	oneNumberDrawnGame.DrawNumber()
 	tests :=
 		[]struct {
 			name     string
@@ -77,44 +83,32 @@ func TestHandleGame(t *testing.T) {
 		}{
 			{
 				name: "game has drawn tile",
-				game: func() bingo.Game {
-					var allDrawnGame bingo.Game
-					prevNumbersLeft := allDrawnGame.NumbersLeft()
-					for {
-						allDrawnGame.DrawNumber()
-						numbersLeft := allDrawnGame.NumbersLeft()
-						if prevNumbersLeft == numbersLeft {
-							return allDrawnGame
-						}
-						prevNumbersLeft = numbersLeft
-					}
-				}(),
+				game: allNumbersDrawnGame,
 				want: "B 2",
 			},
 			{
 				name:    "checked board value",
+				game:    oneNumberDrawnGame,
 				boardID: "board_id_input_value",
 				want:    "board_id_input_value",
 			},
 			{
 				name:     "checked board has no bingo",
+				game:     oneNumberDrawnGame,
 				boardID:  "board_id_input_value",
 				hasBingo: false,
 				want:     "No Bingo :(</a>",
 			},
 			{
 				name:     "checked board has bingo",
+				game:     oneNumberDrawnGame,
 				boardID:  "board_id_input_value",
 				hasBingo: true,
 				want:     "BINGO !!!</a>",
 			},
 			{
 				name: "has previous number",
-				game: func() bingo.Game {
-					var g bingo.Game
-					g.DrawNumber()
-					return g
-				}(),
+				game: oneNumberDrawnGame,
 				want: "Previous number:",
 			},
 			{
@@ -122,6 +116,17 @@ func TestHandleGame(t *testing.T) {
 				game:   bingo.Game{},
 				want:   "Previous number:",
 				negate: true,
+			},
+			{
+				name:   "does not have check board when game is empty",
+				game:   bingo.Game{},
+				want:   "Check Board",
+				negate: true,
+			},
+			{
+				name: "has check board when game is started",
+				game: oneNumberDrawnGame,
+				want: "Check Board",
 			},
 		}
 	for i, test := range tests {
