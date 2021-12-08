@@ -1,55 +1,49 @@
 <div class="forms-and-table">
-<div>
-
-<form id="create-game" method="post" action="/game">
-    <fieldset>
-        <legend>Create Game</legend>
-        <input type="submit">
-    </fieldset>
-</form>
-
-<form id="create-board" method="post" action="/game/board">
-    <fieldset>
-        <legend>Create Board (view)</legend>
-        <input type="submit">
-    </fieldset>
-</form>
-
-<form id="create-boards" method="post" action="/game/boards">
-    <fieldset>
-        <legend>Create Boards (zip)</legend>
-        <div>
-            <label for="board-count">Count</label>
-            <input id="board-count" type="number" name="n" value="5" min="1" max="1000">
-        </div>
-        <input type="submit">
-    </fieldset>
-</form>
-
-</div>
-<div>
-
-{{- if .}}
-<table id="games-list">
-    <caption>Games</caption>
-    <thead>
-        <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Modification Time</th>
-            <th scope="col">Numbers Left</th>
-        </tr>
-    </thead>
-    <tbody>
-        {{- range .}}
-        <tr>
-            <td><a href="/game?gameID={{.ID}}">{{.ID}}</td>
-            <td>{{.ModTime}}</td>
-            <td>{{.NumbersLeft}}</td>
-        </tr>
+    <div>
+        <form id="create-game" method="post" action="/game">
+            <fieldset>
+                <legend>Create Game</legend>
+                <input type="submit">
+            </fieldset>
+        </form>
+        <form id="create-board" method="post" action="/game/board">
+            <fieldset>
+                <legend>Create Board (view)</legend>
+                <input type="submit">
+            </fieldset>
+        </form>
+        <form id="create-boards" method="post" action="/game/boards">
+            <fieldset>
+                <legend>Create Boards (zip)</legend>
+                <div>
+                    <label for="board-count">Count</label>
+                    <input id="board-count" type="number" name="n" value="5" min="1" max="1000">
+                </div>
+                <input type="submit">
+            </fieldset>
+        </form>
+    </div>
+    <div>
+        {{- if .}}
+        <table id="games-list">
+            <caption>Games</caption>
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Modification Time</th>
+                    <th scope="col">Numbers Left</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{- range .}}
+                <tr>
+                    <td><a href="/game?gameID={{.ID}}">{{.ID}}</td>
+                    <td>{{.ModTime}}</td>
+                    <td>{{.NumbersLeft}}</td>
+                </tr>
+                {{- end}}
+            </tbody>
+        </table>
         {{- end}}
-    </tbody>
-</table>
-{{- end}}
-
-</div>
+    </div>
 </div>
