@@ -14,3 +14,9 @@ image {
 .id {
     font-size: 0.5em;
 }
+@media (max-width:32.25em) {
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+}
