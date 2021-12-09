@@ -132,6 +132,27 @@ func TestResetGame(t *testing.T) {
 	}
 }
 
+func TestGameBase64URLEncoding(t *testing.T) {
+	g := Game{
+		numbers:      [numbersLength]Number{69, 12, 41, 1, 8, 65, 5, 48, 32, 28, 39, 9, 2, 29, 37, 72, 33, 53, 66, 15, 54, 71, 49, 46, 34, 50, 56, 20, 25, 73, 6, 38, 21, 67, 44, 3, 52, 35, 4, 36, 45, 23, 17, 40, 58, 24, 74, 19, 59, 13, 14, 61, 64, 51, 10, 7, 16, 43, 68, 31, 75, 27, 30, 22, 57, 62, 18, 42, 63, 11, 55, 47, 60, 70, 26},
+		numbersDrawn: 1,
+	}
+	id, err := g.ID()
+	if err != nil {
+		t.Fatalf("unwanted error getting game id: %v", err)
+	}
+	if want, got := "1-RQwpAQhBBTAgHCcJAh0lSCE1Qg82RzEuIjI4FBlJBiYVQywDNCMEJC0XESg6GEoTOw0OPUAzCgcQK0QfSxseFjk-Eio_CzcvPEYa", id; want != got {
+		t.Errorf("game ids not equal: wanted game id to contain '-' (url base64 encoding, not std encoding with [+/]:\nwanted: %q\ngot:    %q", want, got)
+	}
+	g2, err := GameFromID(id)
+	if err != nil {
+		t.Fatalf("unwanted error getting game from id: %v", err)
+	}
+	if want, got := &g, g2; !reflect.DeepEqual(want, got) {
+		t.Errorf("games not equal:\nwanted: %v\ngot:    %v", want, got)
+	}
+}
+
 const numbersLength int = len(Game{}.numbers)
 
 var gameTests = []struct {

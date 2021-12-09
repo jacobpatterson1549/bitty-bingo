@@ -121,9 +121,6 @@ func (b Board) hasDiagonal2(nums map[Number]struct{}) bool {
 	return true
 }
 
-// base64Encoding is used to encode/decode boards/ids.  The ids can be put in urls.
-var base64Encoding = base64.URLEncoding
-
 // ID encodes the board into a base64 string.
 // Each two numbers can be shrunk to a 0-14 number, concatenated, and converted to a byte.
 // This results in a byte array that is (25-1)/2 = 12 characters long
@@ -144,7 +141,7 @@ func (b Board) ID() (string, error) {
 			i++
 		}
 	}
-	id := base64Encoding.EncodeToString(data)
+	id := base64.URLEncoding.EncodeToString(data)
 	return id, nil
 }
 
@@ -154,7 +151,7 @@ func BoardFromID(id string) (*Board, error) {
 	if len(id) != 16 {
 		return nil, errors.New("id must be 16 characters long")
 	}
-	data, err := base64Encoding.Strict().DecodeString(id)
+	data, err := base64.URLEncoding.DecodeString(id)
 	if err != nil {
 		return nil, errors.New("decoding board from id: " + err.Error())
 	}

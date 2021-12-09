@@ -2,6 +2,7 @@
 package bingo
 
 import (
+	"encoding/base64"
 	"errors"
 	"math/rand"
 	"strconv"
@@ -118,7 +119,7 @@ func (g Game) ID() (string, error) {
 	for i, n := range g.numbers {
 		data[i] = byte(n)
 	}
-	nums := base64Encoding.EncodeToString(data)
+	nums := base64.URLEncoding.EncodeToString(data)
 	id := strconv.Itoa(g.numbersDrawn) + "-" + nums
 	return id, nil
 }
@@ -137,7 +138,7 @@ func GameFromID(id string) (*Game, error) {
 	if err != nil {
 		return nil, errors.New("parsing numbersLeft: " + err.Error())
 	}
-	data, err := base64Encoding.DecodeString(numsStr)
+	data, err := base64.URLEncoding.DecodeString(numsStr)
 	if err != nil {
 		return nil, errors.New("decoding game numbers: " + err.Error())
 	}

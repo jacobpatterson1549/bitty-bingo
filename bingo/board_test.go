@@ -155,6 +155,24 @@ func TestBoardIsValid(t *testing.T) {
 	}
 }
 
+func TestBoardBase64URLEncoding(t *testing.T) {
+	b := Board{12, 7, 9, 13, 8, 17, 24, 19, 30, 22, 36, 42, 0, 41, 39, 47, 56, 49, 54, 53, 65, 67, 71, 72, 73}
+	id, err := b.ID()
+	if err != nil {
+		t.Fatalf("unwanted error getting board id: %v", err)
+	}
+	if want, got := "toxxg-ZbqBo4dGq8", id; want != got {
+		t.Errorf("board ids not equal: wanted board id to contain '-' (url base64 encoding, not std encoding with [+/]:\nwanted: %q\ngot:    %q", want, got)
+	}
+	b2, err := BoardFromID(id)
+	if err != nil {
+		t.Fatalf("unwanted error getting board from id: %v", err)
+	}
+	if want, got := &b, b2; !reflect.DeepEqual(want, got) {
+		t.Errorf("boards not equal:\nwanted: %v\ngot:    %v", want, got)
+	}
+}
+
 func createTestGame(t *testing.T, nums []Number) Game {
 	t.Helper()
 	var g Game
