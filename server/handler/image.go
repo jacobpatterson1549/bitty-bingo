@@ -5,13 +5,6 @@ import (
 	"image/color"
 )
 
-var (
-	// pngColorModel is the png-friendly color model
-	pngColorModel = color.NRGBAModel
-	// transparentColor is the transparent color
-	transparentColor = pngColorModel.Convert(color.Transparent)
-)
-
 // transparentImage wraps an image to make non-black pixels transparent.
 type transparentImage struct {
 	image.Image
@@ -31,10 +24,10 @@ func (m transparentImage) At(x, y int) color.Color {
 	if c := m.Image.At(x, y); c == m.blackColor {
 		return c
 	}
-	return transparentColor
+	return color.Transparent
 }
 
 // ColorModel returns NRGBAModel.  This allows the transparentImage to encode transparent colors correctly to png.
 func (transparentImage) ColorModel() color.Model {
-	return pngColorModel
+	return color.NRGBAModel
 }

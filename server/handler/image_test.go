@@ -40,7 +40,7 @@ func TestTransparentImageColorsBlackAndTransparent(t *testing.T) {
 	m.Set(1, 0, color.Transparent)
 	m.Set(1, 1, color.Opaque)
 	black := m.ColorModel().Convert(color.Black)
-	transparent := m.ColorModel().Convert(color.Transparent)
+	transparent := color.Transparent
 	got := newTransparentImage(m)
 	b := got.Bounds()
 	for y := b.Min.Y; y < b.Max.Y; y++ {
