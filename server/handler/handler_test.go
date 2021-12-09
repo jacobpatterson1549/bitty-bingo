@@ -30,6 +30,8 @@ func TestHandler(t *testing.T) {
 				t.Errorf("test %v (%v): HTTPS response status codes not equal: wanted %v, got %v: %v", i, test.name, test.wantStatusCode, w.Code, w.Body.String())
 			case !reflect.DeepEqual(test.wantHeader, gotHeader):
 				t.Errorf("test %v (%v): HTTPS response headers not equal:\nwanted: %v\ngot:    %v", i, test.name, test.wantHeader, gotHeader)
+			case len(h.(*handler).favicon) == 0:
+				t.Errorf("test %v (%v): favicon not set: %+v", i, test.name, h)
 			}
 		}
 	})

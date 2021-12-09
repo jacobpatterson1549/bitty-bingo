@@ -45,23 +45,23 @@ func TestNewTemplateBoard(t *testing.T) {
 
 func TestHandleHelp(t *testing.T) {
 	var w bytes.Buffer
-	err := executeHelpTemplate(&w)
+	err := executeHelpTemplate(&w, "FAVICON-1")
 	switch {
 	case err != nil:
 		t.Error(err)
-	case w.Len() == 0:
-		t.Error("no bytes written")
+	case !strings.Contains(w.String(), "FAVICON-1"):
+		t.Error("wanted page to contain favicon")
 	}
 }
 
 func TestHandleAbout(t *testing.T) {
 	var w bytes.Buffer
-	err := executeAboutTemplate(&w)
+	err := executeAboutTemplate(&w, "FAVICON-2")
 	switch {
 	case err != nil:
 		t.Error(err)
-	case w.Len() == 0:
-		t.Error("no bytes written")
+	case !strings.Contains(w.String(), "FAVICON-2"):
+		t.Errorf("wanted page to contain FAVICON-2: %v", w.String())
 	}
 }
 
@@ -131,11 +131,13 @@ func TestHandleGame(t *testing.T) {
 		}
 	for i, test := range tests {
 		var w bytes.Buffer
-		err := executeGameTemplate(&w, test.game, "game-id", test.boardID, test.hasBingo)
+		err := executeGameTemplate(&w, "FAVICON-3", test.game, "game-id", test.boardID, test.hasBingo)
 		got := w.String()
 		switch {
 		case err != nil:
 			t.Errorf("test %v (%v): unwanted error: %v", i, test.name, err)
+		case !strings.Contains(w.String(), "FAVICON-3"):
+			t.Errorf("wanted page to contain FAVICON-3: %v", w.String())
 		case strings.Contains(got, test.want) == test.negate:
 			t.Errorf("test %v (%v): (negate-contains-check=%v): wanted rendered game to contain %q, got:\n%v", i, test.name, test.negate, test.want, got)
 		}
@@ -150,11 +152,13 @@ func TestHandleGames(t *testing.T) {
 		NumbersLeft: 36,
 	}
 	gameInfos := []gameInfo{gi}
-	err := executeGamesTemplate(&w, gameInfos)
+	err := executeGamesTemplate(&w, "FAVICON-4", gameInfos)
 	got := w.String()
 	switch {
 	case err != nil:
 		t.Error(err)
+	case !strings.Contains(w.String(), "FAVICON-4"):
+		t.Errorf("wanted page to contain FAVICON-4: %v", w.String())
 	case !strings.Contains(got, gi.ID):
 		t.Errorf("game ID missing: %v", got)
 	case !strings.Contains(got, gi.ModTime):
@@ -169,11 +173,13 @@ func TestHandleBoard(t *testing.T) {
 	var b bingo.Board
 	boardID := "board-313"
 	freeSpace := "free-space-png-base64-data"
-	err := executeBoardTemplate(&w, b, boardID, freeSpace)
+	err := executeBoardTemplate(&w, "FAVICON-5", b, boardID, freeSpace)
 	got := w.String()
 	switch {
 	case err != nil:
 		t.Errorf("unwanted error: %v", err)
+	case !strings.Contains(w.String(), "FAVICON-5"):
+		t.Errorf("wanted page to contain FAVICON-5: %v", w.String())
 	case !strings.Contains(got, boardID):
 		t.Errorf("board ID missing: %v", got)
 	}

@@ -65,46 +65,51 @@ func newTemplateBoard(b bingo.Board, boardID, freeSpace string) *board {
 }
 
 // executeHelpTemplate renders the help html page.
-func executeHelpTemplate(w io.Writer) error {
+func executeHelpTemplate(w io.Writer, favicon string) error {
 	p := page{
-		Name: "help",
+		Name:    "help",
+		Favicon: favicon,
 	}
 	return p.executeIndexTemplate(embeddedTemplate, w)
 }
 
 // executeAboutTemplate renders the about html page.
-func executeAboutTemplate(w io.Writer) error {
+func executeAboutTemplate(w io.Writer, favicon string) error {
 	p := page{
-		Name: "about",
+		Name:    "about",
+		Favicon: favicon,
 	}
 	return p.executeIndexTemplate(embeddedTemplate, w)
 }
 
 // executeGameTemplate renders the game html page.
-func executeGameTemplate(w io.Writer, g bingo.Game, gameID, boardID string, hasBingo bool) error {
+func executeGameTemplate(w io.Writer, favicon string, g bingo.Game, gameID, boardID string, hasBingo bool) error {
 	templateGame := newTemplateGame(g, gameID, boardID, hasBingo)
 	p := page{
-		Name: "game",
-		Game: templateGame,
+		Name:    "game",
+		Favicon: favicon,
+		Game:    templateGame,
 	}
 	return p.executeIndexTemplate(embeddedTemplate, w)
 }
 
 // executeGamesTemplate renders the games list html page.
-func executeGamesTemplate(w io.Writer, gameInfos []gameInfo) error {
+func executeGamesTemplate(w io.Writer, favicon string, gameInfos []gameInfo) error {
 	p := page{
-		Name: "list",
-		List: gameInfos,
+		Name:    "list",
+		Favicon: favicon,
+		List:    gameInfos,
 	}
 	return p.executeIndexTemplate(embeddedTemplate, w)
 }
 
 // executeBoardTemplate renders the board on the html page.
-func executeBoardTemplate(w io.Writer, b bingo.Board, boardID, freeSpace string) error {
+func executeBoardTemplate(w io.Writer, favicon string, b bingo.Board, boardID, freeSpace string) error {
 	templateBoard := newTemplateBoard(b, boardID, freeSpace)
 	p := page{
-		Name:  "board",
-		Board: templateBoard,
+		Name:    "board",
+		Favicon: favicon,
+		Board:   templateBoard,
 	}
 	return p.executeIndexTemplate(embeddedTemplate, w)
 }
@@ -128,10 +133,5 @@ func executeFaviconTemplate() (string, error) {
 
 // executeIndexTemplate renders the page on the index HTML template.
 func (p page) executeIndexTemplate(t *template.Template, w io.Writer) error {
-	favicon, err := executeFaviconTemplate()
-	if err != nil {
-		return err
-	}
-	p.Favicon = favicon
 	return t.ExecuteTemplate(w, "index.html", p)
 }

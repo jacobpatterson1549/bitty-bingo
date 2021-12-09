@@ -28,6 +28,7 @@ type (
 		FreeSpacer
 		gameInfos []gameInfo
 		time      func() string
+		favicon   string
 	}
 	// gameInfo is the display value of the sate of a game at a specific time.
 	gameInfo struct {
@@ -52,10 +53,15 @@ func Handler(gameCount int, time func() string, f FreeSpacer) (http.Handler, err
 	case f == nil:
 		return nil, fmt.Errorf("FreeSpacer required")
 	}
+	favicon, err := executeFaviconTemplate()
+	if err != nil {
+		return nil, fmt.Errorf("creating favicon: %v", err)
+	}
 	h := handler{
 		gameInfos:  make([]gameInfo, 0, gameCount),
 		time:       time,
 		FreeSpacer: f,
+		favicon:    favicon,
 	}
 	return &h, nil
 }
@@ -90,7 +96,7 @@ func newMux(h *handler) *Mux {
 
 // getGames renders the games page onto the response with the game infos.
 func (h *handler) getGames(w http.ResponseWriter, r *http.Request) {
-	executeGamesTemplate(w, h.gameInfos)
+	executeGamesTemplate(w, h.favicon, h.gameInfos)
 }
 
 // getGame renders the game page onto the response with the game of the 'gameID' query parameter.
@@ -103,7 +109,7 @@ func (h handler) getGame(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	executeGameTemplate(w, *g, gameID, boardID, hasBingo)
+	executeGameTemplate(w, h.favicon, *g, gameID, boardID, hasBingo)
 }
 
 // createGame renders an empty game
@@ -131,7 +137,7 @@ func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
-	executeBoardTemplate(w, *b, boardID, freeSpace)
+	executeBoardTemplate(w, h.favicon, *b, boardID, freeSpace)
 }
 
 // createBoard redirects to a new board.
@@ -147,13 +153,13 @@ func (handler) createBoard(w http.ResponseWriter, r *http.Request) {
 }
 
 // getHelp renders the help page onto the response.
-func (handler) getHelp(w http.ResponseWriter, r *http.Request) {
-	executeHelpTemplate(w)
+func (h handler) getHelp(w http.ResponseWriter, r *http.Request) {
+	executeHelpTemplate(w, h.favicon)
 }
 
 // getAbout renders the about page onto the response.
-func (handler) getAbout(w http.ResponseWriter, r *http.Request) {
-	executeAboutTemplate(w)
+func (h handler) getAbout(w http.ResponseWriter, r *http.Request) {
+	executeAboutTemplate(w, h.favicon)
 }
 
 // checkBoard checks the board on the game with a checkType using the 'gameID', 'boardID', and 'type' query parameters.
