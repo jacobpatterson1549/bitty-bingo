@@ -18,7 +18,7 @@
     text-shadow: 0.0625em 0.0625em red;
 }
 .previous-number {
-    font-size: clamp(5em, 25vw, 6em);
+    font-size: clamp(5em, 12vw, 6em);
 }
 #game-drawn-numbers th {
     font-size: 4em;

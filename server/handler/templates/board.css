@@ -1,6 +1,5 @@
 line {
     stroke: black;
-    stroke-width: 0.1875em;
 }
 image {
     image-rendering: pixelated;
@@ -14,9 +13,7 @@ image {
 .id {
     font-size: 0.5em;
 }
-@media (max-width:32.25em) {
-    svg {
-        width: 100%;
-        height: 100%;
-    }
+svg {
+    width: 100%;
+    max-width: 500px;
 }

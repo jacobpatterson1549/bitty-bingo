@@ -1,4 +1,5 @@
 form {
+    display: inline-block;
     margin-bottom: 1em;
 }
 fieldset {
@@ -15,19 +16,12 @@ td {
     text-align: center;
 }
 table {
+    display: inline-block;
     border: .2em groove;
 }
 table caption {
     text-align: left;
 }
-.forms-and-table {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-}
-@media (min-width:44em) {
-    .forms-and-table {
-        flex-direction: row;
-        max-width: 44em;
-    }
+main {
+    columns: 20em;
 }
