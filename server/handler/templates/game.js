@@ -81,8 +81,8 @@ window.onload = () => {
                         log('browser cannot detect QR code on board');
                     } else {
                         barcodeDetector = new BarcodeDetector({ formats });
-                        enableCameraCheckbox.onclick = () => enableCameraCheckbox.checked ? startVideo() : stopVideo();
-                        frontCameraCheckbox.onclick = () => enableCameraCheckbox.checked && startVideo();
+                        enableCameraCheckbox.onclick = () => { enableCameraCheckbox.checked ? startVideo() : stopVideo() };
+                        frontCameraCheckbox.onclick = enableCameraCheckbox.onclick;
                         cameraZoomRange.oninput = (event) => track.applyConstraints({ advanced: [{ zoom: event.target.value }] });
                         allowCameraCheckbox.checked = true;
                     }

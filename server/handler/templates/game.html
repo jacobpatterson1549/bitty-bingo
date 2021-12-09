@@ -3,8 +3,8 @@
         <form id="draw-number" method="post" action="/game/draw_number">
             <fieldset>
                 <legend>Draw Number</legend>
-                <input type="text" name="gameID" value="{{.GameID}}" hidden>
-                <input type="submit" {{if le .Game.NumbersLeft 0}}disabled{{end}}>
+                <input type="text" name="gameID" value="{{.GameID}}" hidden="true" />
+                <input type="submit" {{if le .Game.NumbersLeft 0}}disabled{{end}} />
                 {{- with $n := .Game.PreviousNumberDrawn}}
                 <div>
                     <label>Previous number: <span class="previous-number">{{$n}}</span></label>
@@ -19,44 +19,43 @@
         <form id="check-board" method="get" action="/game/board/check">
             <fieldset>
                 <legend>Check Board</legend>
-                <input id="allow-camera-checkbox" type="checkbox" hidden>
+                <input id="allow-camera-checkbox" type="checkbox" hidden="true" />
                 <div>
                     <div>
-                        <input id="enable-camera-checkbox" type="checkbox">
+                        <input id="enable-camera-checkbox" type="checkbox" />
                         <label for="enable-camera-checkbox">Enable Scanner</label>
                     </div>
                     <div>
-                        <input id="front-camera-checkbox" type="checkbox" hidden>
+                        <input id="front-camera-checkbox" type="checkbox" hidden="true" />
                         <label for="front-camera-checkbox">Front camera</label>
                     </div>
                     <div>
-                        <input id="camera-zoom-range" type="range" hidden>
+                        <input id="camera-zoom-range" type="range" hidden="true" />
                         <label for="camera-zoom-range">Camera zoom</label>
                     </div>
                     <div>
-                        <video id="camera-video" autoplay hidden></video>
+                        <video id="camera-video" autoplay="true" hidden="true"></video>
                     </div>
                 </div>
                 <noscript>browser cannot run javascript to scan board</noscript>
                 <span id="camera-log"></span>
-                <input type="text" hidden name="gameID" value="{{.GameID}}">
+                <input type="text" name="gameID" value="{{.GameID}}" hidden="true" />
                 <div>
                     <label for="board-id">Board</label>
-                    <input id="board-id" type="text" name="boardID" value="{{.BoardID}}" required minLength="16"
-                        maxLength="16" pattern="[A-za-z0-9-]{16}" />
+                    <input id="board-id" type="text" name="boardID" value="{{.BoardID}}" required="true" minLength="16" maxLength="16" pattern="[A-za-z0-9-]{16}" />
                 </div>
                 <fieldset>
                     <legend>type</legend>
                     <div>
-                        <input id="type-has-line" type="radio" name="type" value="HasLine" checked>
+                        <input id="type-has-line" type="radio" name="type" value="HasLine" checked="true" />
                         <label for="type-has-line">Line</label>
                     </div>
                     <div>
-                        <input id="type-is-filled" type="radio" name="type" value="IsFilled">
+                        <input id="type-is-filled" type="radio" name="type" value="IsFilled" />
                         <label for="type-is-filled">All cells</label>
                     </div>
                 </fieldset>
-                <input type="submit">
+                <input type="submit" />
                 {{- if .BoardID}}
                 <div>
                     <span>Previous check:</span>
