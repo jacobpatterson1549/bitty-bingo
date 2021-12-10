@@ -1,16 +1,16 @@
-<form id="create-game" method="post" action="/game">
+<form class="create-game" method="post" action="/game">
     <fieldset>
         <legend>Create Game</legend>
         <input type="submit" />
     </fieldset>
 </form>
-<form id="create-board" method="post" action="/game/board">
+<form class="create-board" method="post" action="/game/board">
     <fieldset>
         <legend>Create Board (view)</legend>
         <input type="submit" />
     </fieldset>
 </form>
-<form id="create-boards" method="post" action="/game/boards">
+<form class="create-boards" method="post" action="/game/boards">
     <fieldset>
         <legend>Create Boards (zip)</legend>
         <div>
@@ -21,7 +21,7 @@
     </fieldset>
 </form>
 {{- if .}}
-<table id="games-list">
+<table class="games-list">
     <caption>Games</caption>
     <thead>
         <tr>
