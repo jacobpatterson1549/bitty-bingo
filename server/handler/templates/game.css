@@ -1,14 +1,12 @@
-#camera-video {
+.bar-code-scanner video {
     border: 0.0625em solid;
     width: 85vw;
     height: 60vh;
 }
-#check-board input[hidden] + label,
-#allow-camera-checkbox:not(:checked) + * {
+.bar-code-scanner .ctrl[hidden] + label {
     display: none;
 }
-#check-board noscript,
-#camera-log {
+.bar-code-scanner :is(noscript, .log) {
     color: gray;
 }
 .has-bingo {
@@ -17,12 +15,13 @@
 .no-bingo {
     text-shadow: 0.0625em 0.0625em red;
 }
-.previous-number {
-    font-size: clamp(5em, 12vw, 6em);
+.previous-number > * {
+    font-size: 5.5em;
 }
-#game-drawn-numbers th {
+.draw-number {
+    width: 100%;
+}
+.game-drawn-numbers th {
     font-size: 4em;
-}
-#game-drawn-numbers td {
-    width: 4em;
+    min-width: 1em;
 }
