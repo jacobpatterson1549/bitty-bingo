@@ -3,9 +3,11 @@ package handler
 import (
 	"errors"
 	"image"
+	"image/color"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -118,6 +120,34 @@ func TestDrawNumberModifiesGames(t *testing.T) {
 	h.ServeHTTP(w2, r2)
 	if want, got := "9-"+board1257894001IDNumbers, w2.Body.String(); !strings.Contains(got, want) {
 		t.Errorf("wanted modified game history to be displayed on the games page (%v):\n%+v", want, w2)
+	}
+}
+
+func TestBoardFreeSpace(t *testing.T) {
+	r := image.Rect(0, 0, 256, 256)
+	m := image.NewGray(r)
+	for y := r.Min.Y; y < r.Max.Y; y++ {
+		for x := r.Min.X; x < r.Max.X; x++ {
+			m.Set(x, y, color.Gray{Y: uint8(x ^ y)})
+		}
+	}
+	h := handler{
+		FreeSpacer: &mockFreeSpacer{
+			Image: m,
+		},
+	}
+	got, err := h.boardFreeSpace(board1257894001ID)
+	re := regexp.MustCompile("^[^a-zA-Z0-9+]$")
+	switch {
+	case err != nil:
+		t.Errorf("unwanted error getting board free space: %v", err)
+	case re.MatchString(got):
+		t.Errorf("wanted only base-64 standard encoding with padding (not %v), got: %v", re, got)
+	default:
+		re := regexp.MustCompile("^[a-zA-Z0-9+/]*={0,2}$")
+		if !re.MatchString(got) {
+			t.Errorf("wanted only base-64 standard encoding characters in free space, excluding right padding characters (=): (%v), got: %v", re, got)
+		}
 	}
 }
 
