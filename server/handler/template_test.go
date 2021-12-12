@@ -197,9 +197,9 @@ func TestHandleFavicon(t *testing.T) {
 	case strings.Contains(got, "\n"):
 		t.Errorf("unwanted line break now in favicon string\nit will be injected into the data href of the link\ngot: %v", got)
 	default:
-		re := regexp.MustCompile("^[a-zA-Z0-9+/]*$")
+		re := regexp.MustCompile("^[a-zA-Z0-9+/]*={0,2}$")
 		if !re.MatchString(got) {
-			t.Errorf("wanted only base-64 standard encoding characters in favicon (%v), got: %v", re, got)
+			t.Errorf("wanted only base-64 standard encoding characters in favicon, excluding right padding characters (=): (%v), got: %v", re, got)
 		}
 	}
 }
