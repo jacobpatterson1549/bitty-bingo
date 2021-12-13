@@ -18,7 +18,7 @@ func TestHandler(t *testing.T) {
 	t.Run("valid configs", func(t *testing.T) {
 		for i, test := range handlerTests {
 			w := httptest.NewRecorder()
-			h, err := Handler(test.gameCount, test.time, okMockFreeSpacer)
+			h, err := Handler(test.gameCount, test.time, okMockBarCoder)
 			if err != nil {
 				t.Errorf("test %v (%v): creating handler: %v", i, test.name, err)
 				continue
@@ -40,7 +40,7 @@ func TestHandler(t *testing.T) {
 	})
 	t.Run("bad parameters", func(t *testing.T) {
 		tests := []struct {
-			FreeSpacer
+			BarCoder
 			gameCount int
 			time      func() string
 			name      string
@@ -56,9 +56,9 @@ func TestHandler(t *testing.T) {
 				name: "nonPositiveGameCount",
 			},
 			{
-				gameCount:  9,
-				FreeSpacer: okMockFreeSpacer,
-				name:       "no time func",
+				gameCount: 9,
+				BarCoder:  okMockBarCoder,
+				name:      "no time func",
 			},
 			{
 				gameCount: 9,
@@ -69,7 +69,7 @@ func TestHandler(t *testing.T) {
 			},
 		}
 		for i, test := range tests {
-			if _, err := Handler(test.gameCount, test.time, test.FreeSpacer); err == nil {
+			if _, err := Handler(test.gameCount, test.time, test.BarCoder); err == nil {
 				t.Errorf("test %v (%v): wanted error for bad parameters", i, test.name)
 			}
 		}
@@ -84,9 +84,9 @@ func TestHandlerServeHTTP(t *testing.T) {
 		wantGameInfos := make([]gameInfo, len(test.wantGameInfos))
 		copy(wantGameInfos, test.wantGameInfos)
 		h := handler{
-			time:       test.time,
-			gameInfos:  gameInfos,
-			FreeSpacer: test.FreeSpacer,
+			time:      test.time,
+			gameInfos: gameInfos,
+			BarCoder:  test.BarCoder,
 		}
 		test.r.Header = test.header
 		bingo.GameResetter.Seed(1257894001) // make board creation deterministic
@@ -124,7 +124,7 @@ func TestDrawNumberModifiesGames(t *testing.T) {
 	}
 }
 
-func TestBoardFreeSpace(t *testing.T) {
+func TestBoardBarCode(t *testing.T) {
 	r := image.Rect(0, 0, 256, 256)
 	m := image.NewGray(r)
 	for y := r.Min.Y; y < r.Max.Y; y++ {
@@ -133,16 +133,16 @@ func TestBoardFreeSpace(t *testing.T) {
 		}
 	}
 	h := handler{
-		FreeSpacer: &mockFreeSpacer{
+		BarCoder: &mockBarCoder{
 			Image: m,
 		},
 	}
-	got, err := h.boardFreeSpace(board1257894001ID)
+	got, err := h.boardBarCode(board1257894001ID)
 	switch {
 	case err != nil:
-		t.Errorf("unwanted error getting board free space: %v", err)
+		t.Errorf("unwanted error getting board bar code: %v", err)
 	case !base64RE.MatchString(got):
-		t.Errorf("wanted only base-64 standard encoding characters in free space, excluding right padding characters (=): (%v), got: %v", base64RE, got)
+		t.Errorf("wanted only base-64 standard encoding characters in bar code image, excluding right padding characters (=): (%v), got: %v", base64RE, got)
 	}
 }
 
@@ -173,14 +173,14 @@ const (
 )
 
 var (
-	okMockFreeSpacer = &mockFreeSpacer{
+	okMockBarCoder = &mockBarCoder{
 		Image: image.NewGray16(image.Rect(0, 0, 1, 1)),
 	}
-	emptyImageMockFreeSpacer = &mockFreeSpacer{
+	emptyImageMockMarCoder = &mockBarCoder{
 		Image: image.NewGray16(image.Rect(0, 0, 0, 0)),
 	}
-	errMockFreeSpacer = &mockFreeSpacer{
-		err: errors.New("mock FreeSpacer error"),
+	errMockBarCoder = &mockBarCoder{
+		err: errors.New("mock error"),
 	}
 	base64RE              = regexp.MustCompile("^[a-zA-Z0-9+/]*={0,2}$")
 	htmlContentTypeHeader = http.Header{
@@ -223,7 +223,7 @@ var (
 		},
 	}
 	handlerServeHTTPTests = []struct {
-		FreeSpacer
+		BarCoder
 		name           string
 		time           func() string
 		gameInfos      []gameInfo
@@ -292,7 +292,7 @@ var (
 		{
 			name:           "get board by id",
 			r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+board1257894001ID, nil),
-			FreeSpacer:     okMockFreeSpacer,
+			BarCoder:       okMockBarCoder,
 			wantStatusCode: 200,
 			wantHeader:     htmlContentTypeHeader,
 		},
@@ -363,7 +363,7 @@ var (
 			name:           "create boards",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=5")),
 			header:         formContentTypeHeader,
-			FreeSpacer:     okMockFreeSpacer,
+			BarCoder:       okMockBarCoder,
 			wantStatusCode: 200,
 			wantHeader: http.Header{
 				headerContentType:     {"application/zip"},
@@ -409,14 +409,14 @@ var (
 		{
 			name:           "get board - FreeSpacer error",
 			r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+board1257894001ID, nil),
-			FreeSpacer:     errMockFreeSpacer,
+			BarCoder:       errMockBarCoder,
 			wantStatusCode: 500,
 			wantHeader:     errorHeader,
 		},
 		{
 			name:           "get board - FreeSpacer produces empty image",
 			r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+board1257894001ID, nil),
-			FreeSpacer:     emptyImageMockFreeSpacer,
+			BarCoder:       emptyImageMockMarCoder,
 			wantStatusCode: 500,
 			wantHeader:     errorHeader,
 		},
@@ -473,7 +473,7 @@ var (
 			name:           "create boards - FreeSpacer error",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=1")),
 			header:         formContentTypeHeader,
-			FreeSpacer:     errMockFreeSpacer,
+			BarCoder:       errMockBarCoder,
 			wantStatusCode: 500,
 			wantHeader:     errorHeader,
 		},

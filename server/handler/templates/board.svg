@@ -41,7 +41,7 @@
   <text x="250" y="150" class="number">{{(index .Board 10).Value}}</text>
   <text x="250" y="250" class="number">{{(index .Board 11).Value}}</text>
   <g class="free-space">
-    <image x="210" y="310" width="80" height="80" href="data:image/png;base64,{{.FreeSpace}}" />
+    <image x="210" y="310" width="80" height="80" href="data:image/png;base64,{{.BarCode}}" />
     <text x="250" y="390" class="id">{{.BoardID}}</text>
   </g>
   <text x="250" y="450" class="number">{{(index .Board 13).Value}}</text>

@@ -2,13 +2,13 @@ package handler
 
 import "image"
 
-// mockFreeSpacer always returns the image and error
-type mockFreeSpacer struct {
+// mockBarCoder always returns the image and error
+type mockBarCoder struct {
 	image.Image
 	err error
 }
 
 // QRCode returns the image and error set in the struct.
-func (f *mockFreeSpacer) QRCode(boardID string, width, height int) (image.Image, error) {
+func (f *mockBarCoder) BarCode(boardID string, width, height int) (image.Image, error) {
 	return f.Image, f.err
 }

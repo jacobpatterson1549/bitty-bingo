@@ -46,8 +46,8 @@ type (
 		page
 		Board   bingo.Board
 		BoardID string
-		// FreeSpace is the base64 encoded png image that should be placed in the free space in the middle of the board
-		FreeSpace string
+		// BarCode is a base64 encoded png image of a bar code that should be placed in the free space in the middle of the board
+		BarCode string
 	}
 )
 
@@ -105,7 +105,7 @@ func executeBoardTemplate(w io.Writer, favicon string, b bingo.Board, boardID, f
 		},
 		Board:     b,
 		BoardID:   boardID,
-		FreeSpace: freeSpace,
+		BarCode: freeSpace,
 	}
 	return embeddedTemplate.ExecuteTemplate(w, indexTemplateName, p)
 }
@@ -115,7 +115,7 @@ func executeBoardExportTemplate(w io.Writer, b bingo.Board, boardID, freeSpace s
 	data := boardPage{
 		Board:     b,
 		BoardID:   boardID,
-		FreeSpace: freeSpace,
+		BarCode: freeSpace,
 	}
 	return embeddedTemplate.ExecuteTemplate(w, boardExportTemplateName, data)
 }

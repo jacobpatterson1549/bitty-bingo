@@ -26,16 +26,16 @@ window.onload = () => {
     const getTrack = () => {
         return cameraVideo.srcObject?.getVideoTracks()[0];
     };
-    const scanQR = (imageCapture, barcodeDetector) => () => {
+    const scanBarCode = (imageCapture, barcodeDetector) => () => {
         if (!imageCapture.track.muted) {
             imageCapture.grabFrame()
                 .then(imageBitmap => {
                     barcodeDetector?.detect(imageBitmap)
                         .then(barCodes => {
                             if (barCodes.length == 1) {
-                                const qrCode = barCodes[0].rawValue;
-                                boardIdInput.value = qrCode;
-                                log('scanned board id: ' + qrCode);
+                                const barCode = barCodes[0].rawValue;
+                                boardIdInput.value = barCode;
+                                log('scanned board id: ' + barCode);
                             }
                         })
                         .catch(error => {
@@ -62,7 +62,7 @@ window.onload = () => {
                 cameraVideo.srcObject = mediaStream;
                 const track = getTrack();
                 const imageCapture = new ImageCapture(track);
-                scannerIdInput.value = setInterval(scanQR(imageCapture, barcodeDetector), 250);
+                scannerIdInput.value = setInterval(scanBarCode(imageCapture, barcodeDetector), 250);
                 frontCameraCheckbox.hidden = false;
                 initCameraZoom(track);
                 cameraVideo.hidden = false;

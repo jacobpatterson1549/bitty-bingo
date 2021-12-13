@@ -136,7 +136,7 @@ func TestHTTPSHandler(t *testing.T) {
 	})
 }
 
-func TestGetBoardWithQR(t *testing.T) {
+func TestGetBoardWithBarCode(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test that depends on external library")
 	}

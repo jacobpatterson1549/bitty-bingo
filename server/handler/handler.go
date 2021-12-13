@@ -16,16 +16,16 @@ import (
 )
 
 type (
-	// FreeSpacer generates the free space image for a board.
-	FreeSpacer interface {
-		// QRCode encodes the board id to a QR code with a width and height.
-		QRCode(boardID string, width, height int) (image.Image, error)
+	// BarCoder generates image of a bar code of the board, possibly with an external library.
+	BarCoder interface {
+		// BarCode encodes the board id to a bar code image with a width and height.
+		BarCode(boardID string, width, height int) (image.Image, error)
 	}
 	// handler tracks servers HTTP requests and stores recent game infos.
 	// The time function is used to create game infos
 	handler struct {
 		http.Handler
-		FreeSpacer
+		BarCoder
 		gameInfos []gameInfo
 		time      func() string
 		favicon   string
@@ -44,7 +44,7 @@ type (
 // Handler creates a HTTP handler to serve the site.
 // The gameCount and time function are validated used from the config in the handler
 // Responses are returned gzip compression when allowed.
-func Handler(gameCount int, time func() string, f FreeSpacer) (http.Handler, error) {
+func Handler(gameCount int, time func() string, f BarCoder) (http.Handler, error) {
 	switch {
 	case gameCount < 1:
 		return nil, fmt.Errorf("positive GameCount required, got %v", gameCount)
@@ -60,10 +60,10 @@ func Handler(gameCount int, time func() string, f FreeSpacer) (http.Handler, err
 	faviconB := faviconW.Bytes()
 	favicon := base64.StdEncoding.EncodeToString([]byte(faviconB))
 	h := handler{
-		gameInfos:  make([]gameInfo, 0, gameCount),
-		time:       time,
-		FreeSpacer: f,
-		favicon:    favicon,
+		gameInfos: make([]gameInfo, 0, gameCount),
+		time:      time,
+		BarCoder:  f,
+		favicon:   favicon,
 	}
 	return &h, nil
 }
@@ -133,7 +133,7 @@ func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	freeSpace, err := h.boardFreeSpace(boardID)
+	freeSpace, err := h.boardBarCode(boardID)
 	if err != nil {
 		message := fmt.Sprintf("unexpected problem creating board free space: %v", err)
 		http.Error(w, message, http.StatusInternalServerError)
@@ -273,7 +273,7 @@ func (h handler) zipNewBoards(w io.Writer, n int) error {
 		if err != nil {
 			return fmt.Errorf("getting id of board #%v: %v\nboard: %#v", i, err, b)
 		}
-		freeSpace, err := h.boardFreeSpace(boardID)
+		freeSpace, err := h.boardBarCode(boardID)
 		if err != nil {
 			return fmt.Errorf("creating board #%v free space: %v", i, err)
 		}
@@ -309,16 +309,16 @@ func (h handler) parseBoard(id string, w http.ResponseWriter) (b *bingo.Board, o
 	return b, true
 }
 
-// boardFreeSpace uses the FreeSpacer to encode the freeSpace image as a base64-encode png image with transparency.
-func (h handler) boardFreeSpace(boardID string) (string, error) {
-	qrCode, err := h.FreeSpacer.QRCode(boardID, 80, 80)
+// boardBarCode uses the BarCoder to encode the bar code image as a base64-encode png image with transparency.
+func (h handler) boardBarCode(boardID string) (string, error) {
+	barCode, err := h.BarCoder.BarCode(boardID, 80, 80)
 	if err != nil {
-		return "", fmt.Errorf("creating qr code for free space: %v", err)
+		return "", fmt.Errorf("creating bar code for free space: %v", err)
 	}
 	var buf bytes.Buffer
-	img := newTransparentImage(qrCode)
+	img := newTransparentImage(barCode)
 	if err := png.Encode(&buf, img); err != nil {
-		return "", fmt.Errorf("converting free space qr code to png image: %v", err)
+		return "", fmt.Errorf("converting free space bar code to png image: %v", err)
 	}
 	bytes := buf.Bytes()
 	data := base64.StdEncoding.EncodeToString(bytes)
