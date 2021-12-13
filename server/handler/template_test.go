@@ -2,46 +2,11 @@ package handler
 
 import (
 	"bytes"
-	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
-
-func TestNewTemplateGame(t *testing.T) {
-	var g bingo.Game
-	g.DrawNumber()
-	g.DrawNumber()
-	gameID := "game-464"
-	boardID := "board-1797"
-	hasBingo := true
-	want := &game{
-		Game:     g,
-		GameID:   gameID,
-		BoardID:  boardID,
-		HasBingo: true,
-	}
-	got := newTemplateGame(g, gameID, boardID, hasBingo)
-	if !reflect.DeepEqual(want, got) {
-		t.Errorf("template games not equal:\nwanted: %#v\ngot:    %#v", want, got)
-	}
-}
-
-func TestNewTemplateBoard(t *testing.T) {
-	b := bingo.NewBoard()
-	boardID := "board-1341"
-	freeSpace := "free-space-png-base64-data"
-	want := &board{
-		Board:     *b,
-		BoardID:   boardID,
-		FreeSpace: freeSpace,
-	}
-	got := newTemplateBoard(*b, boardID, freeSpace)
-	if !reflect.DeepEqual(want, got) {
-		t.Errorf("template games not equal:\nwanted: %#v\ngot:    %#v", want, got)
-	}
-}
 
 func TestHandleHelp(t *testing.T) {
 	var w bytes.Buffer
@@ -177,11 +142,28 @@ func TestHandleBoard(t *testing.T) {
 	got := w.String()
 	switch {
 	case err != nil:
-		t.Errorf("unwanted error: %v", err)
+		t.Error(err)
 	case !strings.Contains(w.String(), "FAVICON-5"):
 		t.Errorf("wanted page to contain FAVICON-5: %v", w.String())
 	case !strings.Contains(got, boardID):
 		t.Errorf("board ID missing: %v", got)
+	}
+}
+
+func TestHandleBoardExport(t *testing.T) {
+	var w bytes.Buffer
+	var b bingo.Board
+	boardID := "board-313"
+	freeSpace := "free-space-png-base64-data-2"
+	err := executeBoardExportTemplate(&w, b, boardID, freeSpace)
+	got := w.String()
+	switch {
+	case err != nil:
+		t.Error(err)
+	case !strings.Contains(got, boardID):
+		t.Errorf("board ID missing: %v", got)
+	case !strings.Contains(got, freeSpace):
+		t.Errorf("board free space missing: %v", got)
 	}
 }
 
@@ -192,7 +174,7 @@ func TestHandleFavicon(t *testing.T) {
 	wantPrefix := "<svg"
 	switch {
 	case err != nil:
-		t.Errorf("unwanted error: %v", err)
+		t.Error(err)
 	case !strings.HasPrefix(got, wantPrefix):
 		t.Errorf("wanted favicon to start with %q:\n%v", wantPrefix, got)
 	}

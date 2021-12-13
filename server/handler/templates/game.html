@@ -10,7 +10,7 @@
             <label class="numbers-left">Numbers left: {{.Game.NumbersLeft}}</label>
         </div>
         <input type="text" name="gameID" value="{{.GameID}}" hidden="true" />
-        <input type="submit" {{if le .Game.NumbersLeft 0}}disabled{{end}} />
+        <input type="submit"{{if le .Game.NumbersLeft 0}} disabled{{end}} />
     </fieldset>
 </form>
 {{- if .Game.PreviousNumberDrawn}}

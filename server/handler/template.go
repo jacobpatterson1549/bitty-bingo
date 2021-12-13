@@ -16,24 +16,34 @@ var (
 	embeddedTemplate = template.Must(template.ParseFS(templatesFS, "templates/*"))
 )
 
+const (
+	indexTemplateName       = "index.html"
+	faviconTemplateName     = "favicon.svg"
+	boardExportTemplateName = "board.svg"
+)
+
 type (
 	// page contains all the data needed to render any html page.
 	page struct {
 		Name    string
 		Favicon string
-		List    []gameInfo
-		Game    *game
-		Board   *board
 	}
-	// game contains the fields to render a game page.
-	game struct {
+	// gamesPage contains the fields to render a list of games
+	gamesPage struct {
+		page
+		List []gameInfo
+	}
+	// gamePage contains the fields to render a gamePage page.
+	gamePage struct {
+		page
 		Game     bingo.Game
 		GameID   string
 		BoardID  string
 		HasBingo bool
 	}
-	// board contains the field to export a board
-	board struct {
+	// boardPage contains the field to export a boardPage
+	boardPage struct {
+		page
 		Board   bingo.Board
 		BoardID string
 		// FreeSpace is the base64 encoded png image that should be placed in the free space in the middle of the board
@@ -41,34 +51,13 @@ type (
 	}
 )
 
-// newTemplateGame creates a game to render from the bingo game.
-func newTemplateGame(g bingo.Game, gameID, boardID string, hasBingo bool) *game {
-	templateGame := game{
-		Game:     g,
-		GameID:   gameID,
-		BoardID:  boardID,
-		HasBingo: hasBingo,
-	}
-	return &templateGame
-}
-
-// newTemplateBoard creates a board to render from the bingo board.
-func newTemplateBoard(b bingo.Board, boardID, freeSpace string) *board {
-	templateBoard := board{
-		Board:     b,
-		BoardID:   boardID,
-		FreeSpace: freeSpace,
-	}
-	return &templateBoard
-}
-
 // executeHelpTemplate renders the help html page.
 func executeHelpTemplate(w io.Writer, favicon string) error {
 	p := page{
 		Name:    "help",
 		Favicon: favicon,
 	}
-	return p.executeIndexTemplate(embeddedTemplate, w)
+	return embeddedTemplate.ExecuteTemplate(w, indexTemplateName, p)
 }
 
 // executeAboutTemplate renders the about html page.
@@ -77,53 +66,61 @@ func executeAboutTemplate(w io.Writer, favicon string) error {
 		Name:    "about",
 		Favicon: favicon,
 	}
-	return p.executeIndexTemplate(embeddedTemplate, w)
+	return embeddedTemplate.ExecuteTemplate(w, indexTemplateName, p)
 }
 
 // executeGameTemplate renders the game html page.
 func executeGameTemplate(w io.Writer, favicon string, g bingo.Game, gameID, boardID string, hasBingo bool) error {
-	templateGame := newTemplateGame(g, gameID, boardID, hasBingo)
-	p := page{
-		Name:    "game",
-		Favicon: favicon,
-		Game:    templateGame,
+	p := gamePage{
+		page: page{
+			Name:    "game",
+			Favicon: favicon,
+		},
+		Game:     g,
+		GameID:   gameID,
+		BoardID:  boardID,
+		HasBingo: hasBingo,
 	}
-	return p.executeIndexTemplate(embeddedTemplate, w)
+	return embeddedTemplate.ExecuteTemplate(w, indexTemplateName, p)
 }
 
 // executeGamesTemplate renders the games list html page.
 func executeGamesTemplate(w io.Writer, favicon string, gameInfos []gameInfo) error {
-	p := page{
-		Name:    "list",
-		Favicon: favicon,
-		List:    gameInfos,
+	p := gamesPage{
+		page: page{
+			Name:    "list",
+			Favicon: favicon,
+		},
+		List: gameInfos,
 	}
-	return p.executeIndexTemplate(embeddedTemplate, w)
+	return embeddedTemplate.ExecuteTemplate(w, indexTemplateName, p)
 }
 
 // executeBoardTemplate renders the board on the html page.
 func executeBoardTemplate(w io.Writer, favicon string, b bingo.Board, boardID, freeSpace string) error {
-	templateBoard := newTemplateBoard(b, boardID, freeSpace)
-	p := page{
-		Name:    "board",
-		Favicon: favicon,
-		Board:   templateBoard,
+	p := boardPage{
+		page: page{
+			Name:    "board",
+			Favicon: favicon,
+		},
+		Board:     b,
+		BoardID:   boardID,
+		FreeSpace: freeSpace,
 	}
-	return p.executeIndexTemplate(embeddedTemplate, w)
+	return embeddedTemplate.ExecuteTemplate(w, indexTemplateName, p)
 }
 
 // executeBoardExportTemplate renders the board onto an svg image.
 func executeBoardExportTemplate(w io.Writer, b bingo.Board, boardID, freeSpace string) error {
-	templateBoard := newTemplateBoard(b, boardID, freeSpace)
-	return embeddedTemplate.ExecuteTemplate(w, "board.svg", templateBoard)
+	data := boardPage{
+		Board:     b,
+		BoardID:   boardID,
+		FreeSpace: freeSpace,
+	}
+	return embeddedTemplate.ExecuteTemplate(w, boardExportTemplateName, data)
 }
 
 // exectueFaviconTemplate renders the favicon without line breaks.
 func executeFaviconTemplate(w io.Writer) error {
-	return embeddedTemplate.ExecuteTemplate(w, "favicon.svg", nil)
-}
-
-// executeIndexTemplate renders the page on the index HTML template.
-func (p page) executeIndexTemplate(t *template.Template, w io.Writer) error {
-	return t.ExecuteTemplate(w, "index.html", p)
+	return embeddedTemplate.ExecuteTemplate(w, faviconTemplateName, nil)
 }

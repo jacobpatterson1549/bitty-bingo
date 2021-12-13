@@ -20,7 +20,7 @@
 {{- end}}
         </style>
 {{- if eq .Name "game"}}
-{{- if .Game.Game.PreviousNumberDrawn}}
+{{- if .Game.PreviousNumberDrawn}}
         <script>
 {{template "game.js"}}
         </script>
@@ -38,11 +38,11 @@
         </header>
         <main>
 {{- if eq .Name "list"}}
-{{template "games.html" .List}}
+{{template "games.html" .}}
 {{- else if eq .Name "game"}}
-{{template "game.html" .Game}}
+{{template "game.html" .}}
 {{- else if eq .Name "board"}}
-{{template "board.svg" .Board}}
+{{template "board.svg" .}}
 {{- else if eq .Name "help"}}
 {{template "help.html"}}
 {{- else if eq .Name "about"}}
