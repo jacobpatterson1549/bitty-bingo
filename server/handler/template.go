@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"bytes"
 	"embed"
-	"encoding/base64"
 	"html/template"
 	"io"
 
@@ -121,14 +119,8 @@ func executeBoardExportTemplate(w io.Writer, b bingo.Board, boardID, freeSpace s
 }
 
 // exectueFaviconTemplate renders the favicon without line breaks.
-func executeFaviconTemplate() (string, error) {
-	var w bytes.Buffer
-	if err := embeddedTemplate.ExecuteTemplate(&w, "favicon.svg", nil); err != nil {
-		return "", err
-	}
-	b := w.Bytes()
-	s := base64.StdEncoding.EncodeToString(b)
-	return s, nil
+func executeFaviconTemplate(w io.Writer) error {
+	return embeddedTemplate.ExecuteTemplate(w, "favicon.svg", nil)
 }
 
 // executeIndexTemplate renders the page on the index HTML template.

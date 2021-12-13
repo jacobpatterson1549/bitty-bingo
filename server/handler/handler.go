@@ -53,10 +53,12 @@ func Handler(gameCount int, time func() string, f FreeSpacer) (http.Handler, err
 	case f == nil:
 		return nil, fmt.Errorf("FreeSpacer required")
 	}
-	favicon, err := executeFaviconTemplate()
-	if err != nil {
+	var faviconW bytes.Buffer
+	if err := executeFaviconTemplate(&faviconW); err != nil {
 		return nil, fmt.Errorf("creating favicon: %v", err)
 	}
+	faviconB := faviconW.Bytes()
+	favicon := base64.StdEncoding.EncodeToString([]byte(faviconB))
 	h := handler{
 		gameInfos:  make([]gameInfo, 0, gameCount),
 		time:       time,

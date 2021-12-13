@@ -27,13 +27,14 @@ func TestHandler(t *testing.T) {
 			h.ServeHTTP(w, test.r)
 			gotStatusCode := w.Code
 			gotHeader := w.Header()
+			wantFaviconPrefix := "PHN2Z"
 			switch {
 			case test.wantStatusCode != gotStatusCode:
 				t.Errorf("test %v (%v): HTTPS response status codes not equal: wanted %v, got %v: %v", i, test.name, test.wantStatusCode, w.Code, w.Body.String())
 			case !reflect.DeepEqual(test.wantHeader, gotHeader):
 				t.Errorf("test %v (%v): HTTPS response headers not equal:\nwanted: %v\ngot:    %v", i, test.name, test.wantHeader, gotHeader)
-			case len(h.(*handler).favicon) == 0:
-				t.Errorf("test %v (%v): favicon not set: %+v", i, test.name, h)
+			case !strings.HasPrefix(h.(*handler).favicon, wantFaviconPrefix):
+				t.Errorf("wanted favicon to be base64 encoded and start with %q [btoa('<svg')]:\n%v", wantFaviconPrefix, h.(*handler).favicon)
 			}
 		}
 	})
@@ -137,17 +138,11 @@ func TestBoardFreeSpace(t *testing.T) {
 		},
 	}
 	got, err := h.boardFreeSpace(board1257894001ID)
-	re := regexp.MustCompile("^[^a-zA-Z0-9+]$")
 	switch {
 	case err != nil:
 		t.Errorf("unwanted error getting board free space: %v", err)
-	case re.MatchString(got):
-		t.Errorf("wanted only base-64 standard encoding with padding (not %v), got: %v", re, got)
-	default:
-		re := regexp.MustCompile("^[a-zA-Z0-9+/]*={0,2}$")
-		if !re.MatchString(got) {
-			t.Errorf("wanted only base-64 standard encoding characters in free space, excluding right padding characters (=): (%v), got: %v", re, got)
-		}
+	case !base64RE.MatchString(got):
+		t.Errorf("wanted only base-64 standard encoding characters in free space, excluding right padding characters (=): (%v), got: %v", base64RE, got)
 	}
 }
 
@@ -187,6 +182,7 @@ var (
 	errMockFreeSpacer = &mockFreeSpacer{
 		err: errors.New("mock FreeSpacer error"),
 	}
+	base64RE              = regexp.MustCompile("^[a-zA-Z0-9+/]*={0,2}$")
 	htmlContentTypeHeader = http.Header{
 		headerContentType: {contentTypeHTML},
 	}

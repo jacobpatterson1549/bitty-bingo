@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"reflect"
-	"regexp"
 	"strings"
 	"testing"
 
@@ -187,19 +186,14 @@ func TestHandleBoard(t *testing.T) {
 }
 
 func TestHandleFavicon(t *testing.T) {
-	got, err := executeFaviconTemplate()
-	const wantPrefix = "PHN2Z"
+	var w bytes.Buffer
+	err := executeFaviconTemplate(&w)
+	got := w.String()
+	wantPrefix := "<svg"
 	switch {
 	case err != nil:
 		t.Errorf("unwanted error: %v", err)
 	case !strings.HasPrefix(got, wantPrefix):
-		t.Errorf("wanted favicon to be base64 encoded and start with %q [btoa('<svg')]:\n%v", wantPrefix, got)
-	case strings.Contains(got, "\n"):
-		t.Errorf("unwanted line break now in favicon string\nit will be injected into the data href of the link\ngot: %v", got)
-	default:
-		re := regexp.MustCompile("^[a-zA-Z0-9+/]*={0,2}$")
-		if !re.MatchString(got) {
-			t.Errorf("wanted only base-64 standard encoding characters in favicon, excluding right padding characters (=): (%v), got: %v", re, got)
-		}
+		t.Errorf("wanted favicon to start with %q:\n%v", wantPrefix, got)
 	}
 }
