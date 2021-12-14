@@ -137,8 +137,8 @@ func TestHandleBoard(t *testing.T) {
 	var w bytes.Buffer
 	var b bingo.Board
 	boardID := "board-313"
-	freeSpace := "free-space-png-base64-data"
-	err := executeBoardTemplate(&w, "FAVICON-5", b, boardID, freeSpace)
+	barCode := "bar-code-png-base64-data"
+	err := executeBoardTemplate(&w, "FAVICON-5", b, boardID, barCode)
 	got := w.String()
 	switch {
 	case err != nil:
@@ -154,16 +154,16 @@ func TestHandleBoardExport(t *testing.T) {
 	var w bytes.Buffer
 	var b bingo.Board
 	boardID := "board-313"
-	freeSpace := "free-space-png-base64-data-2"
-	err := executeBoardExportTemplate(&w, b, boardID, freeSpace)
+	barCode := "bar-code-png-base64-data-2"
+	err := executeBoardExportTemplate(&w, b, boardID, barCode)
 	got := w.String()
 	switch {
 	case err != nil:
 		t.Error(err)
 	case !strings.Contains(got, boardID):
 		t.Errorf("board ID missing: %v", got)
-	case !strings.Contains(got, freeSpace):
-		t.Errorf("board free space missing: %v", got)
+	case !strings.Contains(got, barCode):
+		t.Errorf("board bar code missing: %v", got)
 	}
 }
 

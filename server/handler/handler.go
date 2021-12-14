@@ -44,14 +44,14 @@ type (
 // Handler creates a HTTP handler to serve the site.
 // The gameCount and time function are validated used from the config in the handler
 // Responses are returned gzip compression when allowed.
-func Handler(gameCount int, time func() string, f BarCoder) (http.Handler, error) {
+func Handler(gameCount int, time func() string, b BarCoder) (http.Handler, error) {
 	switch {
 	case gameCount < 1:
 		return nil, fmt.Errorf("positive GameCount required, got %v", gameCount)
 	case time == nil:
 		return nil, fmt.Errorf("time function required")
-	case f == nil:
-		return nil, fmt.Errorf("FreeSpacer required")
+	case b == nil:
+		return nil, fmt.Errorf("BarCoder required")
 	}
 	var faviconW bytes.Buffer
 	if err := executeFaviconTemplate(&faviconW); err != nil {
@@ -62,7 +62,7 @@ func Handler(gameCount int, time func() string, f BarCoder) (http.Handler, error
 	h := handler{
 		gameInfos: make([]gameInfo, 0, gameCount),
 		time:      time,
-		BarCoder:  f,
+		BarCoder:  b,
 		favicon:   favicon,
 	}
 	return &h, nil
@@ -133,13 +133,13 @@ func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	freeSpace, err := h.boardBarCode(boardID)
+	barCode, err := h.boardBarCode(boardID)
 	if err != nil {
-		message := fmt.Sprintf("unexpected problem creating board free space: %v", err)
+		message := fmt.Sprintf("unexpected problem creating board bar code: %v", err)
 		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
-	executeBoardTemplate(w, h.favicon, *b, boardID, freeSpace)
+	executeBoardTemplate(w, h.favicon, *b, boardID, barCode)
 }
 
 // createBoard redirects to a new board.
@@ -273,11 +273,11 @@ func (h handler) zipNewBoards(w io.Writer, n int) error {
 		if err != nil {
 			return fmt.Errorf("getting id of board #%v: %v\nboard: %#v", i, err, b)
 		}
-		freeSpace, err := h.boardBarCode(boardID)
+		barCode, err := h.boardBarCode(boardID)
 		if err != nil {
-			return fmt.Errorf("creating board #%v free space: %v", i, err)
+			return fmt.Errorf("creating board #%v bar code: %v", i, err)
 		}
-		if err := executeBoardExportTemplate(f, *b, boardID, freeSpace); err != nil {
+		if err := executeBoardExportTemplate(f, *b, boardID, barCode); err != nil {
 			return fmt.Errorf("adding board #%v to zip file: %v", i, err)
 		}
 	}
@@ -313,12 +313,12 @@ func (h handler) parseBoard(id string, w http.ResponseWriter) (b *bingo.Board, o
 func (h handler) boardBarCode(boardID string) (string, error) {
 	barCode, err := h.BarCoder.BarCode(boardID, 80, 80)
 	if err != nil {
-		return "", fmt.Errorf("creating bar code for free space: %v", err)
+		return "", fmt.Errorf("creating bar code: %v", err)
 	}
 	var buf bytes.Buffer
 	img := newTransparentImage(barCode)
 	if err := png.Encode(&buf, img); err != nil {
-		return "", fmt.Errorf("converting free space bar code to png image: %v", err)
+		return "", fmt.Errorf("bar code to png image: %v", err)
 	}
 	bytes := buf.Bytes()
 	data := base64.StdEncoding.EncodeToString(bytes)

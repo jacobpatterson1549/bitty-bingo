@@ -97,25 +97,25 @@ func executeGamesTemplate(w io.Writer, favicon string, gameInfos []gameInfo) err
 }
 
 // executeBoardTemplate renders the board on the html page.
-func executeBoardTemplate(w io.Writer, favicon string, b bingo.Board, boardID, freeSpace string) error {
+func executeBoardTemplate(w io.Writer, favicon string, b bingo.Board, boardID, barCode string) error {
 	p := boardPage{
 		page: page{
 			Name:    "board",
 			Favicon: favicon,
 		},
-		Board:     b,
-		BoardID:   boardID,
-		BarCode: freeSpace,
+		Board:   b,
+		BoardID: boardID,
+		BarCode: barCode,
 	}
 	return embeddedTemplate.ExecuteTemplate(w, indexTemplateName, p)
 }
 
 // executeBoardExportTemplate renders the board onto an svg image.
-func executeBoardExportTemplate(w io.Writer, b bingo.Board, boardID, freeSpace string) error {
+func executeBoardExportTemplate(w io.Writer, b bingo.Board, boardID, barCode string) error {
 	data := boardPage{
-		Board:     b,
-		BoardID:   boardID,
-		BarCode: freeSpace,
+		Board:   b,
+		BoardID: boardID,
+		BarCode: barCode,
 	}
 	return embeddedTemplate.ExecuteTemplate(w, boardExportTemplateName, data)
 }

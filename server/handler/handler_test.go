@@ -65,7 +65,7 @@ func TestHandler(t *testing.T) {
 				time: func() string {
 					return "anything"
 				},
-				name: "no FreeSpacer",
+				name: "no bar code",
 			},
 		}
 		for i, test := range tests {
@@ -407,14 +407,14 @@ var (
 			wantHeader:     errorHeader,
 		},
 		{
-			name:           "get board - FreeSpacer error",
+			name:           "get board - BarCoder error",
 			r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+board1257894001ID, nil),
 			BarCoder:       errMockBarCoder,
 			wantStatusCode: 500,
 			wantHeader:     errorHeader,
 		},
 		{
-			name:           "get board - FreeSpacer produces empty image",
+			name:           "get board - BarCoder produces empty image",
 			r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+board1257894001ID, nil),
 			BarCoder:       emptyImageMockMarCoder,
 			wantStatusCode: 500,
@@ -470,7 +470,7 @@ var (
 			wantHeader:     errorHeader,
 		},
 		{
-			name:           "create boards - FreeSpacer error",
+			name:           "create boards - BarCoder error",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=1")),
 			header:         formContentTypeHeader,
 			BarCoder:       errMockBarCoder,
