@@ -14,29 +14,16 @@ type Board [25]Number
 // Each column of the board (5-cell group) only contains numbers of the same column.
 func NewBoard() *Board {
 	var g Game
-	columnRowCounts := 0
+	GameResetter.Reset(&g)
+	g.numbersDrawn = g.NumbersLeft() // "draw" all the numbers
+	cols := g.DrawnNumberColumns()
 	var b Board
-	// each column must have 5 values - an octal bit flag is used to determine which numbers on the board have been populated
-	// each row takes up 3 bits in the flag (2^3 = 8, but only the first 1-5 are used); break when all positions have been populated
-	for columnRowCounts < 055555 {
-		g.DrawNumber()
-		n := g.PreviousNumberDrawn()
-		c := n.Column()
-		offsetC := 3 * c
-		r := (columnRowCounts >> offsetC) & 07
-		if r >= 5 {
-			continue // column has enough values
-		}
-		b[c*5+r] = n
-		clearRowCountMask := 07 << offsetC
-		columnRowCounts &^= clearRowCountMask
-		r++
-		if c == 2 && r == 2 {
-			r++ // skip center cell (leave free cell as zero)
-		}
-		setRowCountMask := r << offsetC
-		columnRowCounts |= setRowCountMask
-	}
+	copy(b[0:], cols[0][:5])
+	copy(b[5:], cols[1][:5])
+	copy(b[10:], cols[2][:2])
+	copy(b[13:], cols[2][2:4]) // leave space for free cell, copying numbers and indexes 3 & 4 into rows 4 & 5 of middle column
+	copy(b[15:], cols[3][:5])
+	copy(b[20:], cols[4][:5])
 	return &b
 }
 
