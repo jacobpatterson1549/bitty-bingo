@@ -133,7 +133,7 @@ func TestBoardIsValid(t *testing.T) {
 			want:  false,
 		},
 		{
-			Board: Board{1, 1, 3, 4, 5, 16, 17, 18, 19, 20, 31, 32, 33, 34, 35, 46, 47, 48, 49, 50, 61, 62, 63, 64, 65},
+			Board: Board{1, 1, 3, 4, 5, 16, 17, 18, 19, 20, 31, 32, 0, 34, 35, 46, 47, 48, 49, 50, 61, 62, 63, 64, 65},
 			name:  "duplicate values",
 			want:  false,
 		},
