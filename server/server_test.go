@@ -50,14 +50,32 @@ func TestNewServer(t *testing.T) {
 
 }
 
-func TestServerShutdown(t *testing.T) {
-	s := Server{
-		httpsServer: new(http.Server),
-		httpServer:  new(http.Server),
+func TestServerRunShutdown(t *testing.T) {
+	tests := []struct {
+		name string
+		Config
+	}{
+		{
+			name: "default values",
+		},
+		{
+			name: "with HTTPS redirect",
+			Config: Config{
+				HTTPSRedirect: true,
+			},
+		},
 	}
-	ctx := context.Background()
-	if err := s.Shutdown(ctx); err != nil {
-		t.Errorf("unwanted error shutting down server: %v", err)
+	for i, test := range tests {
+		s := Server{
+			httpsServer: new(http.Server),
+			httpServer:  new(http.Server),
+			config:      test.Config,
+		}
+		ctx := context.Background()
+		s.Run()
+		if err := s.Shutdown(ctx); err != nil {
+			t.Errorf("test %v (%v): unwanted error shutting down server: %v", i, test.name, err)
+		}
 	}
 }
 
