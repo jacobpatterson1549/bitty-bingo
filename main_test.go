@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jacobpatterson1549/bitty-bingo/server"
+	"github.com/jacobpatterson1549/bitty-bingo/internal/server"
 )
 
 func TestFlagSet(t *testing.T) {

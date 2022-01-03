@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jacobpatterson1549/bitty-bingo/server/handler"
-	"github.com/jacobpatterson1549/bitty-bingo/server/handler/qr"
+	"github.com/jacobpatterson1549/bitty-bingo/internal/server/handler"
+	"github.com/jacobpatterson1549/bitty-bingo/internal/server/handler/qr"
 )
 
 type (

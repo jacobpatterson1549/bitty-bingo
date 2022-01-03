@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jacobpatterson1549/bitty-bingo/server"
+	"github.com/jacobpatterson1549/bitty-bingo/internal/server"
 )
 
 // main runs a bingo server
