@@ -16,13 +16,11 @@ import (
 
 func TestHandler(t *testing.T) {
 	t.Run("valid configs", func(t *testing.T) {
+		gameCount := 10
+		timeF := func() string { return "any-time" }
 		for i, test := range handlerTests {
 			w := httptest.NewRecorder()
-			h, err := Handler(test.gameCount, test.time, okMockBarCoder)
-			if err != nil {
-				t.Errorf("test %v (%v): creating handler: %v", i, test.name, err)
-				continue
-			}
+			h := Handler(gameCount, timeF, okMockBarCoder)
 			test.r.Header = test.header
 			h.ServeHTTP(w, test.r)
 			gotStatusCode := w.Code
@@ -38,39 +36,14 @@ func TestHandler(t *testing.T) {
 			}
 		}
 	})
-	t.Run("bad parameters", func(t *testing.T) {
-		tests := []struct {
-			BarCoder
-			gameCount int
-			time      func() string
-			name      string
-		}{
-			{
-				name: "zero values [zero game count]",
-			},
-			{
-				gameCount: -9,
-				time: func() string {
-					return "anything"
-				},
-				name: "nonPositiveGameCount",
-			},
-			{
-				gameCount: 9,
-				BarCoder:  okMockBarCoder,
-				name:      "no time func",
-			},
-			{
-				gameCount: 9,
-				time: func() string {
-					return "anything"
-				},
-				name: "no bar code",
-			},
-		}
-		for i, test := range tests {
-			if _, err := Handler(test.gameCount, test.time, test.BarCoder); err == nil {
-				t.Errorf("test %v (%v): wanted error for bad parameters", i, test.name)
+	t.Run("zero configs", func(t *testing.T) {
+		for i, test := range handlerTests {
+			h := Handler(0, nil, nil)
+			w := httptest.NewRecorder()
+			test.r.Header = test.header
+			h.ServeHTTP(w, test.r)
+			if want, got := test.wantStatusCode, w.Code; want != got {
+				t.Errorf("test %v (%v): wanted status code to be %v, got %v", i, test.name, want, got)
 			}
 		}
 	})
@@ -108,9 +81,6 @@ func TestDrawNumberModifiesGames(t *testing.T) {
 	r1.Header = formContentTypeHeader
 	h := handler{
 		gameInfos: make([]gameInfo, 0, 1),
-		time: func() string {
-			return "time"
-		},
 	}
 	h.ServeHTTP(w1, r1)
 	if want, got := 303, w1.Result().StatusCode; want != got {
@@ -195,8 +165,6 @@ var (
 	}
 	handlerTests = []struct {
 		name           string
-		gameCount      int
-		time           func() string
 		r              *http.Request
 		header         http.Header
 		wantStatusCode int
@@ -204,22 +172,24 @@ var (
 	}{
 		{
 			name:           "root with no accept encodings",
-			gameCount:      10,
-			time:           func() string { return "time" },
 			r:              httptest.NewRequest(methodGet, urlPathGames, nil),
 			wantStatusCode: 200,
 			wantHeader:     htmlContentTypeHeader,
 		},
 		{
 			name:           "draw number",
-			gameCount:      10,
-			time:           func() string { return "then" },
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader("gameID=8-"+board1257894001IDNumbers)),
 			header:         formContentTypeHeader,
 			wantStatusCode: 303,
 			wantHeader: http.Header{
 				headerLocation: {urlPathGame + "?" + qpGameID + "=9-" + board1257894001IDNumbers},
 			},
+		},
+		{
+			name:           "view board",
+			r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+board1257894001ID, nil),
+			wantStatusCode: 200,
+			wantHeader:     htmlContentTypeHeader,
 		},
 	}
 	handlerServeHTTPTests = []struct {
@@ -428,7 +398,6 @@ var (
 		},
 		{
 			name:           "draw number - no form content type header (cannot parse game id)",
-			time:           func() string { return "time" },
 			gameInfos:      []gameInfo{{}},
 			wantGameInfos:  []gameInfo{{}},
 			r:              httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(qpGameID+"=8-"+board1257894001IDNumbers)),

@@ -59,10 +59,7 @@ func parseServerConfig(cfg *server.Config, fs *flag.FlagSet, programArgs []strin
 
 // runServer creates and runs a bingo server from the config
 func runServer(cfg server.Config, log *log.Logger) (err error) {
-	s, err := cfg.NewServer()
-	if err != nil {
-		return fmt.Errorf("problem creating server: %v", err)
-	}
+	s := cfg.NewServer()
 	done := make(chan os.Signal, 2)
 	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
 	errC := s.Run()

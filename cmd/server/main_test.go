@@ -69,10 +69,6 @@ func TestRunServer(t *testing.T) {
 		wantErrPart   string
 	}{
 		{
-			name:        "bad config",
-			wantErrPart: "problem creating server",
-		},
-		{
 			name:          "server with redirect",
 			serverConfig:  okConfig,
 			httpsRedirect: true,

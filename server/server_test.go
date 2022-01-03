@@ -11,9 +11,8 @@ import (
 
 func TestNewServer(t *testing.T) {
 	tests := []struct {
-		name   string
-		cfg    Config
-		wantOk bool
+		name string
+		cfg  Config
 	}{
 		{
 			name: "zero-value config [bad games count, time func]",
@@ -31,18 +30,11 @@ func TestNewServer(t *testing.T) {
 				TLSKeyFile:    "d",
 				HTTPSRedirect: true,
 			},
-			wantOk: true,
 		},
 	}
 	for i, test := range tests {
-		s, err := test.cfg.NewServer()
+		s := test.cfg.NewServer()
 		switch {
-		case !test.wantOk:
-			if err == nil {
-				t.Errorf("test %v (%v): wanted error", i, test.name)
-			}
-		case err != nil:
-			t.Errorf("test %v (%v): unwanted error: %v", i, test.name, err)
 		case s.httpsServer == nil:
 			t.Errorf("test %v (%v): HTTPS server not set", i, test.name)
 		case s.httpServer == nil:
@@ -97,59 +89,35 @@ func TestHTTPHandler(t *testing.T) {
 }
 
 func TestHTTPSHandler(t *testing.T) {
-	t.Run("valid config", func(t *testing.T) {
-		cfg := Config{
-			GameCount: 10,
-			Time: func() string {
-				return "time"
-			},
-		}
-		w := httptest.NewRecorder()
-		r := httptest.NewRequest("GET", "https://example.com/", nil)
-		h, err := cfg.httpsHandler()
-		if err != nil {
-			t.Fatalf("creating handler: %v", err)
-		}
-		r.Header = http.Header{
-			"Accept-Encoding": {"gzip, deflate, br"},
-		}
-		h.ServeHTTP(w, r)
-		wantStatusCode := 200
-		gotStatusCode := w.Code
-		wantHeader := http.Header{
-			"Content-Encoding": {"gzip"},
-			"Content-Type":     {"application/x-gzip"},
-		}
-		gotHeader := w.Header()
-		switch {
-		case wantStatusCode != gotStatusCode:
-			t.Errorf("HTTPS response status codes not equal: wanted %v, got %v: %v", wantStatusCode, w.Code, w.Body.String())
-		case !reflect.DeepEqual(wantHeader, gotHeader):
-			t.Errorf("HTTPS response headers not equal:\nwanted: %v\ngot:    %v", wantHeader, gotHeader)
-		}
-	})
-	t.Run("bad config", func(t *testing.T) {
-		var cfg Config
-		if _, err := cfg.httpsHandler(); err == nil {
-			t.Errorf("wanted error for bad config")
-		}
-	})
+	var cfg Config
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "https://example.com/", nil)
+	h := cfg.httpsHandler()
+	r.Header = http.Header{
+		"Accept-Encoding": {"gzip, deflate, br"},
+	}
+	h.ServeHTTP(w, r)
+	wantStatusCode := 200
+	gotStatusCode := w.Code
+	wantHeader := http.Header{
+		"Content-Encoding": {"gzip"},
+		"Content-Type":     {"application/x-gzip"},
+	}
+	gotHeader := w.Header()
+	switch {
+	case wantStatusCode != gotStatusCode:
+		t.Errorf("HTTPS response status codes not equal: wanted %v, got %v: %v", wantStatusCode, w.Code, w.Body.String())
+	case !reflect.DeepEqual(wantHeader, gotHeader):
+		t.Errorf("HTTPS response headers not equal:\nwanted: %v\ngot:    %v", wantHeader, gotHeader)
+	}
 }
 
 func TestGetBoardWithBarCode(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test that depends on external library")
 	}
-	cfg := Config{
-		GameCount: 10,
-		Time: func() string {
-			return "time"
-		},
-	}
-	h, err := cfg.httpsHandler()
-	if err != nil {
-		t.Fatalf("error creating handler: %v", err)
-	}
+	var cfg Config
+	h := cfg.httpsHandler()
 	boardID := "5zuTsMm6CTZAs7ad"
 	r := httptest.NewRequest("GET", "/game/board?boardID="+boardID, nil)
 	w := httptest.NewRecorder()

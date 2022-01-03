@@ -50,18 +50,15 @@ const (
 )
 
 // NewServer initializes HTTP and HTTPS TCP servers from the Configs
-func (cfg Config) NewServer() (*Server, error) {
-	httpsHandler, err := cfg.httpsHandler()
-	if err != nil {
-		return nil, fmt.Errorf("creating httpsHandler: %v", err)
-	}
+func (cfg Config) NewServer() *Server {
+	httpsHandler := cfg.httpsHandler()
 	httpHandler := cfg.httpHandler()
 	s := Server{
 		config:      cfg,
 		httpsServer: httpServer(cfg.HTTPSPort, httpsHandler),
 		httpServer:  httpServer(cfg.HTTPPort, httpHandler),
 	}
-	return &s, nil
+	return &s
 }
 
 // Run starts the HTTP and HTTPS TCP servers.
@@ -140,12 +137,9 @@ func (cfg Config) httpHandler() http.Handler {
 // httpsHandler creates a HTTP handler to serve the site.
 // The gameCount and time function are validated used from the config in the handler
 // Responses are returned gzip compression when allowed.
-func (cfg Config) httpsHandler() (http.Handler, error) {
-	h, err := handler.Handler(cfg.GameCount, cfg.Time, cfg)
-	if err != nil {
-		return nil, fmt.Errorf("creating root handler for server: %v", err)
-	}
-	return handler.WithGzip(h), nil
+func (cfg Config) httpsHandler() http.Handler {
+	h := handler.Handler(cfg.GameCount, cfg.Time, cfg)
+	return handler.WithGzip(h)
 }
 
 // BarCode uses a real qr code encoder to create an image of the desired size.

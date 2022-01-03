@@ -44,28 +44,18 @@ type (
 // Handler creates a HTTP handler to serve the site.
 // The gameCount and time function are validated used from the config in the handler
 // Responses are returned gzip compression when allowed.
-func Handler(gameCount int, time func() string, b BarCoder) (http.Handler, error) {
-	switch {
-	case gameCount < 1:
-		return nil, fmt.Errorf("positive GameCount required, got %v", gameCount)
-	case time == nil:
-		return nil, fmt.Errorf("time function required")
-	case b == nil:
-		return nil, fmt.Errorf("BarCoder required")
-	}
+func Handler(gameCount int, time func() string, barCoder BarCoder) http.Handler {
 	var faviconW bytes.Buffer
-	if err := executeFaviconTemplate(&faviconW); err != nil {
-		return nil, fmt.Errorf("creating favicon: %v", err)
-	}
+	executeFaviconTemplate(&faviconW)
 	faviconB := faviconW.Bytes()
 	favicon := base64.StdEncoding.EncodeToString([]byte(faviconB))
 	h := handler{
 		gameInfos: make([]gameInfo, 0, gameCount),
 		time:      time,
-		BarCoder:  b,
+		BarCoder:  barCoder,
 		favicon:   favicon,
 	}
-	return &h, nil
+	return &h
 }
 
 // ServeHTTP serves requests for GET and POST methods, not allowing others.
@@ -223,15 +213,19 @@ func (h *handler) drawNumber(w http.ResponseWriter, r *http.Request) {
 
 // addGame creates a new gameInfo and adds it to the gameInfos stack.  If the stack is full, the last item is discarded.
 func (h *handler) addGame(gameID string, numbersLeft int) {
-	if len(h.gameInfos) < cap(h.gameInfos) {
+	if cap(h.gameInfos) < 1 && len(h.gameInfos) == 0 {
+		h.gameInfos = make([]gameInfo, 1)
+	}
+	if cap(h.gameInfos) > len(h.gameInfos) {
 		h.gameInfos = append(h.gameInfos, gameInfo{}) // increase length
 	}
 	copy(h.gameInfos[1:], h.gameInfos) // shift right, overwriting last
-	modTime := h.time()
 	gi := gameInfo{
 		ID:          gameID,
-		ModTime:     modTime,
 		NumbersLeft: numbersLeft,
+	}
+	if h.time != nil {
+		gi.ModTime = h.time()
 	}
 	h.gameInfos[0] = gi // set first
 }
@@ -312,6 +306,9 @@ func (h handler) parseBoard(id string, w http.ResponseWriter) (b *bingo.Board, o
 
 // boardBarCode uses the BarCoder to encode the bar code image as a base64-encode png image with transparency.
 func (h handler) boardBarCode(boardID string) (string, error) {
+	if h.BarCoder == nil {
+		return "", nil
+	}
 	barCode, err := h.BarCoder.BarCode(boardID, 80, 80)
 	if err != nil {
 		return "", fmt.Errorf("creating bar code: %v", err)
