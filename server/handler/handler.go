@@ -119,8 +119,8 @@ func (h handler) createGame(w http.ResponseWriter, r *http.Request) {
 	var g bingo.Game
 	gameID, err := g.ID()
 	if err != nil {
-		message := fmt.Sprintf("unexpected problem getting new game id: %v=\ngame: %#v", err, g)
-		http.Error(w, message, http.StatusInternalServerError)
+		err := fmt.Errorf("getting new game id: %v=\ngame: %#v", err, g)
+		h.internalServerError(w, err)
 		return
 	}
 	h.redirect(w, r, "/game?gameID="+gameID)
@@ -135,8 +135,8 @@ func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	}
 	barCode, err := h.boardBarCode(boardID)
 	if err != nil {
-		message := fmt.Sprintf("unexpected problem creating board bar code: %v", err)
-		http.Error(w, message, http.StatusInternalServerError)
+		err := fmt.Errorf("creating board bar code: %v", err)
+		h.internalServerError(w, err)
 		return
 	}
 	executeBoardTemplate(w, h.favicon, *b, boardID, barCode)
@@ -147,8 +147,8 @@ func (h handler) createBoard(w http.ResponseWriter, r *http.Request) {
 	b := bingo.NewBoard()
 	boardID, err := b.ID()
 	if err != nil {
-		message := fmt.Sprintf("unexpected problem getting new board id: %v\nboard: %#v", err, b)
-		http.Error(w, message, http.StatusInternalServerError)
+		err := fmt.Errorf("getting new board id: %v\nboard: %#v", err, b)
+		h.internalServerError(w, err)
 		return
 	}
 	h.redirect(w, r, "/game/board?boardID="+boardID)
@@ -213,8 +213,8 @@ func (h *handler) drawNumber(w http.ResponseWriter, r *http.Request) {
 	}
 	afterID, err := g.ID()
 	if err != nil {
-		message := fmt.Sprintf("unexpected problem getting id after drawing number from game with a VALID id %q: %v", gameID, err)
-		http.Error(w, message, http.StatusInternalServerError)
+		err := fmt.Errorf("getting id after drawing number from game with a VALID id %q: %v", gameID, err)
+		h.internalServerError(w, err)
 		return
 	}
 	h.addGame(afterID, afterNumsLeft)
@@ -252,8 +252,8 @@ func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 	}
 	var buf bytes.Buffer
 	if err := h.zipNewBoards(&buf, n); err != nil {
-		message := fmt.Sprintf("unexpected problem creating zip file: %v", err)
-		http.Error(w, message, http.StatusInternalServerError)
+		err := fmt.Errorf("creating zip file: %v", err)
+		h.internalServerError(w, err)
 		return
 	}
 	buf.WriteTo(w)
@@ -334,4 +334,10 @@ func (h handler) redirect(w http.ResponseWriter, r *http.Request, url string) {
 // badRequest tells the response that a bad request was made.
 func (h handler) badRequest(w http.ResponseWriter, message string) {
 	http.Error(w, message, http.StatusBadRequest)
+}
+
+// redirect tells the response that an unexpected error occurred.
+func (h handler) internalServerError(w http.ResponseWriter, err error) {
+	message := fmt.Sprintf("unexpected problem: %v", err)
+	http.Error(w, message, http.StatusInternalServerError)
 }
