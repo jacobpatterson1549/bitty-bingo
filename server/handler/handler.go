@@ -186,7 +186,7 @@ func (h handler) checkBoard(w http.ResponseWriter, r *http.Request) {
 		result = b.IsFilled(*g)
 	default:
 		message := fmt.Sprintf("unknown checkType %q", checkType)
-		http.Error(w, message, http.StatusBadRequest)
+		h.badRequest(w, message)
 		return
 	}
 	url := fmt.Sprintf("/game?gameID=%v&boardID=%v", gameID, boardID)
@@ -242,11 +242,12 @@ func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 	n, err := strconv.Atoi(nQueryParam)
 	if err != nil {
 		message := fmt.Sprintf("%v: example: /game/boards?n=5 creates 5 unique boards", err)
-		http.Error(w, message, http.StatusBadRequest)
+		h.badRequest(w, message)
 		return
 	}
 	if n < 1 || n > 1000 {
-		http.Error(w, "n must be be between 1 and 1000", http.StatusBadRequest)
+		message := "n must be be between 1 and 1000"
+		h.badRequest(w, message)
 		return
 	}
 	var buf bytes.Buffer
@@ -292,7 +293,7 @@ func (h handler) parseGame(id string, w http.ResponseWriter) (g *bingo.Game, ok 
 	g, err := bingo.GameFromID(id)
 	if err != nil {
 		message := fmt.Sprintf("getting game from query parameter: %v", err)
-		http.Error(w, message, http.StatusBadRequest)
+		h.badRequest(w, message)
 		return nil, false
 	}
 	return g, true
@@ -303,7 +304,7 @@ func (h handler) parseBoard(id string, w http.ResponseWriter) (b *bingo.Board, o
 	b, err := bingo.BoardFromID(id)
 	if err != nil {
 		message := fmt.Sprintf("getting board from query parameter: %v", err)
-		http.Error(w, message, http.StatusBadRequest)
+		h.badRequest(w, message)
 		return nil, false
 	}
 	return b, true
@@ -328,4 +329,9 @@ func (h handler) boardBarCode(boardID string) (string, error) {
 // redirect tells the response to see a different url.
 func (h handler) redirect(w http.ResponseWriter, r *http.Request, url string) {
 	http.Redirect(w, r, url, http.StatusSeeOther)
+}
+
+// badRequest tells the response that a bad request was made.
+func (h handler) badRequest(w http.ResponseWriter, message string) {
+	http.Error(w, message, http.StatusBadRequest)
 }
