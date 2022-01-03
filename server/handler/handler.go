@@ -123,7 +123,7 @@ func (h handler) createGame(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "/game?gameID="+gameID, http.StatusSeeOther)
+	h.redirect(w, r, "/game?gameID="+gameID)
 }
 
 // getBoard renders the board page onto the response or create a new board and redirects to it.
@@ -143,7 +143,7 @@ func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 }
 
 // createBoard redirects to a new board.
-func (handler) createBoard(w http.ResponseWriter, r *http.Request) {
+func (h handler) createBoard(w http.ResponseWriter, r *http.Request) {
 	b := bingo.NewBoard()
 	boardID, err := b.ID()
 	if err != nil {
@@ -151,7 +151,7 @@ func (handler) createBoard(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "/game/board?boardID="+boardID, http.StatusSeeOther)
+	h.redirect(w, r, "/game/board?boardID="+boardID)
 }
 
 // getHelp renders the help page onto the response.
@@ -193,7 +193,7 @@ func (h handler) checkBoard(w http.ResponseWriter, r *http.Request) {
 	if result {
 		url += "&bingo"
 	}
-	http.Redirect(w, r, url, http.StatusSeeOther)
+	h.redirect(w, r, url)
 }
 
 // drawNumber draws a new number for the game specified by the request's 'gameID' form parameter.
@@ -218,7 +218,7 @@ func (h *handler) drawNumber(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.addGame(afterID, afterNumsLeft)
-	http.Redirect(w, r, "/game?gameID="+afterID, http.StatusSeeOther)
+	h.redirect(w, r, "/game?gameID="+afterID)
 }
 
 // addGame creates a new gameInfo and adds it to the gameInfos stack.  If the stack is full, the last item is discarded.
@@ -323,4 +323,9 @@ func (h handler) boardBarCode(boardID string) (string, error) {
 	bytes := buf.Bytes()
 	data := base64.StdEncoding.EncodeToString(bytes)
 	return data, nil
+}
+
+// redirect tells the response to see a different url.
+func (h handler) redirect(w http.ResponseWriter, r *http.Request, url string) {
+	http.Redirect(w, r, url, http.StatusSeeOther)
 }
