@@ -4,9 +4,7 @@ package server
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"image"
-	"net"
 	"net/http"
 	"time"
 
@@ -64,9 +62,9 @@ func (cfg Config) NewServer() *Server {
 // Run starts the HTTP and HTTPS TCP servers.
 func (s *Server) Run() <-chan error {
 	errC := make(chan error, 2)
-	go s.serveTCP(s.httpsServer, "https", errC, true)
+	go s.listenAndServe(s.httpsServer, "https", errC, true)
 	if s.config.HTTPSRedirect {
-		go s.serveTCP(s.httpServer, "http", errC, false)
+		go s.listenAndServe(s.httpServer, "http", errC, false)
 	}
 	return errC
 }
@@ -102,29 +100,19 @@ func httpServer(port string, h http.Handler) *http.Server {
 	return &s
 }
 
-// serveTCP servers the server on TCP for the address.
+// listenAndServe servers the server on TCP for the address.
 // TLS certificates are loaded if the server is HTTPS and has a separarte server that redirects HTTP requests to HTTPS.
-func (s Server) serveTCP(svr *http.Server, name string, errC chan<- error, https bool) {
-	l, err := net.Listen("tcp", svr.Addr)
-	if err != nil {
-		errC <- fmt.Errorf("listening to tcp at address %q: %v", svr.Addr, err)
-		return
-	}
-	defer l.Close()
-	if https && s.config.HTTPSRedirect {
-		certificate, err := tls.LoadX509KeyPair(s.config.TLSCertFile, s.config.TLSKeyFile)
-		if err != nil {
-			errC <- fmt.Errorf("loading TLS certificates (%q and %q): %v", s.config.TLSCertFile, s.config.TLSKeyFile, err)
-			return
+func (s Server) listenAndServe(svr *http.Server, name string, errC chan<- error, https bool) {
+	switch {
+	case https && s.config.HTTPSRedirect:
+		tlsConfig := tls.Config{
+			MinVersion: tls.VersionTLS13,
 		}
-		cfg := tls.Config{
-			NextProtos:   []string{"http/1.1"},
-			Certificates: []tls.Certificate{certificate},
-			MinVersion:   tls.VersionTLS13,
-		}
-		l = tls.NewListener(l, &cfg)
+		svr.TLSConfig = &tlsConfig
+		errC <- svr.ListenAndServeTLS(s.config.TLSCertFile, s.config.TLSKeyFile) // BLOCKING
+	default:
+		errC <- svr.ListenAndServe() // BLOCKING
 	}
-	svr.Serve(l) // BLOCKING
 }
 
 // httpHandler creates a HTTP handler that redirects all requests to HTTPS.
