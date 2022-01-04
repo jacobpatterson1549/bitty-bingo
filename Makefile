@@ -2,7 +2,7 @@
 
 OBJ := bitty-bingo
 BUILD_DIR := build
-COVERAGE_OBJ := .coverage.out
+COVERAGE_OBJ := coverage.out
 GO_ARGS :=
 SERVE_ARGS := $(shell grep -s -v "^\#" .env)
 SRC := $(shell find bingo/ internal/ *.go go.mod go.sum)
@@ -16,11 +16,11 @@ all: $(BUILD_DIR)/$(OBJ)
 test: $(SRC)
 	$(GO_TEST) --cover
 
-coverage: $(COVERAGE_OBJ)
+coverage: $(BUILD_DIR)/$(COVERAGE_OBJ)
 	$(GO_TOOL) cover -html=$<
 
 clean:
-	rm -rf $(BUILD_DIR) $(COVERAGE_OBJ)
+	rm -rf $(BUILD_DIR)
 
 serve: $(BUILD_DIR)/$(OBJ)
 	$(SERVE_ARGS) $<
@@ -31,5 +31,5 @@ $(BUILD_DIR):
 $(BUILD_DIR)/$(OBJ): test | $(BUILD_DIR)
 	$(GO_BUILD) -o $@
 
-$(COVERAGE_OBJ): $(SRC)
+$(BUILD_DIR)/$(COVERAGE_OBJ): $(SRC) | $(BUILD_DIR)
 	$(GO_TEST) -coverprofile=$@
