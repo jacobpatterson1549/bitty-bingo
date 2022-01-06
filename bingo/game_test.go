@@ -22,7 +22,7 @@ func TestGameNumbersLeft(t *testing.T) {
 	}
 }
 
-func TestDrawnNumbers(t *testing.T) {
+func TestGameDrawnNumbers(t *testing.T) {
 	for i, test := range gameTests {
 		if want, got := test.wantDrawnNumbers, test.game.DrawnNumbers(); !reflect.DeepEqual(want, got) {
 			t.Errorf("test %v (%v): drawn numbers not equal:\nwanted: %v\ngot:    %v", i, test.name, want, got)
@@ -48,7 +48,7 @@ func TestDrawnNumberColumns(t *testing.T) {
 	}
 }
 
-func TestPreviousNumberDrawn(t *testing.T) {
+func TestGamePreviousNumberDrawn(t *testing.T) {
 	for i, test := range gameTests {
 		if want, got := test.wantPreviousNumberDrawn, test.game.PreviousNumberDrawn(); want != got {
 			t.Errorf("test %v (%v): previous numbers drawn not equal: wanted %v, got %v", i, test.name, want, got)

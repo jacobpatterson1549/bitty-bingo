@@ -2,7 +2,7 @@ package qr
 
 import "testing"
 
-func TestQRCode(t *testing.T) {
+func TestImage(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test that depends on external library")
 	}

@@ -75,7 +75,7 @@ func TestHandlerServeHTTP(t *testing.T) {
 	}
 }
 
-func TestDrawNumberModifiesGames(t *testing.T) {
+func TestHandlerDrawNumberModifiesGames(t *testing.T) {
 	w1 := httptest.NewRecorder()
 	r1 := httptest.NewRequest(methodPost, urlPathGameDrawNumber, strings.NewReader(qpGameID+"=8-"+board1257894001IDNumbers))
 	r1.Header = formContentTypeHeader
@@ -94,7 +94,7 @@ func TestDrawNumberModifiesGames(t *testing.T) {
 	}
 }
 
-func TestBoardBarCode(t *testing.T) {
+func TestHandlerBoardBarCode(t *testing.T) {
 	r := image.Rect(0, 0, 256, 256)
 	m := image.NewGray(r)
 	for y := r.Min.Y; y < r.Max.Y; y++ {

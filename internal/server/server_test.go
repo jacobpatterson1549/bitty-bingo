@@ -80,7 +80,7 @@ func TestServerRunShutdown(t *testing.T) {
 	}
 }
 
-func TestHTTPHandler(t *testing.T) {
+func TestConfigHTTPHandler(t *testing.T) {
 	cfg := Config{
 		HTTPSPort: "8000",
 	}
@@ -107,7 +107,7 @@ func TestHTTPHandler(t *testing.T) {
 	}
 }
 
-func TestHTTPSHandler(t *testing.T) {
+func TestConfigHTTPSHandler(t *testing.T) {
 	var cfg Config
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "https://example.com/", nil)
@@ -131,7 +131,7 @@ func TestHTTPSHandler(t *testing.T) {
 	}
 }
 
-func TestGetBoardWithBarCode(t *testing.T) {
+func TestConfigHTTPSHandlerGetBoardWithBarCode(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test that depends on external library")
 	}

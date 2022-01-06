@@ -12,35 +12,35 @@ func TestNewBoard(t *testing.T) {
 	}
 }
 
-func TestHasLine(t *testing.T) {
+func TestBoardHasLine(t *testing.T) {
 	b := board1257894001
 	for i, test := range hasLineTests {
-		g := createTestGame(t, test.nums)
+		g := newTestingGame(t, test.nums)
 		if want, got := test.want, b.HasLine(g); want != got {
 			t.Errorf("test %v (%v): wanted %v, got %v", i, test.name, want, got)
 		}
 	}
 }
 
-func TestIsFilled(t *testing.T) {
+func TestBoardIsFilled(t *testing.T) {
 	b := board1257894001
 	t.Run("more-than-line", func(t *testing.T) {
 		for i, test := range hasLineTests {
-			g := createTestGame(t, test.nums)
+			g := newTestingGame(t, test.nums)
 			if want, got := false, b.IsFilled(g); want != got {
 				t.Errorf("test %v (%v): wanted isFilled() = %v, got %v", i, test.name, want, got)
 			}
 		}
 	})
 	t.Run("same as board", func(t *testing.T) {
-		g := createTestGame(t, b[:])
+		g := newTestingGame(t, b[:])
 		if want, got := true, b.IsFilled(g); want != got {
 			t.Errorf("wanted isFilled() = %v, got %v", want, got)
 		}
 	})
 	t.Run("all numbers drawn", func(t *testing.T) {
 		nums := []Number{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75}
-		g := createTestGame(t, nums)
+		g := newTestingGame(t, nums)
 		if want, got := true, b.IsFilled(g); want != got {
 			t.Errorf("wanted isFilled() = %v, got %v", want, got)
 		}
@@ -173,7 +173,7 @@ func TestBoardBase64URLEncoding(t *testing.T) {
 	}
 }
 
-func createTestGame(t *testing.T, nums []Number) Game {
+func newTestingGame(t *testing.T, nums []Number) Game {
 	t.Helper()
 	var g Game
 	copy(g.numbers[:], nums)

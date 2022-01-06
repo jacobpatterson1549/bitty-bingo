@@ -8,7 +8,7 @@ import (
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
 
-func TestHandleHelp(t *testing.T) {
+func TestExecuteHelpTemplate(t *testing.T) {
 	var w bytes.Buffer
 	err := executeHelpTemplate(&w, "FAVICON-1")
 	switch {
@@ -19,7 +19,7 @@ func TestHandleHelp(t *testing.T) {
 	}
 }
 
-func TestHandleAbout(t *testing.T) {
+func TestExecuteAboutTemplate(t *testing.T) {
 	var w bytes.Buffer
 	err := executeAboutTemplate(&w, "FAVICON-2")
 	switch {
@@ -30,7 +30,7 @@ func TestHandleAbout(t *testing.T) {
 	}
 }
 
-func TestHandleGame(t *testing.T) {
+func TestExecuteGameTemplate(t *testing.T) {
 	var allNumbersDrawnGame bingo.Game
 	for allNumbersDrawnGame.NumbersLeft() != 0 {
 		allNumbersDrawnGame.DrawNumber()
@@ -109,7 +109,7 @@ func TestHandleGame(t *testing.T) {
 	}
 }
 
-func TestHandleGames(t *testing.T) {
+func TestExecuteGamesTemplate(t *testing.T) {
 	var w bytes.Buffer
 	gi := gameInfo{
 		ID:          "1847",
@@ -133,7 +133,7 @@ func TestHandleGames(t *testing.T) {
 	}
 }
 
-func TestHandleBoard(t *testing.T) {
+func TestExecuteBoardTemplate(t *testing.T) {
 	var w bytes.Buffer
 	var b bingo.Board
 	boardID := "board-313"
@@ -150,7 +150,7 @@ func TestHandleBoard(t *testing.T) {
 	}
 }
 
-func TestHandleBoardExport(t *testing.T) {
+func TestExecuteBoardExportTemplate(t *testing.T) {
 	var w bytes.Buffer
 	var b bingo.Board
 	boardID := "board-313"
@@ -167,7 +167,7 @@ func TestHandleBoardExport(t *testing.T) {
 	}
 }
 
-func TestHandleFavicon(t *testing.T) {
+func TestExecuteFaviconTemplate(t *testing.T) {
 	var w bytes.Buffer
 	err := executeFaviconTemplate(&w)
 	got := w.String()
