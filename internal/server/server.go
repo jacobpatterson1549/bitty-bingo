@@ -80,13 +80,7 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	if s.httpServer != nil {
 		err2 = s.httpServer.Shutdown(ctx)
 	}
-	switch {
-	case err1 != nil:
-		return err2
-	case err2 != nil:
-		return err2
-	}
-	return nil
+	return firstNonNilError(err1, err2)
 }
 
 // httpServer creates a http server on the port with the handler, using default read and write timeouts.
@@ -134,4 +128,14 @@ func (cfg Config) httpsHandler() http.Handler {
 // BarCode uses a real qr code encoder to create an image of the desired size.
 func (Config) BarCode(text string, width, height int) (image.Image, error) {
 	return qr.Image(text, width, height)
+}
+
+// firstNonNill returns the first error that is not nil
+func firstNonNilError(errors ...error) error {
+	for _, err := range errors {
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

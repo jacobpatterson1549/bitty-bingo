@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -161,6 +162,45 @@ func TestGetBoardWithBarCode(t *testing.T) {
 	for i, test := range tests {
 		if !strings.Contains(got, test.want) {
 			t.Errorf("test %v (%v): response body did not contain %q:\n%v", i, test.name, test.want, got)
+		}
+	}
+}
+
+func TestFirstNonNilError(t *testing.T) {
+	a := errors.New("a")
+	b := errors.New("b")
+	tests := []struct {
+		name   string
+		errors []error
+		want   error
+	}{
+		{
+			name: "no errors",
+		},
+		{
+			name:   "all nil",
+			errors: []error{nil, nil, nil},
+			want:   nil,
+		},
+		{
+			name:   "first set",
+			errors: []error{a, nil},
+			want:   a,
+		},
+		{
+			name:   "second set",
+			errors: []error{nil, b},
+			want:   b,
+		},
+		{
+			name:   "both set",
+			errors: []error{a, b},
+			want:   a,
+		},
+	}
+	for i, test := range tests {
+		if want, got := test.want, firstNonNilError(test.errors...); want != got {
+			t.Errorf("test %v (%v): wanted %v, got %v", i, test.name, want, got)
 		}
 	}
 }
