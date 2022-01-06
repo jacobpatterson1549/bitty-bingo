@@ -53,8 +53,8 @@ func (cfg Config) NewServer() *Server {
 	httpHandler := cfg.httpHandler()
 	s := Server{
 		config:      cfg,
-		httpsServer: httpServer(cfg.HTTPSPort, httpsHandler),
-		httpServer:  httpServer(cfg.HTTPPort, httpHandler),
+		httpsServer: httpServer(cfg.HTTPSPort, httpsHandler, true),
+		httpServer:  httpServer(cfg.HTTPPort, httpHandler, false),
 	}
 	return &s
 }
@@ -62,9 +62,9 @@ func (cfg Config) NewServer() *Server {
 // Run starts the HTTP and HTTPS TCP servers.
 func (s *Server) Run() <-chan error {
 	errC := make(chan error, 2)
-	go s.listenAndServe(s.httpsServer, "https", errC, true)
+	go s.listenAndServe(s.httpsServer, errC, true)
 	if s.config.HTTPSRedirect {
-		go s.listenAndServe(s.httpServer, "http", errC, false)
+		go s.listenAndServe(s.httpServer, errC, false)
 	}
 	return errC
 }
@@ -90,25 +90,26 @@ func (s *Server) Shutdown(ctx context.Context) error {
 }
 
 // httpServer creates a http server on the port with the handler, using default read and write timeouts.
-func httpServer(port string, h http.Handler) *http.Server {
-	s := http.Server{
+func httpServer(port string, h http.Handler, https bool) *http.Server {
+	svr := http.Server{
 		Addr:         ":" + port,
 		Handler:      h,
 		ReadTimeout:  readDur,
 		WriteTimeout: writeDur,
 	}
-	return &s
+	if https {
+		svr.TLSConfig = &tls.Config{
+			MinVersion: tls.VersionTLS13,
+		}
+	}
+	return &svr
 }
 
 // listenAndServe servers the server on TCP for the address.
 // TLS certificates are loaded if the server is HTTPS and has a separarte server that redirects HTTP requests to HTTPS.
-func (s Server) listenAndServe(svr *http.Server, name string, errC chan<- error, https bool) {
+func (s Server) listenAndServe(svr *http.Server, errC chan<- error, https bool) {
 	switch {
 	case https && s.config.HTTPSRedirect:
-		tlsConfig := tls.Config{
-			MinVersion: tls.VersionTLS13,
-		}
-		svr.TLSConfig = &tlsConfig
 		errC <- svr.ListenAndServeTLS(s.config.TLSCertFile, s.config.TLSKeyFile) // BLOCKING
 	default:
 		errC <- svr.ListenAndServe() // BLOCKING
