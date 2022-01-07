@@ -3,7 +3,6 @@ package bingo
 import (
 	"encoding/base64"
 	"errors"
-	"strconv"
 )
 
 // Board represents a 5*5 square bingo board.
@@ -119,9 +118,9 @@ func (b Board) ID() (string, error) {
 	}
 	data := make([]byte, 0, 12)
 	for i := 0; i < len(b); i++ {
-		l := encodeNumber(b[i])
+		l := b.encodeNumber(i)
 		i++
-		r := encodeNumber(b[i])
+		r := b.encodeNumber(i)
 		ch := byte(l<<4 | r)
 		data = append(data, ch)
 		if i == 11 { // free cell
@@ -145,11 +144,11 @@ func BoardFromID(id string) (*Board, error) {
 	var b Board
 	i := 0
 	for _, ch := range data {
-		l, err := decodeNumber(ch>>4, i)
+		l, err := decodeBoardNumber(ch>>4, i)
 		if err != nil {
 			return nil, err
 		}
-		r, err := decodeNumber(ch&15, i+1)
+		r, err := decodeBoardNumber(ch&15, i+1)
 		if err != nil {
 			return nil, err
 		}
@@ -166,25 +165,29 @@ func BoardFromID(id string) (*Board, error) {
 }
 
 // encodeNumber converts the number to one in [0,15)
-func encodeNumber(n Number) int {
-	h := int(n-1) % 15 // (mod 15 is same as subtract n.Column()*15)
-	return h
+func (b Board) encodeNumber(index int) int {
+	encodedNumber := int(b[index]-1) % 15 // (mod 15 is same as subtract n.Column()*15)
+	return encodedNumber
 }
 
-// decodeNumber converts the [0,15) byte back to a number at the index in the board
-func decodeNumber(h byte, i int) (Number, error) {
-	if h == 15 {
-		return 0, errors.New("board has invalid number at index " + strconv.Itoa(i))
-	}
-	c := i / 5
-	n := Number(int(h+1) + c*15)
+// decodeBoardNumber converts the [0,15) byte back to a number at the index in the board
+func decodeBoardNumber(encodedNumber byte, index int) (Number, error) {
+	c := index / 5
+	n := Number(int(encodedNumber+1) + c*15)
 	return n, nil
+}
+
+func (b Board) numbers() numbers {
+	nums := make(numbers, len(b)-1) // do not check the center
+	copy(nums, b[:12])
+	copy(nums[12:], b[13:])
+	return nums
 }
 
 // isValid determines if the board has valid numbers, no duplicates, and the center is the zero value
 func (b Board) isValid() bool {
 	switch {
-	case b[12] != 0, !validNumbers(b[:], true), !b.numbersInCorrectColumns():
+	case b[12] != 0, !b.numbers().Valid(), !b.numbersInCorrectColumns():
 		return false
 	}
 	return true

@@ -41,13 +41,16 @@ func (n Number) Valid() bool {
 	return true
 }
 
-// validNumbers determines if the all the valid numbers are in the game and there are no duplicates.
-func validNumbers(numbers []Number, allowZeroValue bool) bool {
-	m := make(map[Number]struct{}, len(numbers))
-	for _, n := range numbers {
+// numbers is an slice of numbers
+type numbers []Number
+
+// Valid determines if the all the numbers are Valid and there are no duplicates.
+func (nums numbers) Valid() bool {
+	m := make(map[Number]struct{}, len(nums))
+	for _, n := range nums {
 		_, duplicate := m[n]
 		switch {
-		case duplicate, !n.Valid() && (n != 0 || !allowZeroValue):
+		case duplicate, !n.Valid():
 			return false // duplicate or invalid
 		}
 		m[n] = struct{}{}

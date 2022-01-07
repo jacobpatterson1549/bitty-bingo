@@ -52,10 +52,10 @@ func TestNumberValid(t *testing.T) {
 	})
 }
 
-func TestValidNumbers(t *testing.T) {
-	for i, test := range validNumbersTests {
-		if want, got := test.want, validNumbers(test.numbers, test.allow0); want != got {
-			t.Errorf("test %v (%v): validNumbers() not equal: wanted %v, got %v", i, test.name, want, got)
+func TestNumbersValid(t *testing.T) {
+	for i, test := range numbersValidTests {
+		if want, got := test.want, test.numbers.Valid(); want != got {
+			t.Errorf("test %v (%v): not equal: wanted %v, got %v", i, test.name, want, got)
 		}
 	}
 }
@@ -148,15 +148,13 @@ var (
 		name string
 	}{
 		{0, "zero value"},
-		{-1, "negative number"},
 		{76, "slightly larger than max"},
 		{100, "much larger than max"},
 	}
-	validNumbersTests = []struct {
-		name    string
-		numbers []Number
-		allow0  bool
-		want    bool
+	numbersValidTests = []struct {
+		numbers
+		name   string
+		want   bool
 	}{
 		{
 			name: "no numbers",
@@ -168,33 +166,13 @@ var (
 			want:    true,
 		},
 		{
-			name:    "0-5, zero ok",
+			name:    "0-5",
 			numbers: []Number{0, 1, 2, 3, 4, 5},
-			allow0:  true,
-			want:    true,
-		},
-		{
-			name:    "0-5, no zero",
-			numbers: []Number{0, 1, 2, 3, 4, 5},
-			allow0:  false,
 			want:    false,
 		},
 		{
 			name:    "1-5, duplicate 3",
 			numbers: []Number{1, 2, 3, 4, 5, 3},
-			allow0:  false,
-			want:    false,
-		},
-		{
-			name:    "1-5, duplicate 3 with allow zeroes",
-			numbers: []Number{1, 2, 3, 4, 5, 3},
-			allow0:  true,
-			want:    false,
-		},
-		{
-			name:    "0-5, duplicate 0",
-			numbers: []Number{0, 1, 2, 3, 4, 5, 0},
-			allow0:  true,
 			want:    false,
 		},
 	}

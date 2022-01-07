@@ -111,6 +111,20 @@ func TestBoardFromID(t *testing.T) {
 	})
 }
 
+func TestBoardNumbers(t *testing.T) {
+	nums := []Number{
+		15, 8, 4, 12, 10,
+		19, 27, 16, 28, 25,
+		42, 41, 31, 40, // no center number
+		49, 52, 50, 46, 57,
+		64, 72, 67, 70, 74,
+	}
+	b := board1257894001
+	if want, got := numbers(nums), b.numbers(); !reflect.DeepEqual(want, got) {
+		t.Errorf("numbers not equal:\nwanted: %#v\ngot:    %#v", want, got)
+	}
+}
+
 func TestBoardIsValid(t *testing.T) {
 	tests := []struct {
 		Board

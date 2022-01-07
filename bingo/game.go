@@ -112,7 +112,7 @@ func (g Game) ID() (string, error) {
 	switch {
 	case g.numbersDrawn == 0:
 		return "0", nil
-	case !validNumbers(g.numbers[:], false):
+	case !numbers(g.numbers[:]).Valid():
 		return "", errors.New("game has duplicate/invalid numbers")
 	}
 	data := make([]byte, len(g.numbers))
@@ -149,7 +149,7 @@ func GameFromID(id string) (*Game, error) {
 	for i, n := range data {
 		g.numbers[i] = Number(n)
 	}
-	if !validNumbers(g.numbers[:], false) {
+	if !numbers(g.numbers[:]).Valid() {
 		return nil, errors.New("game has duplicate/invalid numbers")
 	}
 	g.numbersDrawn = numbersDrawn
