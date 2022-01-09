@@ -177,6 +177,7 @@ func decodeBoardNumber(encodedNumber byte, index int) (Number, error) {
 	return n, nil
 }
 
+// numbers gets the numbers on the board that should be valid
 func (b Board) numbers() numbers {
 	nums := make(numbers, len(b)-1) // do not check the center
 	copy(nums, b[:12])
