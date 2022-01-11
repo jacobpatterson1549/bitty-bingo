@@ -16,10 +16,10 @@ import (
 func TestFlagSet(t *testing.T) {
 	t.Run("name", func(t *testing.T) {
 		var cfg server.Config
-		wantName := "program_name_325"
-		fs := flagSet(&cfg, wantName)
-		if gotName := fs.Name(); wantName != gotName {
-			t.Errorf("names not equal:\nwanted: %q\ngot:    %q", wantName, gotName)
+		name := "program_name_325"
+		fs := flagSet(&cfg, name)
+		if want, got := name, fs.Name(); want != got {
+			t.Errorf("names not equal:\nwanted: %q\ngot:    %q", want, got)
 		}
 	})
 	t.Run("help", func(t *testing.T) {
