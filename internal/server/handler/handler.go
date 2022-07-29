@@ -19,7 +19,8 @@ type (
 	// BarCoder generates image of a bar code of the board, possibly with an external library.
 	BarCoder interface {
 		// BarCode encodes the board id to a bar code image with a width and height.
-		BarCode(boardID string, width, height int) (image.Image, error)
+		// Barcode.Image is not called directly to avoid test dependencies on external libraries
+		BarCode(format string, boardID string, width, height int) (image.Image, error)
 	}
 	// handler tracks servers HTTP requests and stores recent game infos.
 	// The time function is used to create game infos
@@ -119,11 +120,12 @@ func (h handler) createGame(w http.ResponseWriter, r *http.Request) {
 // getBoard renders the board page onto the response or create a new board and redirects to it.
 func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	boardID := r.URL.Query().Get("boardID")
+	barcodeFormat := r.URL.Query().Get("barcodeFormat")
 	b, ok := h.parseBoard(boardID, w)
 	if !ok {
 		return
 	}
-	barCode, err := h.boardBarCode(boardID)
+	barCode, err := h.boardBarCode(boardID, barcodeFormat)
 	if err != nil {
 		err := fmt.Errorf("creating board bar code: %v", err)
 		h.internalServerError(w, err)
@@ -141,7 +143,8 @@ func (h handler) createBoard(w http.ResponseWriter, r *http.Request) {
 		h.internalServerError(w, err)
 		return
 	}
-	h.redirect(w, r, "/game/board?boardID="+boardID)
+	barcodeFormat := r.FormValue("barcodeFormat")
+	h.redirect(w, r, "/game/board?boardID="+boardID+"&barcodeFormat="+barcodeFormat)
 }
 
 // getHelp renders the help page onto the response.
@@ -233,6 +236,7 @@ func (h *handler) addGame(gameID string, numbersLeft int) {
 // createBoards creates 'n' boards as specified by the request's form parameter, attaching the boards in a zip file.
 func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 	nQueryParam := r.FormValue("n")
+	barcodeFormat := r.FormValue("barcodeFormat")
 	n, err := strconv.Atoi(nQueryParam)
 	if err != nil {
 		message := fmt.Sprintf("%v: example: /game/boards?n=5 creates 5 unique boards", err)
@@ -245,7 +249,7 @@ func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var buf bytes.Buffer
-	if err := h.zipNewBoards(&buf, n); err != nil {
+	if err := h.zipNewBoards(&buf, n, barcodeFormat); err != nil {
 		err := fmt.Errorf("creating zip file: %v", err)
 		h.internalServerError(w, err)
 		return
@@ -255,7 +259,7 @@ func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 }
 
 // zipNewBoards writes n new boards to a zip file
-func (h handler) zipNewBoards(w io.Writer, n int) error {
+func (h handler) zipNewBoards(w io.Writer, n int, barCodeFormat string) error {
 	z := zip.NewWriter(w)
 	for i := 1; i <= n; i++ {
 		fileName := fmt.Sprintf("bingo_%v.svg", i)
@@ -268,7 +272,7 @@ func (h handler) zipNewBoards(w io.Writer, n int) error {
 		if err != nil {
 			return fmt.Errorf("getting id of board #%v: %v\nboard: %#v", i, err, b)
 		}
-		barCode, err := h.boardBarCode(boardID)
+		barCode, err := h.boardBarCode(boardID, barCodeFormat)
 		if err != nil {
 			return fmt.Errorf("creating board #%v bar code: %v", i, err)
 		}
@@ -305,11 +309,11 @@ func (h handler) parseBoard(id string, w http.ResponseWriter) (b *bingo.Board, o
 }
 
 // boardBarCode uses the BarCoder to encode the bar code image as a base64-encode png image with transparency.
-func (h handler) boardBarCode(boardID string) (string, error) {
+func (h handler) boardBarCode(boardID string, format string) (string, error) {
 	if h.BarCoder == nil {
 		return "", nil
 	}
-	barCode, err := h.BarCoder.BarCode(boardID, 80, 80)
+	barCode, err := h.BarCoder.BarCode(format, boardID, 80, 80)
 	if err != nil {
 		return "", fmt.Errorf("creating bar code: %v", err)
 	}

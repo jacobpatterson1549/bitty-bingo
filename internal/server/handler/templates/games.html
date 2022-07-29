@@ -7,6 +7,12 @@
 <form class="create-board" method="post" action="/game/board">
     <fieldset>
         <legend>Create Board (view)</legend>
+        <div>
+            <label for="barcode-formats-1">Center Format</label>
+            <select id="barcode-formats-1" name="barcodeFormat">
+                {{template "barcode_formats.html"}}
+            </select>
+        </div>
         <input type="submit" />
     </fieldset>
 </form>
@@ -16,6 +22,12 @@
         <div>
             <label for="board-count">Count</label>
             <input id="board-count" type="number" name="n" value="5" min="1" max="1000" />
+        </div>
+        <div>
+            <label for="barcode-formats-2">Center Format</label>
+            <select id="barcode-formats-2" name="barcodeFormat">
+                {{template "barcode_formats.html"}}
+            </select>
         </div>
         <input type="submit" />
     </fieldset>

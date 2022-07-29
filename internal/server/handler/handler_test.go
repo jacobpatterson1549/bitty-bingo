@@ -107,12 +107,29 @@ func TestHandlerBoardBarCode(t *testing.T) {
 			Image: m,
 		},
 	}
-	got, err := h.boardBarCode(board1257894001ID)
+	got, err := h.boardBarCode(board1257894001ID, "barCodeFormat")
 	switch {
 	case err != nil:
 		t.Errorf("unwanted error getting board bar code: %v", err)
 	case !base64RE.MatchString(got):
 		t.Errorf("wanted only base-64 standard encoding characters in bar code image, excluding right padding characters (=): (%v), got: %v", base64RE, got)
+	}
+}
+
+func TestHandlerCreateBoards(t *testing.T) {
+	w := httptest.NewRecorder()
+	bc := mockBarCoder{
+		Image: okMockBarCoder.Image,
+	}
+	h := handler{
+		BarCoder: &bc,
+	}
+	bcFormat := "scribble"
+	r := httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=5&barcodeFormat="+bcFormat))
+	r.Header = formContentTypeHeader
+	h.ServeHTTP(w, r)
+	if want, got := bcFormat, bc.lastFormat; want != got {
+		t.Errorf("bar code formats not equal: wanted %q, got %q", want, got)
 	}
 }
 
@@ -138,6 +155,7 @@ const (
 	qpBoardID                = "boardID"
 	qpType                   = "type"
 	qpBingo                  = "bingo"
+	qpBarcodeFormat          = "barcodeFormat"
 	typeHasLine              = "HasLine"
 	typeIsFilled             = "IsFilled"
 )
@@ -252,11 +270,11 @@ var (
 			},
 		},
 		{
-			name:           "create board",
-			r:              httptest.NewRequest(methodPost, urlPathGameBoard, nil),
+			name:           "create board (preserves format)",
+			r:              httptest.NewRequest(methodPost, urlPathGameBoard+"?"+qpBarcodeFormat+"=anything", nil),
 			wantStatusCode: 303,
 			wantHeader: http.Header{
-				headerLocation: {urlPathGameBoard + "?" + qpBoardID + "=" + board1257894001ID},
+				headerLocation: {urlPathGameBoard + "?" + qpBoardID + "=" + board1257894001ID + "&" + qpBarcodeFormat + "=anything"},
 			},
 		},
 		{

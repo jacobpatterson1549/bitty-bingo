@@ -135,13 +135,7 @@ func TestConfigHTTPSHandlerGetBoardWithBarCode(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test that depends on external library")
 	}
-	var cfg Config
-	h := cfg.httpsHandler()
-	boardID := "5zuTsMm6CTZAs7ad"
-	r := httptest.NewRequest("GET", "/game/board?boardID="+boardID, nil)
-	w := httptest.NewRecorder()
-	h.ServeHTTP(w, r)
-	got := w.Body.String()
+	const boardID = "5zuTsMm6CTZAs7ad"
 	tests := []struct {
 		name string
 		want string
@@ -155,13 +149,27 @@ func TestConfigHTTPSHandlerGetBoardWithBarCode(t *testing.T) {
 			want: boardID,
 		},
 		{
-			name: "The QR codes seem to all start with this, the first 11 chars are from the png header.  This also checks the image width/height.",
+			name: "The bar codes seem to all start with this, the first 11 chars are from the png header.  This also checks the image width/height.",
 			want: `width="80" height="80" href="data:image/png;base64,iVBORw0KGgo`,
 		},
 	}
+	formats := []string{
+		"",
+		"qr_code",
+		"aztec",
+		"data_matrix",
+	}
 	for i, test := range tests {
-		if !strings.Contains(got, test.want) {
-			t.Errorf("test %v (%v): response body did not contain %q:\n%v", i, test.name, test.want, got)
+		for _, f := range formats {
+			var cfg Config
+			h := cfg.httpsHandler()
+			r := httptest.NewRequest("GET", "/game/board?boardID="+boardID+"&barcodeFormat="+f, nil)
+			w := httptest.NewRecorder()
+			h.ServeHTTP(w, r)
+			got := w.Body.String()
+			if !strings.Contains(got, test.want) {
+				t.Errorf("test %v (%v): response body did not contain %q:\n%v", i, test.name, test.want, got)
+			}
 		}
 	}
 }

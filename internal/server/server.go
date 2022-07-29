@@ -125,9 +125,20 @@ func (cfg Config) httpsHandler() http.Handler {
 	return handler.WithGzip(h)
 }
 
-// BarCode uses a real qr code encoder to create an image of the desired size.
-func (Config) BarCode(text string, width, height int) (image.Image, error) {
-	return barcode.Image(barcode.QR_CODE, text, width, height)
+func (c Config) BarCode(format string, text string, width, height int) (image.Image, error) {
+	f := c.barCodeFormat(format)
+	return barcode.Image(f, text, width, height)
+}
+
+func (c Config) barCodeFormat(f string) barcode.Format {
+	switch f {
+	case "aztec":
+		return barcode.AZTEC
+	case "data_matrix":
+		return barcode.DATA_MATRIX
+	default:
+		return barcode.QR_CODE
+	}
 }
 
 // firstNonNill returns the first error that is not nil
