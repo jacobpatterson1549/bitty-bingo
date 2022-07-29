@@ -76,10 +76,11 @@ window.onload = () => {
         if ('BarcodeDetector' in window) {
             BarcodeDetector.getSupportedFormats()
                 .then(supportedFormats => {
-                    const formats = supportedFormats.filter(format => format === 'qr_code');
+                    const formats = supportedFormats.filter(format => ['qr_code', 'aztec', 'data_matrix'].includes(format));
                     if (formats.length == 0) {
-                        log('browser cannot detect QR code on board');
+                        log('browser cannot detect any type of bar code on board');
                     } else {
+                        log('browser can detect ' + formats.join(', ') + ' bar code types');
                         const barcodeDetector = new BarcodeDetector({ formats });
                         enableCameraCheckbox.onclick = () => { enableCameraCheckbox.checked ? startVideo(barcodeDetector) : stopVideo() };
                         frontCameraCheckbox.onclick = enableCameraCheckbox.onclick;

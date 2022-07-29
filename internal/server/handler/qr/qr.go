@@ -11,9 +11,9 @@ import (
 
 // Image creates an QR-code image of the text that has the specified dimensions.
 func Image(text string, width, height int) (image.Image, error) {
-	qrCode, err := qr.Encode(text, qr.L, qr.Unicode)
 	// qrCode, err := aztec.Encode([]byte(text), aztec.DEFAULT_EC_PERCENT, aztec.DEFAULT_LAYERS)
 	// qrCode, err := datamatrix.Encode(text)
+	qrCode, err := qr.Encode(text, qr.L, qr.Unicode)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected problem encoding QR code image: %v", err)
 	}
