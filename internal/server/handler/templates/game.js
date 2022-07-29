@@ -10,6 +10,9 @@ window.onload = () => {
     const log = (text) => {
         scannerLogSpan.innerText = text;
     };
+    const logError = (message) => (error) => {
+        log(message + ': ' + error);
+    }
     const initCameraZoom = (track) => {
         const trackSettings = track.getSettings();
         if ('zoom' in trackSettings) {
@@ -26,22 +29,22 @@ window.onload = () => {
     const getTrack = () => {
         return cameraVideo.srcObject?.getVideoTracks()[0];
     };
+    const handleBarcodes = (barcodes) => {
+        if (barcodes.length == 1) {
+            const barcode = barcodes[0].rawValue;
+            boardIdInput.value = barcode;
+            log('scanned board id: ' + barcode);
+        }
+    };
+    const handleImageBitmap = (barcodeDetector) => (imageBitmap) => {
+        barcodeDetector?.detect(imageBitmap)
+            .then(handleBarcodes)
+            .catch(logError('detecting bar codes'));
+    };
     const scanBarcode = (imageCapture, barcodeDetector) => () => {
         if (!imageCapture.track.muted) {
             imageCapture.grabFrame()
-                .then(imageBitmap => {
-                    barcodeDetector?.detect(imageBitmap)
-                        .then(barcodes => {
-                            if (barcodes.length == 1) {
-                                const barcode = barcodes[0].rawValue;
-                                boardIdInput.value = barcode;
-                                log('scanned board id: ' + barcode);
-                            }
-                        })
-                        .catch(error => {
-                            log('detecting bar codes: ' + error);
-                        });
-                });
+                .then(handleImageBitmap(barcodeDetector));
         }
     };
     const stopVideo = () => {
@@ -53,41 +56,41 @@ window.onload = () => {
         zoomCameraRange.hidden = true;
         cameraVideo.hidden = true;
     };
+    const handleMediaStream = (barcodeDetector) => (mediaStream) => {
+        cameraVideo.srcObject = mediaStream;
+        const track = getTrack();
+        const imageCapture = new ImageCapture(track);
+        scannerIdInput.value = setInterval(scanBarcode(imageCapture, barcodeDetector), 250);
+        frontCameraCheckbox.hidden = false;
+        initCameraZoom(track);
+        cameraVideo.hidden = false;
+        log('starting video capture');
+    }
     const startVideo = (barcodeDetector) => {
         stopVideo();
         const facingMode = frontCameraCheckbox.checked ? 'user' : 'environment';
         const constraints = { video: { facingMode } };
         navigator.mediaDevices.getUserMedia(constraints)
-            .then(mediaStream => {
-                cameraVideo.srcObject = mediaStream;
-                const track = getTrack();
-                const imageCapture = new ImageCapture(track);
-                scannerIdInput.value = setInterval(scanBarcode(imageCapture, barcodeDetector), 250);
-                frontCameraCheckbox.hidden = false;
-                initCameraZoom(track);
-                cameraVideo.hidden = false;
-                log('starting video capture');
-            })
-            .catch(error => {
-                log('camera not found: ' + error);
-            });
+            .then(handleMediaStream(barcodeDetector))
+            .catch(logError('camera not found'));
     };
+    const handleSupportedBarcodeFormats = (supportedFormats) => {
+        const formats = supportedFormats.filter(format => ['qr_code', 'aztec', 'data_matrix'].includes(format));
+        if (formats.length == 0) {
+            log('browser cannot detect any type of bar code on board');
+        } else {
+            log('browser can detect ' + formats.join(', ') + ' bar code types');
+            const barcodeDetector = new BarcodeDetector({ formats });
+            enableCameraCheckbox.onclick = () => { enableCameraCheckbox.checked ? startVideo(barcodeDetector) : stopVideo() };
+            frontCameraCheckbox.onclick = enableCameraCheckbox.onclick;
+            zoomCameraRange.oninput = (event) => getTrack().applyConstraints({ advanced: [{ zoom: event.target.value }] });
+            enableCameraCheckbox.hidden = false;
+        }
+    }
     const init = () => {
         if ('BarcodeDetector' in window) {
             BarcodeDetector.getSupportedFormats()
-                .then(supportedFormats => {
-                    const formats = supportedFormats.filter(format => ['qr_code', 'aztec', 'data_matrix'].includes(format));
-                    if (formats.length == 0) {
-                        log('browser cannot detect any type of bar code on board');
-                    } else {
-                        log('browser can detect ' + formats.join(', ') + ' bar code types');
-                        const barcodeDetector = new BarcodeDetector({ formats });
-                        enableCameraCheckbox.onclick = () => { enableCameraCheckbox.checked ? startVideo(barcodeDetector) : stopVideo() };
-                        frontCameraCheckbox.onclick = enableCameraCheckbox.onclick;
-                        zoomCameraRange.oninput = (event) => getTrack().applyConstraints({ advanced: [{ zoom: event.target.value }] });
-                        enableCameraCheckbox.hidden = false;
-                    }
-                });
+                .then(handleSupportedBarcodeFormats);
         } else {
             log('browser cannot detect bar code on board');
         }
