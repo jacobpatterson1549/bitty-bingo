@@ -1,4 +1,4 @@
-package qr
+package barcode
 
 import "testing"
 
@@ -22,7 +22,7 @@ func TestImage(t *testing.T) {
 }
 
 var imageTests = []struct {
-	format int
+	format Format
 	name   string
 	text   string
 	width  int

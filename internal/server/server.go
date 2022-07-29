@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/jacobpatterson1549/bitty-bingo/internal/server/handler"
-	"github.com/jacobpatterson1549/bitty-bingo/internal/server/handler/qr"
+	"github.com/jacobpatterson1549/bitty-bingo/internal/server/handler/barcode"
 )
 
 type (
@@ -127,7 +127,7 @@ func (cfg Config) httpsHandler() http.Handler {
 
 // BarCode uses a real qr code encoder to create an image of the desired size.
 func (Config) BarCode(text string, width, height int) (image.Image, error) {
-	return qr.Image(qr.QR_CODE, text, width, height)
+	return barcode.Image(barcode.QR_CODE, text, width, height)
 }
 
 // firstNonNill returns the first error that is not nil

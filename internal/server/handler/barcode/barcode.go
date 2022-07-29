@@ -1,5 +1,5 @@
-// Package qr encodes board text into images
-package qr
+// Package barcode encodes board text into images
+package barcode
 
 import (
 	"fmt"
@@ -12,20 +12,22 @@ import (
 )
 
 // Formats used to create bar codes.  QR_CODE is the default.
+type Format int
+
 const (
-	QR_CODE = iota
+	QR_CODE Format = iota
 	AZTEC
 	DATA_MATRIX
 )
 
 // Image creates an QR-code image of the text that has the specified dimensions.
 // The format should be QR_CODE, AZTEC, or DATA_MATRIX
-func Image(format int, text string, width, height int) (image.Image, error) {
+func Image(f Format, text string, width, height int) (image.Image, error) {
 	var (
 		bc  barcode.Barcode
 		err error
 	)
-	switch format {
+	switch f {
 	case QR_CODE:
 		bc, err = qr.Encode(text, qr.L, qr.Unicode)
 	case AZTEC:
@@ -33,7 +35,7 @@ func Image(format int, text string, width, height int) (image.Image, error) {
 	case DATA_MATRIX:
 		bc, err = datamatrix.Encode(text)
 	default:
-		err = fmt.Errorf("unknown barcode format: %v", format)
+		err = fmt.Errorf("unknown barcode format: %v", f)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("unexpected problem encoding QR code image: %v", err)
