@@ -7,7 +7,7 @@ func TestImage(t *testing.T) {
 		t.Skip("skipping test that depends on external library")
 	}
 	for i, test := range imageTests {
-		got, err := Image(test.text, test.width, test.height)
+		got, err := Image(test.format, test.text, test.width, test.height)
 		switch {
 		case !test.wantOk:
 			if err == nil {
@@ -22,6 +22,7 @@ func TestImage(t *testing.T) {
 }
 
 var imageTests = []struct {
+	format int
 	name   string
 	text   string
 	width  int
@@ -29,11 +30,43 @@ var imageTests = []struct {
 	wantOk bool
 }{
 	{
-		name:   "board1257894001 ID",
+		name:   "board1257894001 ID - default to  QR",
 		text:   "5zuTsMm6CTZAs7ad",
 		width:  80,
 		height: 80,
 		wantOk: true,
+	},
+	{
+		format: QR_CODE,
+		name:   "board1257894001 ID - QR_CODE",
+		text:   "5zuTsMm6CTZAs7ad",
+		width:  80,
+		height: 80,
+		wantOk: true,
+	},
+	{
+		format: AZTEC,
+		name:   "board1257894001 ID - AZTEC",
+		text:   "5zuTsMm6CTZAs7ad",
+		width:  80,
+		height: 80,
+		wantOk: true,
+	},
+	{
+		format: DATA_MATRIX,
+		name:   "board1257894001 ID - AZTEC",
+		text:   "5zuTsMm6CTZAs7ad",
+		width:  80,
+		height: 80,
+		wantOk: true,
+	},
+	{
+		format: 1000,
+		name:   "board1257894001 ID - bad format",
+		text:   "5zuTsMm6CTZAs7ad",
+		width:  80,
+		height: 80,
+		wantOk: false,
 	},
 	{
 		name:   "zero width/height",

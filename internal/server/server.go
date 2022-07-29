@@ -127,7 +127,7 @@ func (cfg Config) httpsHandler() http.Handler {
 
 // BarCode uses a real qr code encoder to create an image of the desired size.
 func (Config) BarCode(text string, width, height int) (image.Image, error) {
-	return qr.Image(text, width, height)
+	return qr.Image(qr.QR_CODE, text, width, height)
 }
 
 // firstNonNill returns the first error that is not nil
