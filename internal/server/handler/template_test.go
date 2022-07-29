@@ -137,8 +137,8 @@ func TestExecuteBoardTemplate(t *testing.T) {
 	var w bytes.Buffer
 	var b bingo.Board
 	boardID := "board-313"
-	barCode := "bar-code-png-base64-data"
-	err := executeBoardTemplate(&w, "FAVICON-5", b, boardID, barCode)
+	barcode := "barcode-png-base64-data"
+	err := executeBoardTemplate(&w, "FAVICON-5", b, boardID, barcode)
 	got := w.String()
 	switch {
 	case err != nil:
@@ -154,15 +154,15 @@ func TestExecuteBoardExportTemplate(t *testing.T) {
 	var w bytes.Buffer
 	var b bingo.Board
 	boardID := "board-313"
-	barCode := "bar-code-png-base64-data-2"
-	err := executeBoardExportTemplate(&w, b, boardID, barCode)
+	barcode := "barcode-png-base64-data-2"
+	err := executeBoardExportTemplate(&w, b, boardID, barcode)
 	got := w.String()
 	switch {
 	case err != nil:
 		t.Error(err)
 	case !strings.Contains(got, boardID):
 		t.Errorf("board ID missing: %v", got)
-	case !strings.Contains(got, barCode):
+	case !strings.Contains(got, barcode):
 		t.Errorf("board bar code missing: %v", got)
 	}
 }

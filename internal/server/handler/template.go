@@ -46,8 +46,8 @@ type (
 		page
 		Board   bingo.Board
 		BoardID string
-		// BarCode is a base64 encoded png image of a bar code that should be placed in the free space in the middle of the board
-		BarCode string
+		// Barcode is a base64 encoded png image of a bar code that should be placed in the free space in the middle of the board
+		Barcode string
 	}
 )
 
@@ -97,7 +97,7 @@ func executeGamesTemplate(w io.Writer, favicon string, gameInfos []gameInfo) err
 }
 
 // executeBoardTemplate renders the board on the html page.
-func executeBoardTemplate(w io.Writer, favicon string, b bingo.Board, boardID, barCode string) error {
+func executeBoardTemplate(w io.Writer, favicon string, b bingo.Board, boardID, barcode string) error {
 	p := boardPage{
 		page: page{
 			Name:    "board",
@@ -105,17 +105,17 @@ func executeBoardTemplate(w io.Writer, favicon string, b bingo.Board, boardID, b
 		},
 		Board:   b,
 		BoardID: boardID,
-		BarCode: barCode,
+		Barcode: barcode,
 	}
 	return embeddedTemplate.ExecuteTemplate(w, indexTemplateName, p)
 }
 
 // executeBoardExportTemplate renders the board onto an svg image.
-func executeBoardExportTemplate(w io.Writer, b bingo.Board, boardID, barCode string) error {
+func executeBoardExportTemplate(w io.Writer, b bingo.Board, boardID, barcode string) error {
 	data := boardPage{
 		Board:   b,
 		BoardID: boardID,
-		BarCode: barCode,
+		Barcode: barcode,
 	}
 	return embeddedTemplate.ExecuteTemplate(w, boardExportTemplateName, data)
 }

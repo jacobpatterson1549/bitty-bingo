@@ -16,17 +16,17 @@ import (
 )
 
 type (
-	// BarCoder generates image of a bar code of the board, possibly with an external library.
-	BarCoder interface {
-		// BarCode encodes the board id to a bar code image with a width and height.
+	// Barcoder generates image of a bar code of the board, possibly with an external library.
+	Barcoder interface {
+		// Barcode encodes the board id to a bar code image with a width and height.
 		// Barcode.Image is not called directly to avoid test dependencies on external libraries
-		BarCode(format string, boardID string, width, height int) (image.Image, error)
+		Barcode(format string, boardID string, width, height int) (image.Image, error)
 	}
 	// handler tracks servers HTTP requests and stores recent game infos.
 	// The time function is used to create game infos
 	handler struct {
 		http.Handler
-		BarCoder
+		Barcoder
 		gameInfos []gameInfo
 		time      func() string
 		favicon   string
@@ -45,7 +45,7 @@ type (
 // Handler creates a HTTP handler to serve the site.
 // The gameCount and time function are validated used from the config in the handler
 // Responses are returned gzip compression when allowed.
-func Handler(gameCount int, time func() string, barCoder BarCoder) http.Handler {
+func Handler(gameCount int, time func() string, barcoder Barcoder) http.Handler {
 	var faviconW bytes.Buffer
 	executeFaviconTemplate(&faviconW)
 	faviconB := faviconW.Bytes()
@@ -53,7 +53,7 @@ func Handler(gameCount int, time func() string, barCoder BarCoder) http.Handler 
 	h := handler{
 		gameInfos: make([]gameInfo, 0, gameCount),
 		time:      time,
-		BarCoder:  barCoder,
+		Barcoder:  barcoder,
 		favicon:   favicon,
 	}
 	return &h
@@ -125,13 +125,13 @@ func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	barCode, err := h.boardBarCode(boardID, barcodeFormat)
+	barcode, err := h.boardBarcode(boardID, barcodeFormat)
 	if err != nil {
 		err := fmt.Errorf("creating board bar code: %v", err)
 		h.internalServerError(w, err)
 		return
 	}
-	executeBoardTemplate(w, h.favicon, *b, boardID, barCode)
+	executeBoardTemplate(w, h.favicon, *b, boardID, barcode)
 }
 
 // createBoard redirects to a new board.
@@ -259,7 +259,7 @@ func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 }
 
 // zipNewBoards writes n new boards to a zip file
-func (h handler) zipNewBoards(w io.Writer, n int, barCodeFormat string) error {
+func (h handler) zipNewBoards(w io.Writer, n int, barcodeFormat string) error {
 	z := zip.NewWriter(w)
 	for i := 1; i <= n; i++ {
 		fileName := fmt.Sprintf("bingo_%v.svg", i)
@@ -272,11 +272,11 @@ func (h handler) zipNewBoards(w io.Writer, n int, barCodeFormat string) error {
 		if err != nil {
 			return fmt.Errorf("getting id of board #%v: %v\nboard: %#v", i, err, b)
 		}
-		barCode, err := h.boardBarCode(boardID, barCodeFormat)
+		barcode, err := h.boardBarcode(boardID, barcodeFormat)
 		if err != nil {
 			return fmt.Errorf("creating board #%v bar code: %v", i, err)
 		}
-		if err := executeBoardExportTemplate(f, *b, boardID, barCode); err != nil {
+		if err := executeBoardExportTemplate(f, *b, boardID, barcode); err != nil {
 			return fmt.Errorf("adding board #%v to zip file: %v", i, err)
 		}
 	}
@@ -308,17 +308,17 @@ func (h handler) parseBoard(id string, w http.ResponseWriter) (b *bingo.Board, o
 	return b, true
 }
 
-// boardBarCode uses the BarCoder to encode the bar code image as a base64-encode png image with transparency.
-func (h handler) boardBarCode(boardID string, format string) (string, error) {
-	if h.BarCoder == nil {
+// boardBarcode uses the Barcoder to encode the bar code image as a base64-encode png image with transparency.
+func (h handler) boardBarcode(boardID string, format string) (string, error) {
+	if h.Barcoder == nil {
 		return "", nil
 	}
-	barCode, err := h.BarCoder.BarCode(format, boardID, 80, 80)
+	barcode, err := h.Barcoder.Barcode(format, boardID, 80, 80)
 	if err != nil {
 		return "", fmt.Errorf("creating bar code: %v", err)
 	}
 	var buf bytes.Buffer
-	img := newTransparentImage(barCode)
+	img := newTransparentImage(barcode)
 	if err := png.Encode(&buf, img); err != nil {
 		return "", fmt.Errorf("bar code to png image: %v", err)
 	}

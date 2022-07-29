@@ -1,12 +1,12 @@
-.bar-code-scanner video {
+.barcode-scanner video {
     border: 0.0625em solid;
     width: 85vw;
     height: 60vh;
 }
-.bar-code-scanner .ctrl[hidden] + label {
+.barcode-scanner .ctrl[hidden] + label {
     display: none;
 }
-.bar-code-scanner :is(noscript, .log) {
+.barcode-scanner :is(noscript, .log) {
     color: gray;
 }
 .has-bingo {

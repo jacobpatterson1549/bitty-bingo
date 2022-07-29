@@ -1,10 +1,10 @@
 window.onload = () => {
-    const enableCameraCheckbox = document.querySelector('.bar-code-scanner .ctrl.enable');
-    const frontCameraCheckbox = document.querySelector('.bar-code-scanner .ctrl.front');
-    const zoomCameraRange = document.querySelector('.bar-code-scanner .ctrl.zoom');
-    const cameraVideo = document.querySelector('.bar-code-scanner video');
-    const scannerLogSpan = document.querySelector('.bar-code-scanner .log');
-    const scannerIdInput = document.querySelector('.bar-code-scanner .scanner-id');
+    const enableCameraCheckbox = document.querySelector('.barcode-scanner .ctrl.enable');
+    const frontCameraCheckbox = document.querySelector('.barcode-scanner .ctrl.front');
+    const zoomCameraRange = document.querySelector('.barcode-scanner .ctrl.zoom');
+    const cameraVideo = document.querySelector('.barcode-scanner video');
+    const scannerLogSpan = document.querySelector('.barcode-scanner .log');
+    const scannerIdInput = document.querySelector('.barcode-scanner .scanner-id');
     const boardIdInput = document.querySelector('#board-id');
 
     const log = (text) => {
@@ -26,16 +26,16 @@ window.onload = () => {
     const getTrack = () => {
         return cameraVideo.srcObject?.getVideoTracks()[0];
     };
-    const scanBarCode = (imageCapture, barcodeDetector) => () => {
+    const scanBarcode = (imageCapture, barcodeDetector) => () => {
         if (!imageCapture.track.muted) {
             imageCapture.grabFrame()
                 .then(imageBitmap => {
                     barcodeDetector?.detect(imageBitmap)
-                        .then(barCodes => {
-                            if (barCodes.length == 1) {
-                                const barCode = barCodes[0].rawValue;
-                                boardIdInput.value = barCode;
-                                log('scanned board id: ' + barCode);
+                        .then(barcodes => {
+                            if (barcodes.length == 1) {
+                                const barcode = barcodes[0].rawValue;
+                                boardIdInput.value = barcode;
+                                log('scanned board id: ' + barcode);
                             }
                         })
                         .catch(error => {
@@ -62,7 +62,7 @@ window.onload = () => {
                 cameraVideo.srcObject = mediaStream;
                 const track = getTrack();
                 const imageCapture = new ImageCapture(track);
-                scannerIdInput.value = setInterval(scanBarCode(imageCapture, barcodeDetector), 250);
+                scannerIdInput.value = setInterval(scanBarcode(imageCapture, barcodeDetector), 250);
                 frontCameraCheckbox.hidden = false;
                 initCameraZoom(track);
                 cameraVideo.hidden = false;

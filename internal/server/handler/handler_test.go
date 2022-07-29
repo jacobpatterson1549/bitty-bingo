@@ -20,7 +20,7 @@ func TestHandler(t *testing.T) {
 		timeF := func() string { return "any-time" }
 		for i, test := range handlerTests {
 			w := httptest.NewRecorder()
-			h := Handler(gameCount, timeF, okMockBarCoder)
+			h := Handler(gameCount, timeF, okMockBarcoder)
 			test.r.Header = test.header
 			h.ServeHTTP(w, test.r)
 			gotStatusCode := w.Code
@@ -59,7 +59,7 @@ func TestHandlerServeHTTP(t *testing.T) {
 		h := handler{
 			time:      test.time,
 			gameInfos: gameInfos,
-			BarCoder:  test.BarCoder,
+			Barcoder:  test.Barcoder,
 		}
 		test.r.Header = test.header
 		bingo.GameResetter.Seed(1257894001) // make board creation deterministic
@@ -94,7 +94,7 @@ func TestHandlerDrawNumberModifiesGames(t *testing.T) {
 	}
 }
 
-func TestHandlerBoardBarCode(t *testing.T) {
+func TestHandlerBoardBarcode(t *testing.T) {
 	r := image.Rect(0, 0, 256, 256)
 	m := image.NewGray(r)
 	for y := r.Min.Y; y < r.Max.Y; y++ {
@@ -103,11 +103,11 @@ func TestHandlerBoardBarCode(t *testing.T) {
 		}
 	}
 	h := handler{
-		BarCoder: &mockBarCoder{
+		Barcoder: &mockBarcoder{
 			Image: m,
 		},
 	}
-	got, err := h.boardBarCode(board1257894001ID, "barCodeFormat")
+	got, err := h.boardBarcode(board1257894001ID, "barcodeFormat")
 	switch {
 	case err != nil:
 		t.Errorf("unwanted error getting board bar code: %v", err)
@@ -118,11 +118,11 @@ func TestHandlerBoardBarCode(t *testing.T) {
 
 func TestHandlerCreateBoards(t *testing.T) {
 	w := httptest.NewRecorder()
-	bc := mockBarCoder{
-		Image: okMockBarCoder.Image,
+	bc := mockBarcoder{
+		Image: okMockBarcoder.Image,
 	}
 	h := handler{
-		BarCoder: &bc,
+		Barcoder: &bc,
 	}
 	bcFormat := "scribble"
 	r := httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=5&barcodeFormat="+bcFormat))
@@ -161,13 +161,13 @@ const (
 )
 
 var (
-	okMockBarCoder = &mockBarCoder{
+	okMockBarcoder = &mockBarcoder{
 		Image: image.NewGray16(image.Rect(0, 0, 1, 1)),
 	}
-	emptyImageMockMarCoder = &mockBarCoder{
+	emptyImageMockBarcoder = &mockBarcoder{
 		Image: image.NewGray16(image.Rect(0, 0, 0, 0)),
 	}
-	errMockBarCoder = &mockBarCoder{
+	errMockBarcoder = &mockBarcoder{
 		err: errors.New("mock error"),
 	}
 	base64RE              = regexp.MustCompile("^[a-zA-Z0-9+/]*={0,2}$")
@@ -211,7 +211,7 @@ var (
 		},
 	}
 	handlerServeHTTPTests = []struct {
-		BarCoder
+		Barcoder
 		name           string
 		time           func() string
 		gameInfos      []gameInfo
@@ -280,7 +280,7 @@ var (
 		{
 			name:           "get board by id",
 			r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+board1257894001ID, nil),
-			BarCoder:       okMockBarCoder,
+			Barcoder:       okMockBarcoder,
 			wantStatusCode: 200,
 			wantHeader:     htmlContentTypeHeader,
 		},
@@ -351,7 +351,7 @@ var (
 			name:           "create boards",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=5")),
 			header:         formContentTypeHeader,
-			BarCoder:       okMockBarCoder,
+			Barcoder:       okMockBarcoder,
 			wantStatusCode: 200,
 			wantHeader: http.Header{
 				headerContentType:     {"application/zip"},
@@ -395,16 +395,16 @@ var (
 			wantHeader:     errorHeader,
 		},
 		{
-			name:           "get board - BarCoder error",
+			name:           "get board - Barcoder error",
 			r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+board1257894001ID, nil),
-			BarCoder:       errMockBarCoder,
+			Barcoder:       errMockBarcoder,
 			wantStatusCode: 500,
 			wantHeader:     errorHeader,
 		},
 		{
-			name:           "get board - BarCoder produces empty image",
+			name:           "get board - Barcoder produces empty image",
 			r:              httptest.NewRequest(methodGet, urlPathGameBoard+"?"+qpBoardID+"="+board1257894001ID, nil),
-			BarCoder:       emptyImageMockMarCoder,
+			Barcoder:       emptyImageMockBarcoder,
 			wantStatusCode: 500,
 			wantHeader:     errorHeader,
 		},
@@ -457,10 +457,10 @@ var (
 			wantHeader:     errorHeader,
 		},
 		{
-			name:           "create boards - BarCoder error",
+			name:           "create boards - Barcoder error",
 			r:              httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=1")),
 			header:         formContentTypeHeader,
-			BarCoder:       errMockBarCoder,
+			Barcoder:       errMockBarcoder,
 			wantStatusCode: 500,
 			wantHeader:     errorHeader,
 		},

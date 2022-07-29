@@ -131,7 +131,7 @@ func TestConfigHTTPSHandler(t *testing.T) {
 	}
 }
 
-func TestConfigHTTPSHandlerGetBoardWithBarCode(t *testing.T) {
+func TestConfigHTTPSHandlerGetBoardWithBarcode(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test that depends on external library")
 	}

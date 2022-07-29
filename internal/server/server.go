@@ -125,12 +125,12 @@ func (cfg Config) httpsHandler() http.Handler {
 	return handler.WithGzip(h)
 }
 
-func (c Config) BarCode(format string, text string, width, height int) (image.Image, error) {
-	f := c.barCodeFormat(format)
+func (c Config) Barcode(format string, text string, width, height int) (image.Image, error) {
+	f := c.barcodeFormat(format)
 	return barcode.Image(f, text, width, height)
 }
 
-func (c Config) barCodeFormat(f string) barcode.Format {
+func (c Config) barcodeFormat(f string) barcode.Format {
 	switch f {
 	case "aztec":
 		return barcode.AZTEC
