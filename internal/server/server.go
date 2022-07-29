@@ -100,7 +100,7 @@ func httpServer(port string, h http.Handler, https bool) *http.Server {
 }
 
 // listenAndServe servers the server on TCP for the address.
-// TLS certificates are loaded if the server is HTTPS and has a separarte server that redirects HTTP requests to HTTPS.
+// TLS certificates are loaded if the server is HTTPS and has a separate server that redirects HTTP requests to HTTPS.
 func (s Server) listenAndServe(svr *http.Server, errC chan<- error, https bool) {
 	switch {
 	case https && s.config.HTTPSRedirect:

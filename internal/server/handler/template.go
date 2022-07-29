@@ -120,7 +120,7 @@ func executeBoardExportTemplate(w io.Writer, b bingo.Board, boardID, barCode str
 	return embeddedTemplate.ExecuteTemplate(w, boardExportTemplateName, data)
 }
 
-// exectueFaviconTemplate renders the favicon without line breaks.
+// executeFaviconTemplate renders the favicon without line breaks.
 func executeFaviconTemplate(w io.Writer) error {
 	return embeddedTemplate.ExecuteTemplate(w, faviconTemplateName, nil)
 }
