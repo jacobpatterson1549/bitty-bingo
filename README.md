@@ -9,7 +9,8 @@
 The application runs as a web server that creates bingo board SVG images.
 It also manages games, whose previous states can be reverted to.
 Boards can be checked to verify if they have a "bingo" in a game.
-Using a phone, the built in QR scanner simplifies checking boards.
+Using a phone, the built in Barcode scanner simplifies checking boards.
+The cell square on boards can be customized to be a QR, Aztec, or Data Matrix bar code.
 
 ## Screenshot
 
@@ -31,7 +32,7 @@ To build for other CPU architectures, use the `GOARCH` build flag. Example: `mak
 
 ### go dependencies
 
-[boombuler/barcode](https://github.com/boombuler/barcode/) is used to generate QR codes for boards as the center "free cell"
+[boombuler/barcode](https://github.com/boombuler/barcode/) is used to generate bar codes for boards as the center "free cell"
 
 ## Testing
 
