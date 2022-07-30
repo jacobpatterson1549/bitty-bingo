@@ -41,7 +41,7 @@ func (n Number) Valid() bool {
 	return true
 }
 
-// numbers is an slice of numbers
+// numbers is an slice of numbers.
 type numbers []Number
 
 // Valid determines if the all the numbers are Valid and there are no duplicates.

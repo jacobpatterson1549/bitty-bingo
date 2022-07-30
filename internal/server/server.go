@@ -47,7 +47,7 @@ const (
 	stopDur = 5 * time.Second
 )
 
-// NewServer initializes HTTP and HTTPS TCP servers from the Configs
+// NewServer initializes HTTP and HTTPS TCP servers.
 func (cfg Config) NewServer() *Server {
 	httpsHandler := cfg.httpsHandler()
 	httpHandler := cfg.httpHandler()
@@ -118,7 +118,7 @@ func (cfg Config) httpHandler() http.Handler {
 }
 
 // httpsHandler creates a HTTP handler to serve the site.
-// The gameCount and time function are validated used from the config in the handler
+// The gameCount and time function are validated used from the config in the handler.
 // Responses are returned gzip compression when allowed.
 func (cfg Config) httpsHandler() http.Handler {
 	h := handler.New(cfg.GameCount, cfg.Time, cfg)
@@ -130,6 +130,8 @@ func (c Config) Barcode(format string, text string, width, height int) (image.Im
 	return barcode.Image(f, text, width, height)
 }
 
+// barcodeFormat converts the format string into a barcode.Format, defaulting to QR_CODE.
+// The format must be lowercase.
 func (c Config) barcodeFormat(f string) barcode.Format {
 	switch f {
 	case "aztec":
@@ -141,7 +143,7 @@ func (c Config) barcodeFormat(f string) barcode.Format {
 	}
 }
 
-// firstNonNill returns the first error that is not nil
+// firstNonNilError returns the first error that is not nil.
 func firstNonNilError(errors ...error) error {
 	for _, err := range errors {
 		if err != nil {

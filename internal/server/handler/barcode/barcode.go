@@ -1,4 +1,4 @@
-// Package barcode encodes board text into images
+// Package barcode encodes text into images.
 package barcode
 
 import (
@@ -21,7 +21,6 @@ const (
 )
 
 // Image creates an QR-code image of the text that has the specified dimensions.
-// The format should be QR_CODE, AZTEC, or DATA_MATRIX
 func Image(f Format, text string, width, height int) (image.Image, error) {
 	var (
 		bc  barcode.Barcode

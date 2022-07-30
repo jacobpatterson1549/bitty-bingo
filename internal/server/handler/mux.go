@@ -2,7 +2,7 @@ package handler
 
 import "net/http"
 
-// Mux is http Handler that is a map of methods to path handler maps
+// Mux is http Handler that maps methods to paths to handlers.
 type Mux map[string]map[string]http.HandlerFunc
 
 // ServeHTTP serves to the path for the method of the request on the handler if such a Handler exists.

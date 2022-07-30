@@ -43,7 +43,7 @@ type (
 )
 
 // New creates a HTTP handler to serve the site.
-// The gameCount and time function are validated used from the config in the handler
+// The gameCount and time function are validated used from the config in the handler.
 // Responses are returned gzip compression when allowed.
 func New(gameCount int, time func() string, barcoder Barcoder) http.Handler {
 	var faviconW bytes.Buffer
@@ -67,7 +67,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.Handler.ServeHTTP(w, r)
 }
 
-// newMux creates a new multiplexer to handle endpoints
+// newMux creates a new multiplexer to handle endpoints.
 func newMux(h *handler) *Mux {
 	return &Mux{
 		"GET": {
@@ -105,7 +105,7 @@ func (h handler) getGame(w http.ResponseWriter, r *http.Request) {
 	executeGameTemplate(w, h.favicon, *g, gameID, boardID, hasBingo)
 }
 
-// createGame renders an empty game
+// createGame renders an empty game.
 func (h handler) createGame(w http.ResponseWriter, r *http.Request) {
 	var g bingo.Game
 	gameID, err := g.ID()
@@ -158,7 +158,7 @@ func (h handler) getAbout(w http.ResponseWriter, r *http.Request) {
 }
 
 // checkBoard checks the board on the game with a checkType using the 'gameID', 'boardID', and 'type' query parameters.
-// The results of the check are included as query parameters onto a redirect to the game page.'
+// The results of the check are included as query parameters onto a redirect to the game page.
 func (h handler) checkBoard(w http.ResponseWriter, r *http.Request) {
 	gameID := r.URL.Query().Get("gameID")
 	g, ok := h.parseGame(gameID, w)
@@ -258,7 +258,7 @@ func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", "attachment; filename=bingo-boards.zip")
 }
 
-// zipNewBoards writes n new boards to a zip file
+// zipNewBoards writes n new boards to a zip file.
 func (h handler) zipNewBoards(w io.Writer, n int, barcodeFormat string) error {
 	z := zip.NewWriter(w)
 	for i := 1; i <= n; i++ {
@@ -286,7 +286,7 @@ func (h handler) zipNewBoards(w io.Writer, n int, barcodeFormat string) error {
 	return nil
 }
 
-// parseGame parses the game, writing parse errors to the response
+// parseGame parses the game, writing parse errors to the response.
 func (h handler) parseGame(id string, w http.ResponseWriter) (g *bingo.Game, ok bool) {
 	g, err := bingo.GameFromID(id)
 	if err != nil {
@@ -297,7 +297,7 @@ func (h handler) parseGame(id string, w http.ResponseWriter) (g *bingo.Game, ok 
 	return g, true
 }
 
-// parseBoard parses the board, writing parse errors to the response
+// parseBoard parses the board, writing parse errors to the response.
 func (h handler) parseBoard(id string, w http.ResponseWriter) (b *bingo.Board, ok bool) {
 	b, err := bingo.BoardFromID(id)
 	if err != nil {
@@ -337,7 +337,7 @@ func (h handler) badRequest(w http.ResponseWriter, message string) {
 	http.Error(w, message, http.StatusBadRequest)
 }
 
-// redirect tells the response that an unexpected error occurred.
+// internalServerError tells the response that an unexpected error occurred.
 func (h handler) internalServerError(w http.ResponseWriter, err error) {
 	message := fmt.Sprintf("unexpected problem: %v", err)
 	http.Error(w, message, http.StatusInternalServerError)

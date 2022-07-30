@@ -109,9 +109,9 @@ func (b Board) hasDiagonal2(nums map[Number]struct{}) bool {
 
 // ID encodes the board into a base64 string.
 // Each two numbers can be shrunk to a 0-14 number, concatenated, and converted to a byte.
-// This results in a byte array that is (25-1)/2 = 12 characters long
+// This results in a byte array that is (25-1)/2 = 12 characters long.
 // Since there are 8 bits in a byte the array uses 8 * 12 = 96 bits.
-// Base 64 uses 6 bits for each character, so the string will be 96 / 6 = 16 characters long
+// Base 64 uses 6 bits for each character, so the string will be 96 / 6 = 16 characters long.
 func (b Board) ID() (string, error) {
 	if !b.isValid() {
 		return "", errors.New("board has duplicate/invalid numbers")
@@ -164,20 +164,20 @@ func BoardFromID(id string) (*Board, error) {
 	return &b, nil
 }
 
-// encodeNumber converts the number to one in [0,15)
+// encodeNumber converts the number to one in [0,15).
 func (b Board) encodeNumber(index int) int {
 	encodedNumber := int(b[index]-1) % 15 // (mod 15 is same as subtract n.Column()*15)
 	return encodedNumber
 }
 
-// decodeBoardNumber converts the [0,15) byte back to a number at the index in the board
+// decodeBoardNumber converts the [0,15) byte back to a number at the index in the board.
 func decodeBoardNumber(encodedNumber byte, index int) (Number, error) {
 	c := index / 5
 	n := Number(int(encodedNumber+1) + c*15)
 	return n, nil
 }
 
-// numbers gets the numbers on the board that should be valid
+// numbers gets the numbers on the board that should be valid.
 func (b Board) numbers() numbers {
 	nums := make(numbers, len(b)-1) // do not check the center
 	copy(nums, b[:12])
@@ -185,7 +185,7 @@ func (b Board) numbers() numbers {
 	return nums
 }
 
-// isValid determines if the board has valid numbers, no duplicates, and the center is the zero value
+// isValid determines if the board has valid numbers, no duplicates, and the center is the zero value.
 func (b Board) isValid() bool {
 	switch {
 	case b[12] != 0, !b.numbers().Valid(), !b.numbersInCorrectColumns():
@@ -194,7 +194,7 @@ func (b Board) isValid() bool {
 	return true
 }
 
-// numbersInCorrectColumns ensures numbers are in correct columns
+// numbersInCorrectColumns ensures numbers are in correct columns.
 func (b Board) numbersInCorrectColumns() bool {
 	for i, n := range b {
 		if i != 12 && n.Column() != i/5 {

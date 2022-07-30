@@ -14,7 +14,7 @@ import (
 	"github.com/jacobpatterson1549/bitty-bingo/internal/server"
 )
 
-// main runs a bingo server
+// main runs a bingo server.
 func main() {
 	programName, programArgs := os.Args[0], os.Args[1:]
 	portOverride, hasPortOverride := os.LookupEnv("PORT")
@@ -29,7 +29,7 @@ func main() {
 	log.Printf("server stopped successfully")
 }
 
-// flagSet creates a flag set that sets the config
+// flagSet creates a flag set that sets the config.
 func flagSet(cfg *server.Config, programName string) *flag.FlagSet {
 	fs := flag.NewFlagSet(programName, flag.ExitOnError)
 	fs.Usage = func() {
@@ -45,7 +45,7 @@ func flagSet(cfg *server.Config, programName string) *flag.FlagSet {
 	return fs
 }
 
-// parseServerConfig parses command line flag set and environment variables into a server config
+// parseServerConfig parses command line flag set and environment variables into a server config.
 func parseServerConfig(cfg *server.Config, fs *flag.FlagSet, programArgs []string, portOverride string, hasPortOverride bool) {
 	fs.Parse(programArgs)
 	cfg.HTTPSRedirect = !hasPortOverride
@@ -57,7 +57,7 @@ func parseServerConfig(cfg *server.Config, fs *flag.FlagSet, programArgs []strin
 	}
 }
 
-// runServer creates and runs a bingo server from the config
+// runServer creates and runs a bingo server from the config.
 func runServer(cfg server.Config, log *log.Logger) (err error) {
 	s := cfg.NewServer()
 	done := make(chan os.Signal, 2)

@@ -47,7 +47,7 @@ func (g Game) NumbersLeft() int {
 	return len(g.numbers) - g.numbersDrawn
 }
 
-// DrawnNumbers is the numbers in the game that have been drawn
+// DrawnNumbers is the numbers in the game that have been drawn.
 func (g Game) DrawnNumbers() []Number {
 	g.normalizeNumbersDrawn()
 	return g.numbers[:g.numbersDrawn]
@@ -96,7 +96,7 @@ func (s *shuffler) Reset(g *Game) {
 	g.numbersDrawn = 0
 }
 
-// normalizeNumbersDrawn clamps numbersDrawn to [0,75]
+// normalizeNumbersDrawn clamps numbersDrawn to [0,75].
 func (g *Game) normalizeNumbersDrawn() {
 	switch {
 	case g.numbersDrawn < 0:
