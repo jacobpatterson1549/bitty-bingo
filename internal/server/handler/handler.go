@@ -117,7 +117,8 @@ func (h handler) createGame(w http.ResponseWriter, r *http.Request) {
 	h.redirect(w, r, "/game?gameID="+gameID)
 }
 
-// getBoard renders the board page onto the response or create a new board and redirects to it.
+// getBoard renders the board page (by 'boardID') onto the response or create a new board and redirects to it.
+// The 'barcodeFormat' query parameter specifies the type of barcode to create in the center cell.
 func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 	boardID := r.URL.Query().Get("boardID")
 	barcodeFormat := r.URL.Query().Get("barcodeFormat")
@@ -135,6 +136,7 @@ func (h handler) getBoard(w http.ResponseWriter, r *http.Request) {
 }
 
 // createBoard redirects to a new board.
+// The 'barcodeFormat' form parameter specifies the type of barcode to create in the center cell.
 func (h handler) createBoard(w http.ResponseWriter, r *http.Request) {
 	b := bingo.NewBoard()
 	boardID, err := b.ID()
@@ -234,6 +236,7 @@ func (h *handler) addGame(gameID string, numbersLeft int) {
 }
 
 // createBoards creates 'n' boards as specified by the request's form parameter, attaching the boards in a zip file.
+// The 'barcodeFormat' form parameter specifies the type of barcode to create in the center cell.
 func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 	nQueryParam := r.FormValue("n")
 	barcodeFormat := r.FormValue("barcodeFormat")
