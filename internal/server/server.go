@@ -121,7 +121,7 @@ func (cfg Config) httpHandler() http.Handler {
 // The gameCount and time function are validated used from the config in the handler
 // Responses are returned gzip compression when allowed.
 func (cfg Config) httpsHandler() http.Handler {
-	h := handler.Handler(cfg.GameCount, cfg.Time, cfg)
+	h := handler.New(cfg.GameCount, cfg.Time, cfg)
 	return handler.WithGzip(h)
 }
 

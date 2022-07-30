@@ -42,10 +42,10 @@ type (
 	}
 )
 
-// Handler creates a HTTP handler to serve the site.
+// New creates a HTTP handler to serve the site.
 // The gameCount and time function are validated used from the config in the handler
 // Responses are returned gzip compression when allowed.
-func Handler(gameCount int, time func() string, barcoder Barcoder) http.Handler {
+func New(gameCount int, time func() string, barcoder Barcoder) http.Handler {
 	var faviconW bytes.Buffer
 	executeFaviconTemplate(&faviconW)
 	faviconB := faviconW.Bytes()

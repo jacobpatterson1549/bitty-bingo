@@ -14,13 +14,13 @@ import (
 	"github.com/jacobpatterson1549/bitty-bingo/bingo"
 )
 
-func TestHandler(t *testing.T) {
+func TestNewHandler(t *testing.T) {
 	t.Run("valid configs", func(t *testing.T) {
 		gameCount := 10
 		timeF := func() string { return "any-time" }
 		for i, test := range handlerTests {
 			w := httptest.NewRecorder()
-			h := Handler(gameCount, timeF, okMockBarcoder)
+			h := New(gameCount, timeF, okMockBarcoder)
 			test.r.Header = test.header
 			h.ServeHTTP(w, test.r)
 			gotStatusCode := w.Code
@@ -38,7 +38,7 @@ func TestHandler(t *testing.T) {
 	})
 	t.Run("zero configs", func(t *testing.T) {
 		for i, test := range handlerTests {
-			h := Handler(0, nil, nil)
+			h := New(0, nil, nil)
 			w := httptest.NewRecorder()
 			test.r.Header = test.header
 			h.ServeHTTP(w, test.r)
