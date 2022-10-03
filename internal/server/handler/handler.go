@@ -257,8 +257,8 @@ func (h handler) createBoards(w http.ResponseWriter, r *http.Request) {
 		h.internalServerError(w, err)
 		return
 	}
+	w.Header().Set("Content-Disposition", "attachment; filename=bingo-boards.zip") // do this before writing response
 	buf.WriteTo(w)
-	w.Header().Set("Content-Disposition", "attachment; filename=bingo-boards.zip")
 }
 
 // zipNewBoards writes n new boards to a zip file.
