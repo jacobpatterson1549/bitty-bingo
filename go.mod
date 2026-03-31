@@ -4,4 +4,4 @@ go 1.17
 
 // +heroku goVersion go1.17
 
-require github.com/boombuler/barcode v1.0.1
+require github.com/boombuler/barcode v1.1.0
