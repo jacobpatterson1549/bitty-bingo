@@ -32,7 +32,7 @@ func (b Board) HasLine(g Game) bool {
 	if b.hasDiagonal1(nums) || b.hasDiagonal2(nums) {
 		return true
 	}
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		if b.hasColumn(i, nums) || b.hasRow(i, nums) {
 			return true
 		}
@@ -65,7 +65,7 @@ func numberSet(g Game) map[Number]struct{} {
 
 // hasColumn checks to see if the column on the board is completely included in nums.
 func (b Board) hasColumn(c int, nums map[Number]struct{}) bool {
-	for r := 0; r < 5; r++ {
+	for r := range 5 {
 		i := c*5 + r
 		if _, ok := nums[b[i]]; !ok {
 			return false
@@ -76,7 +76,7 @@ func (b Board) hasColumn(c int, nums map[Number]struct{}) bool {
 
 // hasColumn checks to see if the row on the board is completely included in nums.
 func (b Board) hasRow(r int, nums map[Number]struct{}) bool {
-	for c := 0; c < 5; c++ {
+	for c := range 5 {
 		i := c*5 + r
 		if _, ok := nums[b[i]]; !ok {
 			return false
@@ -87,7 +87,7 @@ func (b Board) hasRow(r int, nums map[Number]struct{}) bool {
 
 // hasDiagonal1 checks to see if the leading 5-number diagonal on the board is completely included in nums.
 func (b Board) hasDiagonal1(nums map[Number]struct{}) bool {
-	for j := 0; j < 5; j++ {
+	for j := range 5 {
 		i := j*5 + j
 		if _, ok := nums[b[i]]; !ok {
 			return false
@@ -98,7 +98,7 @@ func (b Board) hasDiagonal1(nums map[Number]struct{}) bool {
 
 // hasColumn checks to see if the trailing 5-number diagonal on the board is completely included in nums.
 func (b Board) hasDiagonal2(nums map[Number]struct{}) bool {
-	for j := 0; j < 5; j++ {
+	for j := range 5 {
 		i := j*5 + 4 - j
 		if _, ok := nums[b[i]]; !ok {
 			return false

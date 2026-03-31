@@ -117,26 +117,49 @@ func TestHandlerBoardBarcode(t *testing.T) {
 }
 
 func TestHandlerCreateBoards(t *testing.T) {
-	w := httptest.NewRecorder()
-	bc := mockBarcoder{
-		Image: okMockBarcoder.Image,
-	}
-	h := handler{
-		Barcoder: &bc,
-	}
-	bcFormat := "scribble"
-	r := httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=5&barcodeFormat="+bcFormat))
-	r.Header = formContentTypeHeader
-	h.ServeHTTP(w, r)
-	if want, got := bcFormat, bc.lastFormat; want != got {
-		t.Errorf("bar code formats not equal: wanted %q, got %q", want, got)
-	}
+	t.Run("barcodeFormat passed through", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		bc := mockBarcoder{
+			Image: okMockBarcoder.Image,
+		}
+		h := handler{
+			Barcoder: &bc,
+		}
+		bcFormat := "scribble"
+		r := httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=1&barcodeFormat="+bcFormat))
+		r.Header = formContentTypeHeader
+		h.ServeHTTP(w, r)
+		if want, got := bcFormat, bc.lastFormat; want != got {
+			t.Errorf("bar code formats not equal: wanted %q, got %q", want, got)
+		}
+	})
+	t.Run(headerContentDisposition+" written before zip file", func(t *testing.T) {
+		r := httptest.NewRequest(methodPost, urlPathGameBoards, strings.NewReader("n=1&barcodeFormat="))
+		w := &mockResponseWriter{
+			header: http.Header{},
+		}
+		bc := mockBarcoder{
+			Image: okMockBarcoder.Image,
+		}
+		h := handler{
+			Barcoder: &bc,
+		}
+		r.Header = formContentTypeHeader
+		h.ServeHTTP(w, r)
+		switch {
+		case !w.headerWrittenFirst:
+			t.Errorf("wanted header to be written first.  GCP will render the zip file in the browser if the %v is not written before the zip file is written", headerContentDisposition)
+		case len(w.header.Get(headerContentDisposition)) == 0:
+			t.Errorf("%v header not set", headerContentDisposition)
+		}
+	})
 }
 
 const (
 	methodGet                = "GET"
 	methodPost               = "POST"
 	headerContentType        = "Content-Type"
+	headerContentDisposition = "Content-Disposition"
 	headerLocation           = "Location"
 	contentTypeHTML          = "text/html; charset=utf-8"
 	board1257894001IDNumbers = "DwgEDAoTGxAcGSopHygxNDIuOUBIQ0ZKAQIDBQYHCQsNDhESFBUWFxgaHR4gISIjJCUmJyssLS8wMzU2Nzg6Ozw9Pj9BQkRFR0lL"
@@ -354,8 +377,8 @@ var (
 			Barcoder:       okMockBarcoder,
 			wantStatusCode: 200,
 			wantHeader: http.Header{
-				headerContentType:     {"application/zip"},
-				"Content-Disposition": {"attachment; filename=bingo-boards.zip"},
+				headerContentType:        {"application/zip"},
+				headerContentDisposition: {"attachment; filename=bingo-boards.zip"},
 			},
 		},
 		{

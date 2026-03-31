@@ -1,0 +1,8 @@
+version: '3.1'
+services:
+  web:
+    build: .
+    container_name: "bitty-bingo"
+    env_file: ./.env
+    ports:
+      - "${PORT}:${PORT}"

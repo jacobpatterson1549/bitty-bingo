@@ -58,3 +58,10 @@ Examples:
 * Run only the HTTPS server, using managed TLS certificates: `sudo PORT=443 ./build/bitty-bingo`
 
 * Special: If PORT is defined in a file named `.env` (`PORT=8000`), the server can be started in HTTPS-only mode with `make serve`
+
+### docker
+
+Build the site with Docker. Run `docker compose up --build` after placing environment variables in a file named .env :
+```
+PATH=8003
+```
