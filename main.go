@@ -67,7 +67,7 @@ func runServer(cfg server.Config, log *log.Logger) (err error) {
 	if cfg.HTTPSRedirect {
 		scheme += "s"
 	}
-	log.Printf("started server at " + scheme + "://127.0.0.1:" + cfg.HTTPSPort)
+	log.Printf("started server at %v://127.0.0.1:%v", scheme, cfg.HTTPSPort)
 	select { // BLOCKING
 	case err = <-errC:
 		if err != nil {
