@@ -1,9 +1,9 @@
 # download go dependencies for source code
-FROM golang:1.26-alpine3.23 AS builder
+FROM golang:1.27-alpine3.24 AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN apk add --no-cache \
-        make=~4.4.1-r3 \
+        make=~4.4.1-r4 \
     && go mod download
 
 # build the server
