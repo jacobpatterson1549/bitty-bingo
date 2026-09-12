@@ -60,10 +60,8 @@ func TestServerRunShutdown(t *testing.T) {
 			name: "default values",
 		},
 		{
-			name: "with HTTPS redirect",
-			Config: Config{
-				HTTPSRedirect: true,
-			},
+			name:          "with HTTPS redirect",
+			HTTPSRedirect: true,
 		},
 	}
 	for i, test := range tests {

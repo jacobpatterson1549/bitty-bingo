@@ -72,10 +72,8 @@ func executeAboutTemplate(w io.Writer, favicon string) error {
 // executeGameTemplate renders the game html page.
 func executeGameTemplate(w io.Writer, favicon string, g bingo.Game, gameID, boardID string, hasBingo bool) error {
 	p := gamePage{
-		page: page{
-			Name:    "game",
-			Favicon: favicon,
-		},
+		Name:     "game",
+		Favicon:  favicon,
 		Game:     g,
 		GameID:   gameID,
 		BoardID:  boardID,
@@ -87,11 +85,9 @@ func executeGameTemplate(w io.Writer, favicon string, g bingo.Game, gameID, boar
 // executeGamesTemplate renders the games list html page.
 func executeGamesTemplate(w io.Writer, favicon string, gameInfos []gameInfo) error {
 	p := gamesPage{
-		page: page{
-			Name:    "list",
-			Favicon: favicon,
-		},
-		List: gameInfos,
+		Name:    "list",
+		Favicon: favicon,
+		List:    gameInfos,
 	}
 	return embeddedTemplate.ExecuteTemplate(w, indexTemplateName, p)
 }
@@ -99,10 +95,8 @@ func executeGamesTemplate(w io.Writer, favicon string, gameInfos []gameInfo) err
 // executeBoardTemplate renders the board on the html page.
 func executeBoardTemplate(w io.Writer, favicon string, b bingo.Board, boardID, barcode string) error {
 	p := boardPage{
-		page: page{
-			Name:    "board",
-			Favicon: favicon,
-		},
+		Name:    "board",
+		Favicon: favicon,
 		Board:   b,
 		BoardID: boardID,
 		Barcode: barcode,
