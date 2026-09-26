@@ -1,7 +1,7 @@
 <form class="create-game" method="post" action="/game">
     <fieldset>
         <legend>Create Game</legend>
-        <input type="submit" />
+        <input type="submit">
     </fieldset>
 </form>
 <form class="create-board" method="post" action="/game/board">
@@ -13,7 +13,7 @@
                 {{template "barcode_formats.html"}}
             </select>
         </div>
-        <input type="submit" />
+        <input type="submit">
     </fieldset>
 </form>
 <form class="create-boards" method="post" action="/game/boards">
@@ -21,7 +21,7 @@
         <legend>Create Boards (zip)</legend>
         <div>
             <label for="board-count">Count</label>
-            <input id="board-count" type="number" name="n" value="5" min="1" max="1000" />
+            <input id="board-count" type="number" name="n" value="5" min="1" max="1000">
         </div>
         <div>
             <label for="barcode-formats-2">Center Format</label>
@@ -29,7 +29,7 @@
                 {{template "barcode_formats.html"}}
             </select>
         </div>
-        <input type="submit" />
+        <input type="submit">
     </fieldset>
 </form>
 {{- with .List}}
